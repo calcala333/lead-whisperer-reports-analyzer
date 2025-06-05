@@ -219,7 +219,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                       value={formData.height}
                       onChange={(e) => setFormData({...formData, height: e.target.value})}
                       className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="5'10\""
+                      placeholder="5'10&quot;"
                     />
                   </div>
                   <div>
