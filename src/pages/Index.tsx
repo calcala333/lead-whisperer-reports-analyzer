@@ -5,45 +5,179 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield } from "lucide-react";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users } from "lucide-react";
+import AdminPanel from "@/components/AdminPanel";
+
+interface WantedPerson {
+  id: string;
+  name: string;
+  alias: string;
+  address: string;
+  sex: string;
+  dob: string;
+  height: string;
+  weight: string;
+  hair: string;
+  eyes: string;
+  oln?: string;
+  olc?: string;
+  olt?: string;
+  exp?: string;
+  iss?: string;
+  restrictions?: string;
+  charges: string;
+  reward: string;
+  dangerLevel: string;
+  lastSeen: string;
+  caseNumber: string;
+  statuses?: {
+    dl: string;
+    tdl: string;
+    cdl: string;
+    schlbus: string;
+  };
+}
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showRecord, setShowRecord] = useState(false);
+  const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
+  const [showAdmin, setShowAdmin] = useState(false);
 
-  // Sample wanted person data
-  const wantedPerson = {
-    name: "ASHBY JR WILLIAM R",
-    alias: "BILLY ASHBY",
-    address: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
-    sex: "M",
-    dob: "11/21/1961",
-    height: "5'05\"",
-    weight: "160",
-    hair: "BRO",
-    eyes: "BRO",
-    oln: "A210-9366-1331",
-    olc: "D*",
-    olt: "ORIGINAL",
-    exp: "11/21/2028",
-    iss: "09/21/2024",
-    restrictions: "CORRECTIVE LENSES",
-    charges: "IDENTITY THEFT, FRAUD, FORGERY",
-    reward: "$50,000",
-    dangerLevel: "HIGH",
-    lastSeen: "CHICAGO, IL",
-    caseNumber: "2024-7809-WNT",
-    statuses: {
-      dl: "SUSPENDED",
-      tdl: "REVOKED",
-      cdl: "INVALID",
-      schlbus: "PROHIBITED"
+  // Mock data with multiple wanted persons
+  const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
+    {
+      id: "1",
+      name: "ASHBY JR WILLIAM R",
+      alias: "BILLY ASHBY",
+      address: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
+      sex: "M",
+      dob: "11/21/1961",
+      height: "5'05\"",
+      weight: "160",
+      hair: "BRO",
+      eyes: "BRO",
+      oln: "A210-9366-1331",
+      olc: "D*",
+      olt: "ORIGINAL",
+      exp: "11/21/2028",
+      iss: "09/21/2024",
+      restrictions: "CORRECTIVE LENSES",
+      charges: "IDENTITY THEFT, FRAUD, FORGERY",
+      reward: "$50,000",
+      dangerLevel: "HIGH",
+      lastSeen: "CHICAGO, IL",
+      caseNumber: "2024-7809-WNT",
+      statuses: {
+        dl: "SUSPENDED",
+        tdl: "REVOKED",
+        cdl: "INVALID",
+        schlbus: "PROHIBITED"
+      }
+    },
+    {
+      id: "2",
+      name: "RODRIGUEZ MARIA ELENA",
+      alias: "LA SOMBRA",
+      address: "1247 SUNSET BLVD  LOS ANGELES  90026",
+      sex: "F",
+      dob: "03/15/1985",
+      height: "5'07\"",
+      weight: "135",
+      hair: "BLK",
+      eyes: "BRO",
+      charges: "DRUG TRAFFICKING, MONEY LAUNDERING, RACKETEERING",
+      reward: "$100,000",
+      dangerLevel: "EXTREME",
+      lastSeen: "TIJUANA, MEXICO",
+      caseNumber: "2024-8901-WNT"
+    },
+    {
+      id: "3",
+      name: "THOMPSON JAMES ROBERT",
+      alias: "GHOST",
+      address: "4521 MAPLE ST  DETROIT  48201",
+      sex: "M",
+      dob: "07/08/1978",
+      height: "6'02\"",
+      weight: "195",
+      hair: "BLD",
+      eyes: "BLU",
+      charges: "ARMED ROBBERY, ASSAULT WITH DEADLY WEAPON",
+      reward: "$25,000",
+      dangerLevel: "HIGH",
+      lastSeen: "DETROIT, MI",
+      caseNumber: "2024-5634-WNT"
+    },
+    {
+      id: "4",
+      name: "CHEN WEI MING",
+      alias: "THE PHANTOM",
+      address: "789 BROADWAY  NEW YORK  10003",
+      sex: "M",
+      dob: "12/22/1990",
+      height: "5'09\"",
+      weight: "170",
+      hair: "BLK",
+      eyes: "BRO",
+      charges: "CYBERCRIME, IDENTITY THEFT, WIRE FRAUD",
+      reward: "$75,000",
+      dangerLevel: "HIGH",
+      lastSeen: "HONG KONG",
+      caseNumber: "2024-9123-WNT"
+    },
+    {
+      id: "5",
+      name: "JACKSON TYRONE MARCUS",
+      alias: "T-BONE",
+      address: "2156 MLK JR BLVD  ATLANTA  30309",
+      sex: "M",
+      dob: "05/30/1983",
+      height: "5'11\"",
+      weight: "185",
+      hair: "BLK",
+      eyes: "BRO",
+      charges: "MURDER, CONSPIRACY, RACKETEERING",
+      reward: "$150,000",
+      dangerLevel: "EXTREME",
+      lastSeen: "MIAMI, FL",
+      caseNumber: "2024-4567-WNT"
+    },
+    {
+      id: "6",
+      name: "VOLKOV DIMITRI ALEXEI",
+      alias: "THE BEAR",
+      address: "UNKNOWN",
+      sex: "M",
+      dob: "01/12/1975",
+      height: "6'04\"",
+      weight: "240",
+      hair: "BRO",
+      eyes: "GRN",
+      charges: "TERRORISM, WEAPONS TRAFFICKING, MURDER",
+      reward: "$500,000",
+      dangerLevel: "EXTREME",
+      lastSeen: "MOSCOW, RUSSIA",
+      caseNumber: "2024-0001-WNT"
     }
-  };
+  ]);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      setShowRecord(true);
+      const found = wantedPersons.find(person => 
+        person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        person.alias.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        person.caseNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      if (found) {
+        setSelectedPerson(found);
+        setShowRecord(true);
+      } else {
+        // If not found, show the first person as example
+        setSelectedPerson(wantedPersons[0]);
+        setShowRecord(true);
+      }
     }
   };
 
@@ -53,18 +187,52 @@ const Index = () => {
     }
   };
 
+  const handleAddPerson = (personData: Omit<WantedPerson, 'id'>) => {
+    const newPerson: WantedPerson = {
+      ...personData,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+    setWantedPersons([...wantedPersons, newPerson]);
+  };
+
+  const handleEditPerson = (id: string, personData: Omit<WantedPerson, 'id'>) => {
+    setWantedPersons(wantedPersons.map(person => 
+      person.id === id ? { ...personData, id } : person
+    ));
+  };
+
+  const handleDeletePerson = (id: string) => {
+    setWantedPersons(wantedPersons.filter(person => person.id !== id));
+  };
+
+  const currentPerson = selectedPerson || wantedPersons[0];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-950 via-gray-900 to-black">
       {/* Header */}
       <div className="bg-red-900 text-white py-8 shadow-2xl border-b-4 border-red-600">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <Shield className="h-12 w-12 text-red-300" />
-            <div className="text-center">
-              <h1 className="text-5xl font-bold tracking-wide">MOST WANTED</h1>
-              <p className="text-red-200 text-xl mt-2 font-semibold">Federal Bureau of Investigation</p>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <Shield className="h-12 w-12 text-red-300" />
+              <div>
+                <h1 className="text-5xl font-bold tracking-wide">MOST WANTED</h1>
+                <p className="text-red-200 text-xl mt-2 font-semibold">Federal Bureau of Investigation</p>
+              </div>
             </div>
-            <Shield className="h-12 w-12 text-red-300" />
+            <div className="flex gap-4">
+              <Button
+                onClick={() => setShowAdmin(true)}
+                className="bg-gray-800 hover:bg-gray-700 text-white"
+              >
+                <Settings className="h-5 w-5 mr-2" />
+                Admin Panel
+              </Button>
+              <Badge variant="outline" className="border-red-300 text-red-100 text-lg px-4 py-2">
+                <Users className="h-4 w-4 mr-2" />
+                {wantedPersons.length} Active Cases
+              </Badge>
+            </div>
           </div>
           <div className="text-center">
             <p className="text-red-100 text-lg">Seeking Information Leading to Arrest</p>
@@ -98,12 +266,72 @@ const Index = () => {
                 SEARCH
               </Button>
             </div>
+            <div className="mt-4 text-gray-300">
+              <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.name.split(' ')[0]).join(', ')}, or any case number</p>
+            </div>
           </CardContent>
         </Card>
 
+        {/* Top Wanted Gallery */}
+        {!showRecord && (
+          <div className="mb-8">
+            <Card className="shadow-2xl border-2 border-red-800 bg-gray-900/90 backdrop-blur-sm">
+              <CardHeader className="bg-red-800 text-white rounded-t-lg">
+                <CardTitle className="text-3xl text-center">TOP MOST WANTED FUGITIVES</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {wantedPersons.slice(0, 6).map((person) => (
+                    <Card 
+                      key={person.id} 
+                      className="bg-gray-700 border-red-600 cursor-pointer hover:bg-gray-600 transition-colors"
+                      onClick={() => {
+                        setSelectedPerson(person);
+                        setShowRecord(true);
+                      }}
+                    >
+                      <CardContent className="p-4">
+                        <div className="text-center space-y-3">
+                          <div className="h-32 bg-gray-600 rounded-lg flex items-center justify-center">
+                            <User className="h-16 w-16 text-gray-400" />
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-red-400">{person.name}</h3>
+                            <p className="text-gray-300">{person.alias}</p>
+                          </div>
+                          <div className="space-y-2">
+                            <Badge 
+                              variant={person.dangerLevel === "EXTREME" ? "destructive" : "secondary"}
+                              className={person.dangerLevel === "EXTREME" ? "bg-red-600" : "bg-orange-600"}
+                            >
+                              {person.dangerLevel}
+                            </Badge>
+                            <div className="text-yellow-400 font-bold text-lg">{person.reward}</div>
+                            <div className="text-gray-400 text-sm">{person.charges.split(',')[0]}...</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
         {/* Wanted Person Display */}
-        {showRecord && (
+        {showRecord && currentPerson && (
           <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <Button
+                onClick={() => setShowRecord(false)}
+                variant="outline"
+                className="border-gray-600 text-gray-300"
+              >
+                ← Back to Gallery
+              </Button>
+            </div>
+
             {/* Alert Header */}
             <Card className="shadow-2xl border-4 border-red-600 bg-red-900/90 backdrop-blur-sm">
               <CardHeader className="bg-red-700 text-white rounded-t-lg">
@@ -116,17 +344,22 @@ const Index = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="text-center">
                     <span className="text-sm font-medium text-red-200">REWARD</span>
-                    <div className="text-4xl font-bold text-yellow-400">{wantedPerson.reward}</div>
+                    <div className="text-4xl font-bold text-yellow-400">{currentPerson.reward}</div>
                   </div>
                   <div className="text-center">
                     <span className="text-sm font-medium text-red-200">DANGER LEVEL</span>
-                    <Badge variant="destructive" className="ml-2 text-lg px-4 py-2 bg-red-600">
-                      {wantedPerson.dangerLevel}
+                    <Badge 
+                      variant="destructive" 
+                      className={`ml-2 text-lg px-4 py-2 ${
+                        currentPerson.dangerLevel === "EXTREME" ? "bg-red-600" : "bg-orange-600"
+                      }`}
+                    >
+                      {currentPerson.dangerLevel}
                     </Badge>
                   </div>
                   <div className="text-center">
                     <span className="text-sm font-medium text-red-200">CASE NUMBER</span>
-                    <div className="text-xl font-mono font-bold text-white">{wantedPerson.caseNumber}</div>
+                    <div className="text-xl font-mono font-bold text-white">{currentPerson.caseNumber}</div>
                   </div>
                 </div>
               </CardContent>
@@ -143,18 +376,18 @@ const Index = () => {
               <CardContent className="p-6 bg-gray-800 text-white">
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-4xl font-bold text-red-400 mb-2">{wantedPerson.name}</h3>
-                    <p className="text-xl text-gray-300">Also Known As: <span className="font-semibold text-yellow-400">{wantedPerson.alias}</span></p>
+                    <h3 className="text-4xl font-bold text-red-400 mb-2">{currentPerson.name}</h3>
+                    <p className="text-xl text-gray-300">Also Known As: <span className="font-semibold text-yellow-400">{currentPerson.alias}</span></p>
                   </div>
                   
                   <div className="flex items-center gap-2 text-gray-300">
                     <MapPin className="h-5 w-5 text-red-400" />
-                    <span className="text-lg">Last Known Address: {wantedPerson.address}</span>
+                    <span className="text-lg">Last Known Address: {currentPerson.address}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-gray-300">
                     <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                    <span className="text-lg font-semibold">Last Seen: {wantedPerson.lastSeen}</span>
+                    <span className="text-lg font-semibold">Last Seen: {currentPerson.lastSeen}</span>
                   </div>
 
                   <Separator className="my-6 bg-gray-600" />
@@ -162,39 +395,39 @@ const Index = () => {
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                     <div>
                       <span className="text-sm font-medium text-gray-400">SEX</span>
-                      <p className="text-xl font-bold text-white">{wantedPerson.sex}</p>
+                      <p className="text-xl font-bold text-white">{currentPerson.sex}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         DOB
                       </span>
-                      <p className="text-xl font-bold text-white">{wantedPerson.dob}</p>
+                      <p className="text-xl font-bold text-white">{currentPerson.dob}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
                         <Ruler className="h-3 w-3" />
                         HEIGHT
                       </span>
-                      <p className="text-xl font-bold text-white">{wantedPerson.height}</p>
+                      <p className="text-xl font-bold text-white">{currentPerson.height}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
                         <Weight className="h-3 w-3" />
                         WEIGHT
                       </span>
-                      <p className="text-xl font-bold text-white">{wantedPerson.weight}</p>
+                      <p className="text-xl font-bold text-white">{currentPerson.weight}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-400">HAIR</span>
-                      <p className="text-xl font-bold text-white">{wantedPerson.hair}</p>
+                      <p className="text-xl font-bold text-white">{currentPerson.hair}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
                         <Eye className="h-3 w-3" />
                         EYES
                       </span>
-                      <p className="text-xl font-bold text-white">{wantedPerson.eyes}</p>
+                      <p className="text-xl font-bold text-white">{currentPerson.eyes}</p>
                     </div>
                   </div>
                 </div>
@@ -207,32 +440,40 @@ const Index = () => {
                 <CardTitle className="text-2xl">CRIMINAL CHARGES</CardTitle>
               </CardHeader>
               <CardContent className="p-6 bg-orange-900 text-white">
-                <div className="text-2xl font-bold text-orange-200">{wantedPerson.charges}</div>
-                <Separator className="my-4 bg-orange-700" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-orange-300">LICENSE STATUS</span>
-                    <Badge variant="destructive" className="ml-2 bg-red-700 text-white">
-                      {wantedPerson.statuses.dl}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-orange-300">CDL STATUS</span>
-                    <Badge variant="destructive" className="ml-2 bg-red-700 text-white">
-                      {wantedPerson.statuses.cdl}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-orange-300">LICENSE NUMBER</span>
-                    <p className="text-lg font-mono font-bold text-white">{wantedPerson.oln}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-orange-300">RESTRICTIONS</span>
-                    <Badge variant="outline" className="ml-2 border-orange-400 text-orange-200">
-                      {wantedPerson.restrictions}
-                    </Badge>
-                  </div>
-                </div>
+                <div className="text-2xl font-bold text-orange-200">{currentPerson.charges}</div>
+                {currentPerson.statuses && (
+                  <>
+                    <Separator className="my-4 bg-orange-700" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <span className="text-sm font-medium text-orange-300">LICENSE STATUS</span>
+                        <Badge variant="destructive" className="ml-2 bg-red-700 text-white">
+                          {currentPerson.statuses.dl}
+                        </Badge>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-orange-300">CDL STATUS</span>
+                        <Badge variant="destructive" className="ml-2 bg-red-700 text-white">
+                          {currentPerson.statuses.cdl}
+                        </Badge>
+                      </div>
+                      {currentPerson.oln && (
+                        <div>
+                          <span className="text-sm font-medium text-orange-300">LICENSE NUMBER</span>
+                          <p className="text-lg font-mono font-bold text-white">{currentPerson.oln}</p>
+                        </div>
+                      )}
+                      {currentPerson.restrictions && (
+                        <div>
+                          <span className="text-sm font-medium text-orange-300">RESTRICTIONS</span>
+                          <Badge variant="outline" className="ml-2 border-orange-400 text-orange-200">
+                            {currentPerson.restrictions}
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -270,7 +511,7 @@ const Index = () => {
             <div className="space-y-4">
               <Shield className="h-24 w-24 text-red-400 mx-auto opacity-50" />
               <div className="text-gray-300 text-2xl font-semibold">
-                Enter suspect information to search the fugitive database
+                Search the fugitive database or browse our most wanted
               </div>
               <div className="text-gray-500 text-lg">
                 Help us bring dangerous criminals to justice
@@ -298,6 +539,16 @@ const Index = () => {
           </p>
         </div>
       </div>
+
+      {/* Admin Panel */}
+      <AdminPanel
+        people={wantedPersons}
+        onAddPerson={handleAddPerson}
+        onEditPerson={handleEditPerson}
+        onDeletePerson={handleDeletePerson}
+        isOpen={showAdmin}
+        onClose={() => setShowAdmin(false)}
+      />
     </div>
   );
 };
