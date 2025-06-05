@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -284,33 +283,90 @@ const Index = () => {
                   {wantedPersons.slice(0, 6).map((person) => (
                     <Card 
                       key={person.id} 
-                      className="bg-gray-700 border-red-600 cursor-pointer hover:bg-gray-600 transition-colors"
+                      className="bg-gray-800 border-red-600 cursor-pointer hover:bg-gray-700 transition-all duration-300 hover:scale-105 overflow-hidden relative"
                       onClick={() => {
                         setSelectedPerson(person);
                         setShowRecord(true);
                       }}
                     >
-                      <CardContent className="p-4">
-                        <div className="text-center space-y-3">
-                          <div className="h-32 bg-gray-600 rounded-lg flex items-center justify-center">
-                            <User className="h-16 w-16 text-gray-400" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-red-400">{person.name}</h3>
-                            <p className="text-gray-300">{person.alias}</p>
-                          </div>
-                          <div className="space-y-2">
+                      <div className="relative">
+                        {/* Photo placeholder with overlay */}
+                        <div className="h-64 bg-gradient-to-b from-gray-600 to-gray-800 flex items-center justify-center relative">
+                          <User className="h-20 w-20 text-gray-400" />
+                          
+                          {/* High Risk Badge */}
+                          <div className="absolute top-3 left-3">
                             <Badge 
-                              variant={person.dangerLevel === "EXTREME" ? "destructive" : "secondary"}
-                              className={person.dangerLevel === "EXTREME" ? "bg-red-600" : "bg-orange-600"}
+                              className={`text-white font-bold px-3 py-1 ${
+                                person.dangerLevel === "EXTREME" ? "bg-red-600" : 
+                                person.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
+                              }`}
                             >
-                              {person.dangerLevel}
+                              {person.dangerLevel} RISK
                             </Badge>
-                            <div className="text-yellow-400 font-bold text-lg">{person.reward}</div>
-                            <div className="text-gray-400 text-sm">{person.charges.split(',')[0]}...</div>
+                          </div>
+
+                          {/* Reward amount */}
+                          <div className="absolute bottom-4 left-4">
+                            <div className="text-green-400 font-bold text-2xl">
+                              $ {person.reward.replace('$', '')}
+                            </div>
                           </div>
                         </div>
-                      </CardContent>
+
+                        {/* Person Details */}
+                        <div className="p-4 space-y-3">
+                          {/* Name */}
+                          <div>
+                            <h3 className="text-xl font-bold text-white tracking-wider">
+                              {person.name}
+                            </h3>
+                            <p className="text-red-400 text-sm font-semibold">
+                              AKA: {person.alias}
+                            </p>
+                            <p className="text-gray-400 text-xs font-mono">
+                              #{person.caseNumber}
+                            </p>
+                          </div>
+
+                          <Separator className="bg-gray-600" />
+
+                          {/* Charges */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <AlertTriangle className="h-4 w-4 text-red-400" />
+                              <span className="text-red-300 font-semibold text-sm">CHARGES</span>
+                            </div>
+                            <p className="text-white text-sm">
+                              {person.charges.length > 50 ? 
+                                person.charges.substring(0, 50) + "..." : 
+                                person.charges
+                              }
+                            </p>
+                          </div>
+
+                          {/* Last Seen */}
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4 text-yellow-400" />
+                              <span className="text-yellow-300 font-semibold text-sm">LAST SEEN</span>
+                            </div>
+                            <p className="text-white text-sm">{person.lastSeen}</p>
+                          </div>
+
+                          <Separator className="bg-gray-600" />
+
+                          {/* Description */}
+                          <div className="space-y-1">
+                            <span className="text-gray-300 font-semibold text-sm">DESCRIPTION</span>
+                            <p className="text-gray-300 text-xs">
+                              {person.sex === 'M' ? 'Male' : 'Female'}, {
+                                person.dob ? new Date().getFullYear() - new Date(person.dob).getFullYear() : 'Unknown'
+                              } years old, {person.height}, {person.weight} lbs, {person.hair} hair, {person.eyes} eyes
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </Card>
                   ))}
                 </div>
