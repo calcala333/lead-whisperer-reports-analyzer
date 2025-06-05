@@ -227,10 +227,6 @@ const Index = () => {
                 <Settings className="h-5 w-5 mr-2" />
                 Admin Panel
               </Button>
-              <Badge variant="outline" className="border-red-300 text-red-100 text-lg px-4 py-2">
-                <Users className="h-4 w-4 mr-2" />
-                {wantedPersons.length} Active Cases
-              </Badge>
             </div>
           </div>
           <div className="text-center">
@@ -309,7 +305,7 @@ const Index = () => {
                           {/* Reward amount */}
                           <div className="absolute bottom-4 left-4">
                             <div className="text-green-400 font-bold text-2xl">
-                              $ {person.reward.replace('$', '')}
+                              {person.reward.replace('$', '')}
                             </div>
                           </div>
                         </div>
@@ -567,10 +563,8 @@ const Index = () => {
             <div className="space-y-4">
               <Shield className="h-24 w-24 text-red-400 mx-auto opacity-50" />
               <div className="text-gray-300 text-2xl font-semibold">
-                Search the fugitive database or browse our most wanted
               </div>
               <div className="text-gray-500 text-lg">
-                Help us bring dangerous criminals to justice
               </div>
             </div>
           </div>
@@ -579,21 +573,6 @@ const Index = () => {
 
       {/* Footer */}
       <div className="bg-black text-white py-8 mt-12 border-t-4 border-red-600">
-        <div className="container mx-auto px-4 text-center space-y-4">
-          <div className="flex items-center justify-center gap-2">
-            <Shield className="h-6 w-6 text-red-400" />
-            <p className="text-gray-300 text-lg font-semibold">
-              Federal Bureau of Investigation - Most Wanted Division
-            </p>
-            <Shield className="h-6 w-6 text-red-400" />
-          </div>
-          <p className="text-sm text-gray-400">
-            This system is for authorized law enforcement personnel only. Unauthorized access is a federal crime.
-          </p>
-          <p className="text-xs text-gray-500">
-            Report tips: 1-800-CALL-FBI | Online: tips.fbi.gov
-          </p>
-        </div>
       </div>
 
       {/* Admin Panel */}
