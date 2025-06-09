@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users } from "lucide-react";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
@@ -70,6 +70,7 @@ interface WantedPerson {
   lastSeen: string;
   orderOfProtection?: boolean;
   protectionExpirationDate?: string;
+  photos?: string[];
 }
 
 const Index = () => {
@@ -77,6 +78,7 @@ const Index = () => {
   const [showRecord, setShowRecord] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [photoIndexes, setPhotoIndexes] = useState<{[key: string]: number}>({});
 
   // Mock data with multiple wanted persons - updated to match new interface
   const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
@@ -125,7 +127,8 @@ const Index = () => {
       dangerLevel: "HIGH",
       lastSeen: "CHICAGO, IL",
       orderOfProtection: true,
-      protectionExpirationDate: "2029-11-21"
+      protectionExpirationDate: "2029-11-21",
+      photos: []
     },
     {
       id: "2",
@@ -404,6 +407,29 @@ const Index = () => {
     setWantedPersons(wantedPersons.filter(person => person.id !== id));
   };
 
+  const nextPhoto = (personId: string, totalPhotos: number) => {
+    setPhotoIndexes(prev => ({
+      ...prev,
+      [personId]: ((prev[personId] || 0) + 1) % totalPhotos
+    }));
+  };
+
+  const prevPhoto = (personId: string, totalPhotos: number) => {
+    setPhotoIndexes(prev => ({
+      ...prev,
+      [personId]: ((prev[personId] || 0) - 1 + totalPhotos) % totalPhotos
+    }));
+  };
+
+  const getCurrentPhotoIndex = (personId: string) => photoIndexes[personId] || 0;
+
+  const isOrderOfProtectionActive = (person: WantedPerson) => {
+    if (!person.orderOfProtection || !person.protectionExpirationDate) return false;
+    const expirationDate = new Date(person.protectionExpirationDate);
+    const today = new Date();
+    return expirationDate > today;
+  };
+
   const currentPerson = selectedPerson || wantedPersons[0];
 
   return (
@@ -469,92 +495,162 @@ const Index = () => {
               </CardHeader>
               <CardContent className="p-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wantedPersons.slice(0, 6).map((person) => (
-                    <Card 
-                      key={person.id} 
-                      className="bg-white border-gray-300 cursor-pointer hover:bg-gray-50 transition-all duration-300 hover:scale-105 overflow-hidden relative shadow-lg"
-                      onClick={() => {
-                        setSelectedPerson(person);
-                        setShowRecord(true);
-                      }}
-                    >
-                      <div className="relative">
-                        {/* Photo placeholder with overlay */}
-                        <div className="h-64 bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center relative">
-                          <User className="h-20 w-20 text-gray-500" />
-                          
-                          {/* High Risk Badge */}
-                          <div className="absolute top-3 left-3">
-                            <Badge 
-                              className={`text-white font-bold px-3 py-1 ${
-                                person.dangerLevel === "EXTREME" ? "bg-red-600" : 
-                                person.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
-                              }`}
-                            >
-                              {person.dangerLevel} RISK
-                            </Badge>
-                          </div>
+                  {wantedPersons.slice(0, 6).map((person) => {
+                    const currentPhotoIndex = getCurrentPhotoIndex(person.id);
+                    const hasPhotos = person.photos && person.photos.length > 0;
+                    const hasMultiplePhotos = person.photos && person.photos.length > 1;
+                    const isProtectionActive = isOrderOfProtectionActive(person);
+                    
+                    return (
+                      <Card 
+                        key={person.id} 
+                        className="bg-white border-gray-300 cursor-pointer hover:bg-gray-50 transition-all duration-300 hover:scale-105 overflow-hidden relative shadow-lg"
+                        onClick={() => {
+                          setSelectedPerson(person);
+                          setShowRecord(true);
+                        }}
+                      >
+                        <div className="relative">
+                          {/* Photo placeholder with overlay */}
+                          <div className="h-64 bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center relative">
+                            {hasPhotos ? (
+                              <img 
+                                src={person.photos[currentPhotoIndex]} 
+                                alt={`${person.firstName} ${person.lastName}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="h-20 w-20 text-gray-500" />
+                            )}
+                            
+                            {/* Photo navigation for multiple photos */}
+                            {hasMultiplePhotos && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    prevPhoto(person.id, person.photos!.length);
+                                  }}
+                                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    nextPhoto(person.id, person.photos!.length);
+                                  }}
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
+                                >
+                                  <ChevronRight className="h-4 w-4" />
+                                </button>
+                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+                                  {person.photos!.map((_, index) => (
+                                    <div
+                                      key={index}
+                                      className={`w-2 h-2 rounded-full ${
+                                        index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                            
+                            {/* High Risk Badge */}
+                            <div className="absolute top-3 left-3">
+                              <Badge 
+                                className={`text-white font-bold px-3 py-1 ${
+                                  person.dangerLevel === "EXTREME" ? "bg-red-600" : 
+                                  person.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
+                                }`}
+                              >
+                                {person.dangerLevel} RISK
+                              </Badge>
+                            </div>
 
-                          {/* Order of Protection Bubble */}
-                          {person.orderOfProtection && (
-                            <div className="absolute top-3 right-3">
-                              <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
-                                <Shield className="h-4 w-4 text-white" />
+                            {/* Order of Protection Bubble */}
+                            {isProtectionActive && (
+                              <div className="absolute top-3 right-3">
+                                <div className="relative group">
+                                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center animate-pulse">
+                                    <Shield className="h-5 w-5 text-white" />
+                                  </div>
+                                  {/* Tooltip */}
+                                  <div className="absolute right-0 top-10 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                    Order of Protection
+                                    <br />
+                                    Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                  </div>
+                                </div>
                               </div>
+                            )}
+                          </div>
+
+                          {/* Person Details */}
+                          <div className="p-4 space-y-3">
+                            {/* Name */}
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-900 tracking-wider">
+                                {person.name || `${person.lastName}, ${person.firstName} ${person.middleName}`.trim()}
+                              </h3>
+                              <p className="text-red-600 text-sm font-semibold">
+                                AKA: {person.alias || 'Unknown'}
+                              </p>
                             </div>
-                          )}
+
+                            <Separator className="bg-gray-200" />
+
+                            {/* Charges */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-red-500" />
+                                <span className="text-red-600 font-semibold text-sm">CHARGES</span>
+                              </div>
+                              <p className="text-gray-800 text-sm">
+                                {person.charges.length > 50 ? 
+                                  person.charges.substring(0, 50) + "..." : 
+                                  person.charges
+                                }
+                              </p>
+                            </div>
+
+                            {/* Last Seen */}
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-orange-500" />
+                                <span className="text-orange-600 font-semibold text-sm">LAST SEEN</span>
+                              </div>
+                              <p className="text-gray-800 text-sm">{person.lastSeen}</p>
+                            </div>
+
+                            <Separator className="bg-gray-200" />
+
+                            {/* Description */}
+                            <div className="space-y-1">
+                              <span className="text-gray-700 font-semibold text-sm">DESCRIPTION</span>
+                              <p className="text-gray-600 text-xs">
+                                {person.sex === 'M' ? 'Male' : 'Female'}, {person.age} years old, {person.height}, {person.weight} lbs, {person.hair || 'Unknown'} hair, {person.eyes || 'Unknown'} eyes
+                              </p>
+                            </div>
+
+                            {/* Order of Protection Status */}
+                            {isProtectionActive && (
+                              <div className="bg-purple-50 border border-purple-200 rounded p-2">
+                                <div className="flex items-center gap-2">
+                                  <Shield className="h-4 w-4 text-purple-600" />
+                                  <span className="text-purple-800 font-semibold text-xs">ACTIVE ORDER OF PROTECTION</span>
+                                </div>
+                                <p className="text-purple-700 text-xs mt-1">
+                                  Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-
-                        {/* Person Details */}
-                        <div className="p-4 space-y-3">
-                          {/* Name */}
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900 tracking-wider">
-                              {person.name || `${person.lastName}, ${person.firstName} ${person.middleName}`.trim()}
-                            </h3>
-                            <p className="text-red-600 text-sm font-semibold">
-                              AKA: {person.alias || 'Unknown'}
-                            </p>
-                          </div>
-
-                          <Separator className="bg-gray-200" />
-
-                          {/* Charges */}
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <AlertTriangle className="h-4 w-4 text-red-500" />
-                              <span className="text-red-600 font-semibold text-sm">CHARGES</span>
-                            </div>
-                            <p className="text-gray-800 text-sm">
-                              {person.charges.length > 50 ? 
-                                person.charges.substring(0, 50) + "..." : 
-                                person.charges
-                              }
-                            </p>
-                          </div>
-
-                          {/* Last Seen */}
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-orange-500" />
-                              <span className="text-orange-600 font-semibold text-sm">LAST SEEN</span>
-                            </div>
-                            <p className="text-gray-800 text-sm">{person.lastSeen}</p>
-                          </div>
-
-                          <Separator className="bg-gray-200" />
-
-                          {/* Description */}
-                          <div className="space-y-1">
-                            <span className="text-gray-700 font-semibold text-sm">DESCRIPTION</span>
-                            <p className="text-gray-600 text-xs">
-                              {person.sex === 'M' ? 'Male' : 'Female'}, {person.age} years old, {person.height}, {person.weight} lbs, {person.hair || 'Unknown'} hair, {person.eyes || 'Unknown'} eyes
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
@@ -595,7 +691,7 @@ const Index = () => {
                       {currentPerson.dangerLevel}
                     </Badge>
                   </div>
-                  {currentPerson.orderOfProtection && (
+                  {isOrderOfProtectionActive(currentPerson) && (
                     <div className="text-center">
                       <span className="text-sm font-medium text-red-700">ORDER OF PROTECTION</span>
                       <div className="text-xl font-bold text-purple-600">

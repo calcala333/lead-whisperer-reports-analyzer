@@ -1,12 +1,11 @@
-
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon } from "lucide-react";
 
 interface WantedPerson {
   id: string;
@@ -71,6 +70,7 @@ interface WantedPerson {
   lastSeen: string;
   orderOfProtection?: boolean;
   protectionExpirationDate?: string;
+  photos?: string[];
 }
 
 interface AdminPanelProps {
@@ -85,6 +85,7 @@ interface AdminPanelProps {
 const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen, onClose }: AdminPanelProps) => {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     // Subject Demographics
     lastName: "",
@@ -140,7 +141,8 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
     dangerLevel: "",
     lastSeen: "",
     orderOfProtection: false,
-    protectionExpirationDate: ""
+    protectionExpirationDate: "",
+    photos: [] as string[]
   });
 
   const resetForm = () => {
@@ -182,12 +184,57 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
       dangerLevel: "",
       lastSeen: "",
       orderOfProtection: false,
-      protectionExpirationDate: ""
+      protectionExpirationDate: "",
+      photos: []
     });
+  };
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newPhotos: string[] = [];
+      const fileArray = Array.from(files);
+      
+      fileArray.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            newPhotos.push(e.target.result as string);
+            if (newPhotos.length === fileArray.length) {
+              setFormData(prev => ({
+                ...prev,
+                photos: [...prev.photos, ...newPhotos]
+              }));
+            }
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos.filter((_, i) => i !== index)
+    }));
+  };
+
+  const isOrderOfProtectionActive = (person: WantedPerson) => {
+    if (!person.orderOfProtection || !person.protectionExpirationDate) return false;
+    const expirationDate = new Date(person.protectionExpirationDate);
+    const today = new Date();
+    return expirationDate > today;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that if order of protection is checked, expiration date is provided
+    if (formData.orderOfProtection && !formData.protectionExpirationDate) {
+      alert("Please provide an expiration date for the order of protection.");
+      return;
+    }
     
     // Create legacy fields for compatibility
     const personData = {
@@ -249,7 +296,8 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
       dangerLevel: person.dangerLevel || "",
       lastSeen: person.lastSeen || "",
       orderOfProtection: person.orderOfProtection || false,
-      protectionExpirationDate: person.protectionExpirationDate || ""
+      protectionExpirationDate: person.protectionExpirationDate || "",
+      photos: person.photos || []
     });
     setEditingId(person.id);
     setIsAddingNew(true);
@@ -289,6 +337,54 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
               <CardContent className="bg-white p-6">
                 <form onSubmit={handleSubmit} className="space-y-8">
                   
+                  {/* Photo Upload Section */}
+                  <div className="bg-gray-100 p-4 rounded-lg">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">PHOTO UPLOAD</h4>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <Button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Upload Photos
+                        </Button>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                        />
+                        <span className="text-sm text-gray-600">Upload multiple photos for this person</span>
+                      </div>
+                      
+                      {formData.photos.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          {formData.photos.map((photo, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={photo}
+                                alt={`Photo ${index + 1}`}
+                                className="w-full h-32 object-cover rounded border"
+                              />
+                              <Button
+                                type="button"
+                                onClick={() => removePhoto(index)}
+                                className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white p-1 h-auto"
+                                size="sm"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Subject Demographics */}
                   <div className="bg-gray-100 p-4 rounded-lg">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">SUBJECT DEMOGRAPHICS</h4>
@@ -757,6 +853,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
               <Table>
                 <TableHeader>
                   <TableRow className="border-gray-300">
+                    <TableHead className="text-gray-700">Photo</TableHead>
                     <TableHead className="text-gray-700">Name</TableHead>
                     <TableHead className="text-gray-700">Charges</TableHead>
                     <TableHead className="text-gray-700">Danger Level</TableHead>
@@ -765,59 +862,84 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {people.map((person) => (
-                    <TableRow key={person.id} className="border-gray-300">
-                      <TableCell className="text-gray-800">
-                        <div>
-                          <div className="font-semibold">
-                            {person.name || `${person.lastName || ''}, ${person.firstName || ''} ${person.middleName || ''}`.trim()}
+                  {people.map((person) => {
+                    const isProtectionActive = isOrderOfProtectionActive(person);
+                    const hasPhotos = person.photos && person.photos.length > 0;
+                    
+                    return (
+                      <TableRow key={person.id} className="border-gray-300">
+                        <TableCell>
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                            {hasPhotos ? (
+                              <img 
+                                src={person.photos[0]} 
+                                alt={`${person.firstName} ${person.lastName}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="h-6 w-6 text-gray-400" />
+                            )}
                           </div>
-                          <div className="text-sm text-gray-500">{person.alias || 'No alias'}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-gray-800">{person.charges}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "destructive" : "secondary"}
-                          className={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-800"}
-                        >
-                          {person.dangerLevel}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-gray-800">
-                        {person.orderOfProtection ? (
+                        </TableCell>
+                        <TableCell className="text-gray-800">
                           <div>
-                            <Badge className="bg-purple-600 text-white">Active</Badge>
-                            <div className="text-xs text-gray-500 mt-1">
-                              Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                            <div className="font-semibold">
+                              {person.name || `${person.lastName || ''}, ${person.firstName || ''} ${person.middleName || ''}`.trim()}
                             </div>
+                            <div className="text-sm text-gray-500">{person.alias || 'No alias'}</div>
+                            {hasPhotos && (
+                              <div className="text-xs text-blue-600">
+                                {person.photos.length} photo{person.photos.length > 1 ? 's' : ''}
+                              </div>
+                            )}
                           </div>
-                        ) : (
-                          <span className="text-gray-500">None</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startEdit(person)}
-                            className="border-gray-400 text-gray-700"
+                        </TableCell>
+                        <TableCell className="text-gray-800">{person.charges}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "destructive" : "secondary"}
+                            className={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-800"}
                           >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => onDeletePerson(person.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            {person.dangerLevel}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-gray-800">
+                          {person.orderOfProtection ? (
+                            <div>
+                              <Badge className={isProtectionActive ? "bg-purple-600 text-white" : "bg-gray-400 text-white"}>
+                                {isProtectionActive ? "Active" : "Expired"}
+                              </Badge>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-500">None</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startEdit(person)}
+                              className="border-gray-400 text-gray-700"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => onDeletePerson(person.id)}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
