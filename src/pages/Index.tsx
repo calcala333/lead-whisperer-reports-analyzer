@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,10 +26,10 @@ interface WantedPerson {
   iss?: string;
   restrictions?: string;
   charges: string;
-  reward: string;
   dangerLevel: string;
   lastSeen: string;
-  caseNumber: string;
+  orderOfProtection?: boolean;
+  protectionDuration?: string;
   statuses?: {
     dl: string;
     tdl: string;
@@ -63,10 +64,10 @@ const Index = () => {
       iss: "09/21/2024",
       restrictions: "CORRECTIVE LENSES",
       charges: "IDENTITY THEFT, FRAUD, FORGERY",
-      reward: "$50,000",
       dangerLevel: "HIGH",
       lastSeen: "CHICAGO, IL",
-      caseNumber: "2024-7809-WNT",
+      orderOfProtection: true,
+      protectionDuration: "5 years",
       statuses: {
         dl: "SUSPENDED",
         tdl: "REVOKED",
@@ -86,10 +87,9 @@ const Index = () => {
       hair: "BLK",
       eyes: "BRO",
       charges: "DRUG TRAFFICKING, MONEY LAUNDERING, RACKETEERING",
-      reward: "$100,000",
       dangerLevel: "EXTREME",
       lastSeen: "TIJUANA, MEXICO",
-      caseNumber: "2024-8901-WNT"
+      orderOfProtection: false
     },
     {
       id: "3",
@@ -103,10 +103,10 @@ const Index = () => {
       hair: "BLD",
       eyes: "BLU",
       charges: "ARMED ROBBERY, ASSAULT WITH DEADLY WEAPON",
-      reward: "$25,000",
       dangerLevel: "HIGH",
       lastSeen: "DETROIT, MI",
-      caseNumber: "2024-5634-WNT"
+      orderOfProtection: true,
+      protectionDuration: "2 years"
     },
     {
       id: "4",
@@ -120,10 +120,9 @@ const Index = () => {
       hair: "BLK",
       eyes: "BRO",
       charges: "CYBERCRIME, IDENTITY THEFT, WIRE FRAUD",
-      reward: "$75,000",
       dangerLevel: "HIGH",
       lastSeen: "HONG KONG",
-      caseNumber: "2024-9123-WNT"
+      orderOfProtection: false
     },
     {
       id: "5",
@@ -137,10 +136,10 @@ const Index = () => {
       hair: "BLK",
       eyes: "BRO",
       charges: "MURDER, CONSPIRACY, RACKETEERING",
-      reward: "$150,000",
       dangerLevel: "EXTREME",
       lastSeen: "MIAMI, FL",
-      caseNumber: "2024-4567-WNT"
+      orderOfProtection: true,
+      protectionDuration: "10 years"
     },
     {
       id: "6",
@@ -154,10 +153,9 @@ const Index = () => {
       hair: "BRO",
       eyes: "GRN",
       charges: "TERRORISM, WEAPONS TRAFFICKING, MURDER",
-      reward: "$500,000",
       dangerLevel: "EXTREME",
       lastSeen: "MOSCOW, RUSSIA",
-      caseNumber: "2024-0001-WNT"
+      orderOfProtection: false
     }
   ]);
 
@@ -165,8 +163,7 @@ const Index = () => {
     if (searchQuery.trim()) {
       const found = wantedPersons.find(person => 
         person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        person.alias.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        person.caseNumber.toLowerCase().includes(searchQuery.toLowerCase())
+        person.alias.toLowerCase().includes(searchQuery.toLowerCase())
       );
       
       if (found) {
@@ -214,10 +211,6 @@ const Index = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <Shield className="h-12 w-12 text-blue-200" />
-              <div>
-                <h1 className="text-5xl font-bold tracking-wide">MOST WANTED</h1>
-                <p className="text-blue-200 text-xl mt-2 font-semibold">Federal Bureau of Investigation</p>
-              </div>
             </div>
             <div className="flex gap-4">
               <Button
@@ -229,9 +222,6 @@ const Index = () => {
               </Button>
             </div>
           </div>
-          <div className="text-center">
-            <p className="text-blue-100 text-lg">Seeking Information Leading to Arrest</p>
-          </div>
         </div>
       </div>
 
@@ -241,13 +231,13 @@ const Index = () => {
           <CardHeader className="bg-blue-500 text-white rounded-t-lg border-b-2 border-blue-300">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <Search className="h-6 w-6" />
-              FUGITIVE DATABASE SEARCH
+              Search Database
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 bg-white">
             <div className="flex gap-4">
               <Input
-                placeholder="Enter Name, Alias, or Case Number"
+                placeholder="Enter Name or Alias"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
@@ -262,7 +252,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="mt-4 text-gray-600">
-              <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.name.split(' ')[0]).join(', ')}, or any case number</p>
+              <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.name.split(' ')[0]).join(', ')}</p>
             </div>
           </CardContent>
         </Card>
@@ -272,7 +262,7 @@ const Index = () => {
           <div className="mb-8">
             <Card className="shadow-2xl border-2 border-blue-200">
               <CardHeader className="bg-blue-500 text-white rounded-t-lg">
-                <CardTitle className="text-3xl text-center">TOP MOST WANTED FUGITIVES</CardTitle>
+                <CardTitle className="text-3xl text-center">Wanted Individuals</CardTitle>
               </CardHeader>
               <CardContent className="p-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -312,9 +302,6 @@ const Index = () => {
                             </h3>
                             <p className="text-red-600 text-sm font-semibold">
                               AKA: {person.alias}
-                            </p>
-                            <p className="text-gray-500 text-xs font-mono">
-                              #{person.caseNumber}
                             </p>
                           </div>
 
@@ -382,15 +369,11 @@ const Index = () => {
               <CardHeader className="bg-red-600 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-3 text-3xl">
                   <AlertTriangle className="h-8 w-8 animate-pulse" />
-                  WANTED FUGITIVE - ARMED & DANGEROUS
+                  WANTED - ARMED & DANGEROUS
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <span className="text-sm font-medium text-red-700">REWARD</span>
-                    <div className="text-4xl font-bold text-green-600">{currentPerson.reward}</div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="text-center">
                     <span className="text-sm font-medium text-red-700">DANGER LEVEL</span>
                     <Badge 
@@ -402,10 +385,14 @@ const Index = () => {
                       {currentPerson.dangerLevel}
                     </Badge>
                   </div>
-                  <div className="text-center">
-                    <span className="text-sm font-medium text-red-700">CASE NUMBER</span>
-                    <div className="text-xl font-mono font-bold text-gray-800">{currentPerson.caseNumber}</div>
-                  </div>
+                  {currentPerson.orderOfProtection && (
+                    <div className="text-center">
+                      <span className="text-sm font-medium text-red-700">ORDER OF PROTECTION</span>
+                      <div className="text-xl font-bold text-purple-600">
+                        Active - {currentPerson.protectionDuration}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -535,14 +522,14 @@ const Index = () => {
                     DO NOT ATTEMPT TO APPREHEND. CONTACT LAW ENFORCEMENT IMMEDIATELY.
                   </p>
                   <p className="text-lg text-yellow-700">
-                    If you have information regarding this fugitive, contact your local FBI office or call 1-800-CALL-FBI.
+                    If you have information regarding this individual, contact your local authorities.
                   </p>
                 </div>
                 
                 <Separator className="my-6 bg-yellow-300" />
                 
                 <div className="text-xs text-yellow-700 font-mono text-center space-y-1">
-                  <p>FBI CASE FILE ACCESSED: 05JUN2025 10:08:25</p>
+                  <p>DATABASE ACCESSED: 05JUN2025 10:08:25</p>
                   <p>CLASSIFICATION: CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE</p>
                   <p>AUTHORIZED ACCESS ONLY - UNAUTHORIZED USE PROHIBITED</p>
                 </div>

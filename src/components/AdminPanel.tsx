@@ -20,10 +20,10 @@ interface WantedPerson {
   hair: string;
   eyes: string;
   charges: string;
-  reward: string;
   dangerLevel: string;
   lastSeen: string;
-  caseNumber: string;
+  orderOfProtection?: boolean;
+  protectionDuration?: string;
 }
 
 interface AdminPanelProps {
@@ -49,10 +49,10 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
     hair: "",
     eyes: "",
     charges: "",
-    reward: "",
     dangerLevel: "",
     lastSeen: "",
-    caseNumber: ""
+    orderOfProtection: false,
+    protectionDuration: ""
   });
 
   const resetForm = () => {
@@ -67,10 +67,10 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
       hair: "",
       eyes: "",
       charges: "",
-      reward: "",
       dangerLevel: "",
       lastSeen: "",
-      caseNumber: ""
+      orderOfProtection: false,
+      protectionDuration: ""
     });
   };
 
@@ -87,7 +87,22 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
   };
 
   const startEdit = (person: WantedPerson) => {
-    setFormData(person);
+    setFormData({
+      name: person.name,
+      alias: person.alias,
+      address: person.address,
+      sex: person.sex,
+      dob: person.dob,
+      height: person.height,
+      weight: person.weight,
+      hair: person.hair,
+      eyes: person.eyes,
+      charges: person.charges,
+      dangerLevel: person.dangerLevel,
+      lastSeen: person.lastSeen,
+      orderOfProtection: person.orderOfProtection || false,
+      protectionDuration: person.protectionDuration || ""
+    });
     setEditingId(person.id);
     setIsAddingNew(true);
   };
@@ -98,7 +113,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <h2 className="text-2xl font-bold text-white">Admin Panel - Manage Wanted Persons</h2>
+          <h2 className="text-2xl font-bold text-white">Admin Panel - Manage Records</h2>
           <Button variant="ghost" onClick={onClose} className="text-white">
             <X className="h-6 w-6" />
           </Button>
@@ -106,7 +121,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
 
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-white">Wanted Persons Database</h3>
+            <h3 className="text-xl font-semibold text-white">Database Records</h3>
             <Button 
               onClick={() => setIsAddingNew(true)}
               className="bg-red-700 hover:bg-red-800"
@@ -120,7 +135,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
             <Card className="bg-gray-800 border-gray-700">
               <CardHeader>
                 <CardTitle className="text-white">
-                  {editingId ? "Edit Person" : "Add New Wanted Person"}
+                  {editingId ? "Edit Person" : "Add New Person"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -155,23 +170,13 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                     />
                   </div>
                   <div>
-                    <Label htmlFor="reward" className="text-gray-300">Reward</Label>
-                    <Input
-                      id="reward"
-                      value={formData.reward}
-                      onChange={(e) => setFormData({...formData, reward: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="$50,000"
-                    />
-                  </div>
-                  <div>
                     <Label htmlFor="dangerLevel" className="text-gray-300">Danger Level</Label>
                     <Input
                       id="dangerLevel"
                       value={formData.dangerLevel}
                       onChange={(e) => setFormData({...formData, dangerLevel: e.target.value})}
                       className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="HIGH, MEDIUM, LOW"
+                      placeholder="HIGH, MEDIUM, LOW, EXTREME"
                     />
                   </div>
                   <div>
@@ -183,6 +188,28 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                       className="bg-gray-700 border-gray-600 text-white"
                     />
                   </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="orderOfProtection"
+                      checked={formData.orderOfProtection}
+                      onChange={(e) => setFormData({...formData, orderOfProtection: e.target.checked})}
+                      className="rounded"
+                    />
+                    <Label htmlFor="orderOfProtection" className="text-gray-300">Order of Protection</Label>
+                  </div>
+                  {formData.orderOfProtection && (
+                    <div>
+                      <Label htmlFor="protectionDuration" className="text-gray-300">Protection Duration</Label>
+                      <Input
+                        id="protectionDuration"
+                        value={formData.protectionDuration}
+                        onChange={(e) => setFormData({...formData, protectionDuration: e.target.value})}
+                        className="bg-gray-700 border-gray-600 text-white"
+                        placeholder="e.g., 2 years, 5 years, permanent"
+                      />
+                    </div>
+                  )}
                   <div className="col-span-full">
                     <Label htmlFor="address" className="text-gray-300">Address</Label>
                     <Input
@@ -252,16 +279,6 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                       placeholder="BRO, BLU, GRN"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="caseNumber" className="text-gray-300">Case Number</Label>
-                    <Input
-                      id="caseNumber"
-                      value={formData.caseNumber}
-                      onChange={(e) => setFormData({...formData, caseNumber: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
-                      placeholder="2024-XXXX-WNT"
-                    />
-                  </div>
 
                   <div className="col-span-full flex gap-4">
                     <Button type="submit" className="bg-red-700 hover:bg-red-800">
@@ -295,9 +312,8 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                   <TableRow className="border-gray-700">
                     <TableHead className="text-gray-300">Name</TableHead>
                     <TableHead className="text-gray-300">Charges</TableHead>
-                    <TableHead className="text-gray-300">Reward</TableHead>
                     <TableHead className="text-gray-300">Danger Level</TableHead>
-                    <TableHead className="text-gray-300">Case Number</TableHead>
+                    <TableHead className="text-gray-300">Order of Protection</TableHead>
                     <TableHead className="text-gray-300">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -311,16 +327,24 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                         </div>
                       </TableCell>
                       <TableCell className="text-white">{person.charges}</TableCell>
-                      <TableCell className="text-yellow-400 font-bold">{person.reward}</TableCell>
                       <TableCell>
                         <Badge 
-                          variant={person.dangerLevel === "HIGH" ? "destructive" : "secondary"}
-                          className={person.dangerLevel === "HIGH" ? "bg-red-600" : ""}
+                          variant={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "destructive" : "secondary"}
+                          className={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "bg-red-600" : ""}
                         >
                           {person.dangerLevel}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white font-mono">{person.caseNumber}</TableCell>
+                      <TableCell className="text-white">
+                        {person.orderOfProtection ? (
+                          <div>
+                            <Badge className="bg-purple-600 text-white">Active</Badge>
+                            <div className="text-xs text-gray-400 mt-1">{person.protectionDuration}</div>
+                          </div>
+                        ) : (
+                          <span className="text-gray-500">None</span>
+                        )}
+                      </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
