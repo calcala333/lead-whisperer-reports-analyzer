@@ -207,16 +207,16 @@ const Index = () => {
   const currentPerson = selectedPerson || wantedPersons[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-950 via-gray-900 to-black">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-red-900 text-white py-8 shadow-2xl border-b-4 border-red-600">
+      <div className="bg-blue-600 text-white py-8 shadow-2xl border-b-4 border-blue-800">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
-              <Shield className="h-12 w-12 text-red-300" />
+              <Shield className="h-12 w-12 text-blue-200" />
               <div>
                 <h1 className="text-5xl font-bold tracking-wide">MOST WANTED</h1>
-                <p className="text-red-200 text-xl mt-2 font-semibold">Federal Bureau of Investigation</p>
+                <p className="text-blue-200 text-xl mt-2 font-semibold">Federal Bureau of Investigation</p>
               </div>
             </div>
             <div className="flex gap-4">
@@ -230,38 +230,38 @@ const Index = () => {
             </div>
           </div>
           <div className="text-center">
-            <p className="text-red-100 text-lg">Seeking Information Leading to Arrest</p>
+            <p className="text-blue-100 text-lg">Seeking Information Leading to Arrest</p>
           </div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-8">
         {/* Search Section */}
-        <Card className="mb-8 shadow-2xl border-2 border-red-800 bg-gray-900/90 backdrop-blur-sm">
-          <CardHeader className="bg-red-800 text-white rounded-t-lg border-b-2 border-red-600">
+        <Card className="mb-8 shadow-2xl border-2 border-blue-200">
+          <CardHeader className="bg-blue-500 text-white rounded-t-lg border-b-2 border-blue-300">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <Search className="h-6 w-6" />
               FUGITIVE DATABASE SEARCH
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-6 bg-gray-800">
+          <CardContent className="p-6 bg-white">
             <div className="flex gap-4">
               <Input
                 placeholder="Enter Name, Alias, or Case Number"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 text-lg bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                className="flex-1 text-lg border-gray-300"
               />
               <Button 
                 onClick={handleSearch}
-                className="bg-red-700 hover:bg-red-800 px-8 text-lg font-bold"
+                className="bg-blue-600 hover:bg-blue-700 px-8 text-lg font-bold"
               >
                 <Search className="h-5 w-5 mr-2" />
                 SEARCH
               </Button>
             </div>
-            <div className="mt-4 text-gray-300">
+            <div className="mt-4 text-gray-600">
               <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.name.split(' ')[0]).join(', ')}, or any case number</p>
             </div>
           </CardContent>
@@ -270,16 +270,16 @@ const Index = () => {
         {/* Top Wanted Gallery */}
         {!showRecord && (
           <div className="mb-8">
-            <Card className="shadow-2xl border-2 border-red-800 bg-gray-900/90 backdrop-blur-sm">
-              <CardHeader className="bg-red-800 text-white rounded-t-lg">
+            <Card className="shadow-2xl border-2 border-blue-200">
+              <CardHeader className="bg-blue-500 text-white rounded-t-lg">
                 <CardTitle className="text-3xl text-center">TOP MOST WANTED FUGITIVES</CardTitle>
               </CardHeader>
-              <CardContent className="p-6 bg-gray-800">
+              <CardContent className="p-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {wantedPersons.slice(0, 6).map((person) => (
                     <Card 
                       key={person.id} 
-                      className="bg-gray-800 border-red-600 cursor-pointer hover:bg-gray-700 transition-all duration-300 hover:scale-105 overflow-hidden relative"
+                      className="bg-white border-gray-300 cursor-pointer hover:bg-gray-50 transition-all duration-300 hover:scale-105 overflow-hidden relative shadow-lg"
                       onClick={() => {
                         setSelectedPerson(person);
                         setShowRecord(true);
@@ -287,8 +287,8 @@ const Index = () => {
                     >
                       <div className="relative">
                         {/* Photo placeholder with overlay */}
-                        <div className="h-64 bg-gradient-to-b from-gray-600 to-gray-800 flex items-center justify-center relative">
-                          <User className="h-20 w-20 text-gray-400" />
+                        <div className="h-64 bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center relative">
+                          <User className="h-20 w-20 text-gray-500" />
                           
                           {/* High Risk Badge */}
                           <div className="absolute top-3 left-3">
@@ -301,39 +301,32 @@ const Index = () => {
                               {person.dangerLevel} RISK
                             </Badge>
                           </div>
-
-                          {/* Reward amount */}
-                          <div className="absolute bottom-4 left-4">
-                            <div className="text-green-400 font-bold text-2xl">
-                              {person.reward.replace('$', '')}
-                            </div>
-                          </div>
                         </div>
 
                         {/* Person Details */}
                         <div className="p-4 space-y-3">
                           {/* Name */}
                           <div>
-                            <h3 className="text-xl font-bold text-white tracking-wider">
+                            <h3 className="text-xl font-bold text-gray-900 tracking-wider">
                               {person.name}
                             </h3>
-                            <p className="text-red-400 text-sm font-semibold">
+                            <p className="text-red-600 text-sm font-semibold">
                               AKA: {person.alias}
                             </p>
-                            <p className="text-gray-400 text-xs font-mono">
+                            <p className="text-gray-500 text-xs font-mono">
                               #{person.caseNumber}
                             </p>
                           </div>
 
-                          <Separator className="bg-gray-600" />
+                          <Separator className="bg-gray-200" />
 
                           {/* Charges */}
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
-                              <AlertTriangle className="h-4 w-4 text-red-400" />
-                              <span className="text-red-300 font-semibold text-sm">CHARGES</span>
+                              <AlertTriangle className="h-4 w-4 text-red-500" />
+                              <span className="text-red-600 font-semibold text-sm">CHARGES</span>
                             </div>
-                            <p className="text-white text-sm">
+                            <p className="text-gray-800 text-sm">
                               {person.charges.length > 50 ? 
                                 person.charges.substring(0, 50) + "..." : 
                                 person.charges
@@ -344,18 +337,18 @@ const Index = () => {
                           {/* Last Seen */}
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-yellow-400" />
-                              <span className="text-yellow-300 font-semibold text-sm">LAST SEEN</span>
+                              <MapPin className="h-4 w-4 text-orange-500" />
+                              <span className="text-orange-600 font-semibold text-sm">LAST SEEN</span>
                             </div>
-                            <p className="text-white text-sm">{person.lastSeen}</p>
+                            <p className="text-gray-800 text-sm">{person.lastSeen}</p>
                           </div>
 
-                          <Separator className="bg-gray-600" />
+                          <Separator className="bg-gray-200" />
 
                           {/* Description */}
                           <div className="space-y-1">
-                            <span className="text-gray-300 font-semibold text-sm">DESCRIPTION</span>
-                            <p className="text-gray-300 text-xs">
+                            <span className="text-gray-700 font-semibold text-sm">DESCRIPTION</span>
+                            <p className="text-gray-600 text-xs">
                               {person.sex === 'M' ? 'Male' : 'Female'}, {
                                 person.dob ? new Date().getFullYear() - new Date(person.dob).getFullYear() : 'Unknown'
                               } years old, {person.height}, {person.weight} lbs, {person.hair} hair, {person.eyes} eyes
@@ -378,15 +371,15 @@ const Index = () => {
               <Button
                 onClick={() => setShowRecord(false)}
                 variant="outline"
-                className="border-gray-600 text-gray-300"
+                className="border-gray-400 text-gray-700"
               >
                 ← Back to Gallery
               </Button>
             </div>
 
             {/* Alert Header */}
-            <Card className="shadow-2xl border-4 border-red-600 bg-red-900/90 backdrop-blur-sm">
-              <CardHeader className="bg-red-700 text-white rounded-t-lg">
+            <Card className="shadow-2xl border-4 border-red-600 bg-red-50">
+              <CardHeader className="bg-red-600 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-3 text-3xl">
                   <AlertTriangle className="h-8 w-8 animate-pulse" />
                   WANTED FUGITIVE - ARMED & DANGEROUS
@@ -395,11 +388,11 @@ const Index = () => {
               <CardContent className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="text-center">
-                    <span className="text-sm font-medium text-red-200">REWARD</span>
-                    <div className="text-4xl font-bold text-yellow-400">{currentPerson.reward}</div>
+                    <span className="text-sm font-medium text-red-700">REWARD</span>
+                    <div className="text-4xl font-bold text-green-600">{currentPerson.reward}</div>
                   </div>
                   <div className="text-center">
-                    <span className="text-sm font-medium text-red-200">DANGER LEVEL</span>
+                    <span className="text-sm font-medium text-red-700">DANGER LEVEL</span>
                     <Badge 
                       variant="destructive" 
                       className={`ml-2 text-lg px-4 py-2 ${
@@ -410,76 +403,76 @@ const Index = () => {
                     </Badge>
                   </div>
                   <div className="text-center">
-                    <span className="text-sm font-medium text-red-200">CASE NUMBER</span>
-                    <div className="text-xl font-mono font-bold text-white">{currentPerson.caseNumber}</div>
+                    <span className="text-sm font-medium text-red-700">CASE NUMBER</span>
+                    <div className="text-xl font-mono font-bold text-gray-800">{currentPerson.caseNumber}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Suspect Information */}
-            <Card className="shadow-2xl border-2 border-gray-600 bg-gray-900/90 backdrop-blur-sm">
-              <CardHeader className="bg-gray-800 text-white rounded-t-lg border-b-2 border-gray-700">
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-gray-100 text-gray-800 rounded-t-lg border-b-2 border-gray-200">
                 <CardTitle className="flex items-center gap-3 text-2xl">
                   <User className="h-6 w-6" />
                   SUSPECT IDENTIFICATION
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 bg-gray-800 text-white">
+              <CardContent className="p-6 bg-white text-gray-800">
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-4xl font-bold text-red-400 mb-2">{currentPerson.name}</h3>
-                    <p className="text-xl text-gray-300">Also Known As: <span className="font-semibold text-yellow-400">{currentPerson.alias}</span></p>
+                    <h3 className="text-4xl font-bold text-red-600 mb-2">{currentPerson.name}</h3>
+                    <p className="text-xl text-gray-700">Also Known As: <span className="font-semibold text-orange-600">{currentPerson.alias}</span></p>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <MapPin className="h-5 w-5 text-red-400" />
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <MapPin className="h-5 w-5 text-red-500" />
                     <span className="text-lg">Last Known Address: {currentPerson.address}</span>
                   </div>
 
-                  <div className="flex items-center gap-2 text-gray-300">
-                    <AlertTriangle className="h-5 w-5 text-yellow-400" />
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <AlertTriangle className="h-5 w-5 text-orange-500" />
                     <span className="text-lg font-semibold">Last Seen: {currentPerson.lastSeen}</span>
                   </div>
 
-                  <Separator className="my-6 bg-gray-600" />
+                  <Separator className="my-6 bg-gray-300" />
 
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                     <div>
-                      <span className="text-sm font-medium text-gray-400">SEX</span>
-                      <p className="text-xl font-bold text-white">{currentPerson.sex}</p>
+                      <span className="text-sm font-medium text-gray-500">SEX</span>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.sex}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
+                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         DOB
                       </span>
-                      <p className="text-xl font-bold text-white">{currentPerson.dob}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.dob}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
+                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
                         <Ruler className="h-3 w-3" />
                         HEIGHT
                       </span>
-                      <p className="text-xl font-bold text-white">{currentPerson.height}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.height}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
+                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
                         <Weight className="h-3 w-3" />
                         WEIGHT
                       </span>
-                      <p className="text-xl font-bold text-white">{currentPerson.weight}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.weight}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-400">HAIR</span>
-                      <p className="text-xl font-bold text-white">{currentPerson.hair}</p>
+                      <span className="text-sm font-medium text-gray-500">HAIR</span>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.hair}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-400 flex items-center gap-1">
+                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
                         <Eye className="h-3 w-3" />
                         EYES
                       </span>
-                      <p className="text-xl font-bold text-white">{currentPerson.eyes}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.eyes}</p>
                     </div>
                   </div>
                 </div>
@@ -487,38 +480,38 @@ const Index = () => {
             </Card>
 
             {/* Criminal Charges */}
-            <Card className="shadow-2xl border-2 border-orange-600 bg-orange-900/90 backdrop-blur-sm">
-              <CardHeader className="bg-orange-800 text-white rounded-t-lg">
+            <Card className="shadow-2xl border-2 border-orange-300 bg-orange-50">
+              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
                 <CardTitle className="text-2xl">CRIMINAL CHARGES</CardTitle>
               </CardHeader>
-              <CardContent className="p-6 bg-orange-900 text-white">
-                <div className="text-2xl font-bold text-orange-200">{currentPerson.charges}</div>
+              <CardContent className="p-6 bg-orange-50 text-gray-800">
+                <div className="text-2xl font-bold text-orange-700">{currentPerson.charges}</div>
                 {currentPerson.statuses && (
                   <>
-                    <Separator className="my-4 bg-orange-700" />
+                    <Separator className="my-4 bg-orange-300" />
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div>
-                        <span className="text-sm font-medium text-orange-300">LICENSE STATUS</span>
-                        <Badge variant="destructive" className="ml-2 bg-red-700 text-white">
+                        <span className="text-sm font-medium text-orange-700">LICENSE STATUS</span>
+                        <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
                           {currentPerson.statuses.dl}
                         </Badge>
                       </div>
                       <div>
-                        <span className="text-sm font-medium text-orange-300">CDL STATUS</span>
-                        <Badge variant="destructive" className="ml-2 bg-red-700 text-white">
+                        <span className="text-sm font-medium text-orange-700">CDL STATUS</span>
+                        <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
                           {currentPerson.statuses.cdl}
                         </Badge>
                       </div>
                       {currentPerson.oln && (
                         <div>
-                          <span className="text-sm font-medium text-orange-300">LICENSE NUMBER</span>
-                          <p className="text-lg font-mono font-bold text-white">{currentPerson.oln}</p>
+                          <span className="text-sm font-medium text-orange-700">LICENSE NUMBER</span>
+                          <p className="text-lg font-mono font-bold text-gray-800">{currentPerson.oln}</p>
                         </div>
                       )}
                       {currentPerson.restrictions && (
                         <div>
-                          <span className="text-sm font-medium text-orange-300">RESTRICTIONS</span>
-                          <Badge variant="outline" className="ml-2 border-orange-400 text-orange-200">
+                          <span className="text-sm font-medium text-orange-700">RESTRICTIONS</span>
+                          <Badge variant="outline" className="ml-2 border-orange-500 text-orange-700">
                             {currentPerson.restrictions}
                           </Badge>
                         </div>
@@ -530,25 +523,25 @@ const Index = () => {
             </Card>
 
             {/* Warning Notice */}
-            <Card className="shadow-2xl border-4 border-yellow-500 bg-yellow-900/90 backdrop-blur-sm">
+            <Card className="shadow-2xl border-4 border-yellow-400 bg-yellow-50">
               <CardContent className="p-6">
                 <div className="text-center space-y-4">
                   <div className="flex items-center justify-center gap-2">
-                    <AlertTriangle className="h-8 w-8 text-yellow-400 animate-pulse" />
-                    <span className="text-2xl font-bold text-yellow-100">WARNING</span>
-                    <AlertTriangle className="h-8 w-8 text-yellow-400 animate-pulse" />
+                    <AlertTriangle className="h-8 w-8 text-yellow-600 animate-pulse" />
+                    <span className="text-2xl font-bold text-yellow-800">WARNING</span>
+                    <AlertTriangle className="h-8 w-8 text-yellow-600 animate-pulse" />
                   </div>
-                  <p className="text-xl font-semibold text-yellow-100">
+                  <p className="text-xl font-semibold text-yellow-800">
                     DO NOT ATTEMPT TO APPREHEND. CONTACT LAW ENFORCEMENT IMMEDIATELY.
                   </p>
-                  <p className="text-lg text-yellow-200">
+                  <p className="text-lg text-yellow-700">
                     If you have information regarding this fugitive, contact your local FBI office or call 1-800-CALL-FBI.
                   </p>
                 </div>
                 
-                <Separator className="my-6 bg-yellow-700" />
+                <Separator className="my-6 bg-yellow-300" />
                 
-                <div className="text-xs text-yellow-300 font-mono text-center space-y-1">
+                <div className="text-xs text-yellow-700 font-mono text-center space-y-1">
                   <p>FBI CASE FILE ACCESSED: 05JUN2025 10:08:25</p>
                   <p>CLASSIFICATION: CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE</p>
                   <p>AUTHORIZED ACCESS ONLY - UNAUTHORIZED USE PROHIBITED</p>
@@ -561,10 +554,10 @@ const Index = () => {
         {!showRecord && (
           <div className="text-center py-16">
             <div className="space-y-4">
-              <Shield className="h-24 w-24 text-red-400 mx-auto opacity-50" />
-              <div className="text-gray-300 text-2xl font-semibold">
+              <Shield className="h-24 w-24 text-gray-400 mx-auto opacity-50" />
+              <div className="text-gray-600 text-2xl font-semibold">
               </div>
-              <div className="text-gray-500 text-lg">
+              <div className="text-gray-400 text-lg">
               </div>
             </div>
           </div>
@@ -572,7 +565,7 @@ const Index = () => {
       </div>
 
       {/* Footer */}
-      <div className="bg-black text-white py-8 mt-12 border-t-4 border-red-600">
+      <div className="bg-gray-800 text-white py-8 mt-12 border-t-4 border-blue-600">
       </div>
 
       {/* Admin Panel */}
