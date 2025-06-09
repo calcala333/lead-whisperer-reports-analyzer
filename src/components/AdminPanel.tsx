@@ -23,7 +23,7 @@ interface WantedPerson {
   dangerLevel: string;
   lastSeen: string;
   orderOfProtection?: boolean;
-  protectionDuration?: string;
+  protectionExpirationDate?: string;
 }
 
 interface AdminPanelProps {
@@ -52,7 +52,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
     dangerLevel: "",
     lastSeen: "",
     orderOfProtection: false,
-    protectionDuration: ""
+    protectionExpirationDate: ""
   });
 
   const resetForm = () => {
@@ -70,7 +70,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
       dangerLevel: "",
       lastSeen: "",
       orderOfProtection: false,
-      protectionDuration: ""
+      protectionExpirationDate: ""
     });
   };
 
@@ -101,7 +101,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
       dangerLevel: person.dangerLevel,
       lastSeen: person.lastSeen,
       orderOfProtection: person.orderOfProtection || false,
-      protectionDuration: person.protectionDuration || ""
+      protectionExpirationDate: person.protectionExpirationDate || ""
     });
     setEditingId(person.id);
     setIsAddingNew(true);
@@ -111,20 +111,20 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-gray-900 rounded-lg w-full max-w-6xl max-h-[90vh] overflow-auto">
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
+      <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-auto border-2 border-blue-200">
+        <div className="flex items-center justify-between p-6 border-b border-blue-200 bg-blue-600">
           <h2 className="text-2xl font-bold text-white">Admin Panel - Manage Records</h2>
-          <Button variant="ghost" onClick={onClose} className="text-white">
+          <Button variant="ghost" onClick={onClose} className="text-white hover:bg-blue-700">
             <X className="h-6 w-6" />
           </Button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 bg-white">
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold text-white">Database Records</h3>
+            <h3 className="text-xl font-semibold text-gray-800">Database Records</h3>
             <Button 
               onClick={() => setIsAddingNew(true)}
-              className="bg-red-700 hover:bg-red-800"
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add New Person
@@ -132,60 +132,60 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
           </div>
 
           {isAddingNew && (
-            <Card className="bg-gray-800 border-gray-700">
-              <CardHeader>
-                <CardTitle className="text-white">
+            <Card className="bg-white border-2 border-blue-200">
+              <CardHeader className="bg-blue-500 text-white rounded-t-lg">
+                <CardTitle>
                   {editingId ? "Edit Person" : "Add New Person"}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="bg-white p-6">
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="name" className="text-gray-300">Full Name</Label>
+                    <Label htmlFor="name" className="text-gray-700">Full Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="alias" className="text-gray-300">Alias</Label>
+                    <Label htmlFor="alias" className="text-gray-700">Alias</Label>
                     <Input
                       id="alias"
                       value={formData.alias}
                       onChange={(e) => setFormData({...formData, alias: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="charges" className="text-gray-300">Charges</Label>
+                    <Label htmlFor="charges" className="text-gray-700">Charges</Label>
                     <Input
                       id="charges"
                       value={formData.charges}
                       onChange={(e) => setFormData({...formData, charges: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="dangerLevel" className="text-gray-300">Danger Level</Label>
+                    <Label htmlFor="dangerLevel" className="text-gray-700">Danger Level</Label>
                     <Input
                       id="dangerLevel"
                       value={formData.dangerLevel}
                       onChange={(e) => setFormData({...formData, dangerLevel: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="HIGH, MEDIUM, LOW, EXTREME"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="lastSeen" className="text-gray-300">Last Seen</Label>
+                    <Label htmlFor="lastSeen" className="text-gray-700">Last Seen</Label>
                     <Input
                       id="lastSeen"
                       value={formData.lastSeen}
                       onChange={(e) => setFormData({...formData, lastSeen: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                     />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -196,92 +196,93 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                       onChange={(e) => setFormData({...formData, orderOfProtection: e.target.checked})}
                       className="rounded"
                     />
-                    <Label htmlFor="orderOfProtection" className="text-gray-300">Order of Protection</Label>
+                    <Label htmlFor="orderOfProtection" className="text-gray-700">Order of Protection</Label>
                   </div>
                   {formData.orderOfProtection && (
                     <div>
-                      <Label htmlFor="protectionDuration" className="text-gray-300">Protection Duration</Label>
+                      <Label htmlFor="protectionExpirationDate" className="text-gray-700">Protection Expiration Date</Label>
                       <Input
-                        id="protectionDuration"
-                        value={formData.protectionDuration}
-                        onChange={(e) => setFormData({...formData, protectionDuration: e.target.value})}
-                        className="bg-gray-700 border-gray-600 text-white"
-                        placeholder="e.g., 2 years, 5 years, permanent"
+                        id="protectionExpirationDate"
+                        type="date"
+                        value={formData.protectionExpirationDate}
+                        onChange={(e) => setFormData({...formData, protectionExpirationDate: e.target.value})}
+                        className="border-gray-300 text-gray-800"
+                        required={formData.orderOfProtection}
                       />
                     </div>
                   )}
                   <div className="col-span-full">
-                    <Label htmlFor="address" className="text-gray-300">Address</Label>
+                    <Label htmlFor="address" className="text-gray-700">Address</Label>
                     <Input
                       id="address"
                       value={formData.address}
                       onChange={(e) => setFormData({...formData, address: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="sex" className="text-gray-300">Sex</Label>
+                    <Label htmlFor="sex" className="text-gray-700">Sex</Label>
                     <Input
                       id="sex"
                       value={formData.sex}
                       onChange={(e) => setFormData({...formData, sex: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="M/F"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="dob" className="text-gray-300">Date of Birth</Label>
+                    <Label htmlFor="dob" className="text-gray-700">Date of Birth</Label>
                     <Input
                       id="dob"
                       value={formData.dob}
                       onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="MM/DD/YYYY"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="height" className="text-gray-300">Height</Label>
+                    <Label htmlFor="height" className="text-gray-700">Height</Label>
                     <Input
                       id="height"
                       value={formData.height}
                       onChange={(e) => setFormData({...formData, height: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="5'10&quot;"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="weight" className="text-gray-300">Weight</Label>
+                    <Label htmlFor="weight" className="text-gray-700">Weight</Label>
                     <Input
                       id="weight"
                       value={formData.weight}
                       onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="180"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="hair" className="text-gray-300">Hair</Label>
+                    <Label htmlFor="hair" className="text-gray-700">Hair</Label>
                     <Input
                       id="hair"
                       value={formData.hair}
                       onChange={(e) => setFormData({...formData, hair: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="BRO, BLK, BLD"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="eyes" className="text-gray-300">Eyes</Label>
+                    <Label htmlFor="eyes" className="text-gray-700">Eyes</Label>
                     <Input
                       id="eyes"
                       value={formData.eyes}
                       onChange={(e) => setFormData({...formData, eyes: e.target.value})}
-                      className="bg-gray-700 border-gray-600 text-white"
+                      className="border-gray-300 text-gray-800"
                       placeholder="BRO, BLU, GRN"
                     />
                   </div>
 
                   <div className="col-span-full flex gap-4">
-                    <Button type="submit" className="bg-red-700 hover:bg-red-800">
+                    <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
                       {editingId ? "Update Person" : "Add Person"}
                     </Button>
                     <Button 
@@ -292,7 +293,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                         setEditingId(null);
                         resetForm();
                       }}
-                      className="border-gray-600 text-gray-300"
+                      className="border-gray-400 text-gray-700"
                     >
                       Cancel
                     </Button>
@@ -302,44 +303,46 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
             </Card>
           )}
 
-          <Card className="bg-gray-800 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white">Current Database ({people.length} records)</CardTitle>
+          <Card className="bg-white border-2 border-blue-200">
+            <CardHeader className="bg-blue-500 text-white rounded-t-lg">
+              <CardTitle>Current Database ({people.length} records)</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="bg-white p-6">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-gray-700">
-                    <TableHead className="text-gray-300">Name</TableHead>
-                    <TableHead className="text-gray-300">Charges</TableHead>
-                    <TableHead className="text-gray-300">Danger Level</TableHead>
-                    <TableHead className="text-gray-300">Order of Protection</TableHead>
-                    <TableHead className="text-gray-300">Actions</TableHead>
+                  <TableRow className="border-gray-300">
+                    <TableHead className="text-gray-700">Name</TableHead>
+                    <TableHead className="text-gray-700">Charges</TableHead>
+                    <TableHead className="text-gray-700">Danger Level</TableHead>
+                    <TableHead className="text-gray-700">Order of Protection</TableHead>
+                    <TableHead className="text-gray-700">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {people.map((person) => (
-                    <TableRow key={person.id} className="border-gray-700">
-                      <TableCell className="text-white">
+                    <TableRow key={person.id} className="border-gray-300">
+                      <TableCell className="text-gray-800">
                         <div>
                           <div className="font-semibold">{person.name}</div>
-                          <div className="text-sm text-gray-400">{person.alias}</div>
+                          <div className="text-sm text-gray-500">{person.alias}</div>
                         </div>
                       </TableCell>
-                      <TableCell className="text-white">{person.charges}</TableCell>
+                      <TableCell className="text-gray-800">{person.charges}</TableCell>
                       <TableCell>
                         <Badge 
                           variant={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "destructive" : "secondary"}
-                          className={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "bg-red-600" : ""}
+                          className={person.dangerLevel === "HIGH" || person.dangerLevel === "EXTREME" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-800"}
                         >
                           {person.dangerLevel}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-white">
+                      <TableCell className="text-gray-800">
                         {person.orderOfProtection ? (
                           <div>
                             <Badge className="bg-purple-600 text-white">Active</Badge>
-                            <div className="text-xs text-gray-400 mt-1">{person.protectionDuration}</div>
+                            <div className="text-xs text-gray-500 mt-1">
+                              Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                            </div>
                           </div>
                         ) : (
                           <span className="text-gray-500">None</span>
@@ -351,7 +354,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                             size="sm"
                             variant="outline"
                             onClick={() => startEdit(person)}
-                            className="border-gray-600 text-gray-300"
+                            className="border-gray-400 text-gray-700"
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
@@ -359,7 +362,7 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                             size="sm"
                             variant="destructive"
                             onClick={() => onDeletePerson(person.id)}
-                            className="bg-red-700 hover:bg-red-800"
+                            className="bg-red-600 hover:bg-red-700 text-white"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>

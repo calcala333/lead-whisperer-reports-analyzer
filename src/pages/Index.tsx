@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,7 @@ interface WantedPerson {
   dangerLevel: string;
   lastSeen: string;
   orderOfProtection?: boolean;
-  protectionDuration?: string;
+  protectionExpirationDate?: string;
   statuses?: {
     dl: string;
     tdl: string;
@@ -67,7 +66,7 @@ const Index = () => {
       dangerLevel: "HIGH",
       lastSeen: "CHICAGO, IL",
       orderOfProtection: true,
-      protectionDuration: "5 years",
+      protectionExpirationDate: "2029-11-21",
       statuses: {
         dl: "SUSPENDED",
         tdl: "REVOKED",
@@ -106,7 +105,7 @@ const Index = () => {
       dangerLevel: "HIGH",
       lastSeen: "DETROIT, MI",
       orderOfProtection: true,
-      protectionDuration: "2 years"
+      protectionExpirationDate: "2026-07-08"
     },
     {
       id: "4",
@@ -139,7 +138,7 @@ const Index = () => {
       dangerLevel: "EXTREME",
       lastSeen: "MIAMI, FL",
       orderOfProtection: true,
-      protectionDuration: "10 years"
+      protectionExpirationDate: "2035-05-30"
     },
     {
       id: "6",
@@ -291,6 +290,15 @@ const Index = () => {
                               {person.dangerLevel} RISK
                             </Badge>
                           </div>
+
+                          {/* Order of Protection Bubble */}
+                          {person.orderOfProtection && (
+                            <div className="absolute top-3 right-3">
+                              <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                                <Shield className="h-4 w-4 text-white" />
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         {/* Person Details */}
@@ -389,7 +397,7 @@ const Index = () => {
                     <div className="text-center">
                       <span className="text-sm font-medium text-red-700">ORDER OF PROTECTION</span>
                       <div className="text-xl font-bold text-purple-600">
-                        Active - {currentPerson.protectionDuration}
+                        Active - Expires: {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
                       </div>
                     </div>
                   )}
