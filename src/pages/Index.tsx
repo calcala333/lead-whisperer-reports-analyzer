@@ -9,32 +9,67 @@ import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
   id: string;
-  name: string;
-  alias: string;
-  address: string;
+  // Subject Demographics
+  lastName: string;
+  firstName: string;
+  middleName: string;
   sex: string;
-  dob: string;
+  race: string;
+  age: string;
+  birthDate: string;
+  deceased: string;
   height: string;
   weight: string;
-  hair: string;
-  eyes: string;
-  oln?: string;
-  olc?: string;
-  olt?: string;
-  exp?: string;
-  iss?: string;
-  restrictions?: string;
+  
+  // Identification
+  driversLicenseNumber: string;
+  driversLicenseState: string;
+  
+  // Address of Residence
+  addressOfResidence: string;
+  district: string;
+  majorityDistrict: string;
+  
+  // IDOC Information
+  idocNumber: string;
+  idocAddressOfResidence: string;
+  idocDistrict: string;
+  
+  // Criminal Record Details
+  latestArrestCB: string;
+  latestFelonyArrestCB: string;
+  onParole: string;
+  latestContact: string;
+  latestContactDistrict: string;
+  latestWarrant: string;
+  latestInvestigativeAlert: string;
+  
+  // Domestic Violence Arrest Record
+  domesticViolenceArrestCount: string;
+  latestDomesticViolenceArrestDate: string;
+  
+  // Weapons Arrest Record
+  weaponsPossession: string;
+  weaponsArrestCount: string;
+  latestWeaponsArrestDate: string;
+  
+  // Narcotics Arrest Record
+  narcoticsPossession: string;
+  narcoticsArrestCount: string;
+  latestNarcoticsArrestDate: string;
+
+  // Legacy fields for compatibility
+  name?: string;
+  alias?: string;
+  address?: string;
+  dob?: string;
+  hair?: string;
+  eyes?: string;
   charges: string;
   dangerLevel: string;
   lastSeen: string;
   orderOfProtection?: boolean;
   protectionExpirationDate?: string;
-  statuses?: {
-    dl: string;
-    tdl: string;
-    cdl: string;
-    schlbus: string;
-  };
 }
 
 const Index = () => {
@@ -43,46 +78,94 @@ const Index = () => {
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
 
-  // Mock data with multiple wanted persons
+  // Mock data with multiple wanted persons - updated to match new interface
   const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
     {
       id: "1",
+      lastName: "ASHBY JR",
+      firstName: "WILLIAM",
+      middleName: "R",
+      sex: "M",
+      race: "WHI",
+      age: "62",
+      birthDate: "11/21/1961",
+      deceased: "N",
+      height: "5'05\"",
+      weight: "160",
+      driversLicenseNumber: "A210-9366-1331",
+      driversLicenseState: "IL",
+      addressOfResidence: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
+      district: "011",
+      majorityDistrict: "011",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "HX123456",
+      latestFelonyArrestCB: "No Data",
+      onParole: "No Data",
+      latestContact: "15 NOV 2024 @ 14:30",
+      latestContactDistrict: "011",
+      latestWarrant: "No Data",
+      latestInvestigativeAlert: "No Data",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "N",
+      weaponsArrestCount: "No Data",
+      latestWeaponsArrestDate: "No Data",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
       name: "ASHBY JR WILLIAM R",
       alias: "BILLY ASHBY",
       address: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
-      sex: "M",
       dob: "11/21/1961",
-      height: "5'05\"",
-      weight: "160",
       hair: "BRO",
       eyes: "BRO",
-      oln: "A210-9366-1331",
-      olc: "D*",
-      olt: "ORIGINAL",
-      exp: "11/21/2028",
-      iss: "09/21/2024",
-      restrictions: "CORRECTIVE LENSES",
       charges: "IDENTITY THEFT, FRAUD, FORGERY",
       dangerLevel: "HIGH",
       lastSeen: "CHICAGO, IL",
       orderOfProtection: true,
-      protectionExpirationDate: "2029-11-21",
-      statuses: {
-        dl: "SUSPENDED",
-        tdl: "REVOKED",
-        cdl: "INVALID",
-        schlbus: "PROHIBITED"
-      }
+      protectionExpirationDate: "2029-11-21"
     },
     {
       id: "2",
+      lastName: "RODRIGUEZ",
+      firstName: "MARIA",
+      middleName: "ELENA",
+      sex: "F",
+      race: "HIS",
+      age: "39",
+      birthDate: "03/15/1985",
+      deceased: "N",
+      height: "5'07\"",
+      weight: "135",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "1247 SUNSET BLVD  LOS ANGELES  90026",
+      district: "Unknown",
+      majorityDistrict: "Unknown",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "LA987654",
+      latestFelonyArrestCB: "LA987654",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "Unknown",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "Armed & Dangerous",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "3",
+      latestWeaponsArrestDate: "12 JAN 2024",
+      narcoticsPossession: "Y",
+      narcoticsArrestCount: "5",
+      latestNarcoticsArrestDate: "20 FEB 2024",
       name: "RODRIGUEZ MARIA ELENA",
       alias: "LA SOMBRA",
       address: "1247 SUNSET BLVD  LOS ANGELES  90026",
-      sex: "F",
       dob: "03/15/1985",
-      height: "5'07\"",
-      weight: "135",
       hair: "BLK",
       eyes: "BRO",
       charges: "DRUG TRAFFICKING, MONEY LAUNDERING, RACKETEERING",
@@ -92,13 +175,43 @@ const Index = () => {
     },
     {
       id: "3",
+      lastName: "THOMPSON",
+      firstName: "JAMES",
+      middleName: "ROBERT",
+      sex: "M",
+      race: "BLK",
+      age: "46",
+      birthDate: "07/08/1978",
+      deceased: "N",
+      height: "6'02\"",
+      weight: "195",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "4521 MAPLE ST  DETROIT  48201",
+      district: "003",
+      majorityDistrict: "003",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "DT456789",
+      latestFelonyArrestCB: "DT456789",
+      onParole: "No Data",
+      latestContact: "08 OCT 2024 @ 09:15",
+      latestContactDistrict: "003",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "No Data",
+      domesticViolenceArrestCount: "2",
+      latestDomesticViolenceArrestDate: "15 SEP 2024",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "1",
+      latestWeaponsArrestDate: "08 OCT 2024",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
       name: "THOMPSON JAMES ROBERT",
       alias: "GHOST",
       address: "4521 MAPLE ST  DETROIT  48201",
-      sex: "M",
       dob: "07/08/1978",
-      height: "6'02\"",
-      weight: "195",
       hair: "BLD",
       eyes: "BLU",
       charges: "ARMED ROBBERY, ASSAULT WITH DEADLY WEAPON",
@@ -109,13 +222,43 @@ const Index = () => {
     },
     {
       id: "4",
+      lastName: "CHEN",
+      firstName: "WEI",
+      middleName: "MING",
+      sex: "M",
+      race: "ASI",
+      age: "34",
+      birthDate: "12/22/1990",
+      deceased: "N",
+      height: "5'09\"",
+      weight: "170",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "789 BROADWAY  NEW YORK  10003",
+      district: "001",
+      majorityDistrict: "001",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "NY112233",
+      latestFelonyArrestCB: "NY112233",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "001",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "Cyber Criminal",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "N",
+      weaponsArrestCount: "No Data",
+      latestWeaponsArrestDate: "No Data",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
       name: "CHEN WEI MING",
       alias: "THE PHANTOM",
       address: "789 BROADWAY  NEW YORK  10003",
-      sex: "M",
       dob: "12/22/1990",
-      height: "5'09\"",
-      weight: "170",
       hair: "BLK",
       eyes: "BRO",
       charges: "CYBERCRIME, IDENTITY THEFT, WIRE FRAUD",
@@ -125,13 +268,43 @@ const Index = () => {
     },
     {
       id: "5",
+      lastName: "JACKSON",
+      firstName: "TYRONE",
+      middleName: "MARCUS",
+      sex: "M",
+      race: "BLK",
+      age: "41",
+      birthDate: "05/30/1983",
+      deceased: "N",
+      height: "5'11\"",
+      weight: "185",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "2156 MLK JR BLVD  ATLANTA  30309",
+      district: "005",
+      majorityDistrict: "005",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "AT789012",
+      latestFelonyArrestCB: "AT789012",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "005",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "Extremely Dangerous",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "4",
+      latestWeaponsArrestDate: "18 MAR 2024",
+      narcoticsPossession: "Y",
+      narcoticsArrestCount: "2",
+      latestNarcoticsArrestDate: "05 JAN 2024",
       name: "JACKSON TYRONE MARCUS",
       alias: "T-BONE",
       address: "2156 MLK JR BLVD  ATLANTA  30309",
-      sex: "M",
       dob: "05/30/1983",
-      height: "5'11\"",
-      weight: "185",
       hair: "BLK",
       eyes: "BRO",
       charges: "MURDER, CONSPIRACY, RACKETEERING",
@@ -142,13 +315,43 @@ const Index = () => {
     },
     {
       id: "6",
+      lastName: "VOLKOV",
+      firstName: "DIMITRI",
+      middleName: "ALEXEI",
+      sex: "M",
+      race: "WHI",
+      age: "49",
+      birthDate: "01/12/1975",
+      deceased: "N",
+      height: "6'04\"",
+      weight: "240",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "UNKNOWN",
+      district: "Unknown",
+      majorityDistrict: "Unknown",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "No Data",
+      latestFelonyArrestCB: "No Data",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "Unknown",
+      latestWarrant: "International",
+      latestInvestigativeAlert: "Terrorist",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "Unknown",
+      latestWeaponsArrestDate: "No Data",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
       name: "VOLKOV DIMITRI ALEXEI",
       alias: "THE BEAR",
       address: "UNKNOWN",
-      sex: "M",
       dob: "01/12/1975",
-      height: "6'04\"",
-      weight: "240",
       hair: "BRO",
       eyes: "GRN",
       charges: "TERRORISM, WEAPONS TRAFFICKING, MURDER",
@@ -161,8 +364,9 @@ const Index = () => {
   const handleSearch = () => {
     if (searchQuery.trim()) {
       const found = wantedPersons.find(person => 
-        person.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        person.alias.toLowerCase().includes(searchQuery.toLowerCase())
+        (person.name && person.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (person.alias && person.alias.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        `${person.lastName} ${person.firstName}`.toLowerCase().includes(searchQuery.toLowerCase())
       );
       
       if (found) {
@@ -251,7 +455,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="mt-4 text-gray-600">
-              <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.name.split(' ')[0]).join(', ')}</p>
+              <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.firstName).join(', ')}</p>
             </div>
           </CardContent>
         </Card>
@@ -306,10 +510,10 @@ const Index = () => {
                           {/* Name */}
                           <div>
                             <h3 className="text-xl font-bold text-gray-900 tracking-wider">
-                              {person.name}
+                              {person.name || `${person.lastName}, ${person.firstName} ${person.middleName}`.trim()}
                             </h3>
                             <p className="text-red-600 text-sm font-semibold">
-                              AKA: {person.alias}
+                              AKA: {person.alias || 'Unknown'}
                             </p>
                           </div>
 
@@ -344,9 +548,7 @@ const Index = () => {
                           <div className="space-y-1">
                             <span className="text-gray-700 font-semibold text-sm">DESCRIPTION</span>
                             <p className="text-gray-600 text-xs">
-                              {person.sex === 'M' ? 'Male' : 'Female'}, {
-                                person.dob ? new Date().getFullYear() - new Date(person.dob).getFullYear() : 'Unknown'
-                              } years old, {person.height}, {person.weight} lbs, {person.hair} hair, {person.eyes} eyes
+                              {person.sex === 'M' ? 'Male' : 'Female'}, {person.age} years old, {person.height}, {person.weight} lbs, {person.hair || 'Unknown'} hair, {person.eyes || 'Unknown'} eyes
                             </p>
                           </div>
                         </div>
@@ -416,13 +618,15 @@ const Index = () => {
               <CardContent className="p-6 bg-white text-gray-800">
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-4xl font-bold text-red-600 mb-2">{currentPerson.name}</h3>
-                    <p className="text-xl text-gray-700">Also Known As: <span className="font-semibold text-orange-600">{currentPerson.alias}</span></p>
+                    <h3 className="text-4xl font-bold text-red-600 mb-2">
+                      {currentPerson.name || `${currentPerson.lastName}, ${currentPerson.firstName} ${currentPerson.middleName}`.trim()}
+                    </h3>
+                    <p className="text-xl text-gray-700">Also Known As: <span className="font-semibold text-orange-600">{currentPerson.alias || 'Unknown'}</span></p>
                   </div>
                   
                   <div className="flex items-center gap-2 text-gray-700">
                     <MapPin className="h-5 w-5 text-red-500" />
-                    <span className="text-lg">Last Known Address: {currentPerson.address}</span>
+                    <span className="text-lg">Last Known Address: {currentPerson.address || currentPerson.addressOfResidence}</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-gray-700">
@@ -442,7 +646,7 @@ const Index = () => {
                         <Calendar className="h-3 w-3" />
                         DOB
                       </span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.dob}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.dob || currentPerson.birthDate}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
@@ -460,14 +664,14 @@ const Index = () => {
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-500">HAIR</span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.hair}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.hair || 'Unknown'}</p>
                     </div>
                     <div>
                       <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
                         <Eye className="h-3 w-3" />
                         EYES
                       </span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.eyes}</p>
+                      <p className="text-xl font-bold text-gray-800">{currentPerson.eyes || 'Unknown'}</p>
                     </div>
                   </div>
                 </div>
@@ -481,39 +685,29 @@ const Index = () => {
               </CardHeader>
               <CardContent className="p-6 bg-orange-50 text-gray-800">
                 <div className="text-2xl font-bold text-orange-700">{currentPerson.charges}</div>
-                {currentPerson.statuses && (
-                  <>
-                    <Separator className="my-4 bg-orange-300" />
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div>
-                        <span className="text-sm font-medium text-orange-700">LICENSE STATUS</span>
-                        <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
-                          {currentPerson.statuses.dl}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-sm font-medium text-orange-700">CDL STATUS</span>
-                        <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
-                          {currentPerson.statuses.cdl}
-                        </Badge>
-                      </div>
-                      {currentPerson.oln && (
-                        <div>
-                          <span className="text-sm font-medium text-orange-700">LICENSE NUMBER</span>
-                          <p className="text-lg font-mono font-bold text-gray-800">{currentPerson.oln}</p>
-                        </div>
-                      )}
-                      {currentPerson.restrictions && (
-                        <div>
-                          <span className="text-sm font-medium text-orange-700">RESTRICTIONS</span>
-                          <Badge variant="outline" className="ml-2 border-orange-500 text-orange-700">
-                            {currentPerson.restrictions}
-                          </Badge>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
+                <Separator className="my-4 bg-orange-300" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <span className="text-sm font-medium text-orange-700">LICENSE NUMBER</span>
+                    <p className="text-lg font-mono font-bold text-gray-800">{currentPerson.driversLicenseNumber || 'No Data'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-orange-700">LICENSE STATE</span>
+                    <p className="text-lg font-bold text-gray-800">{currentPerson.driversLicenseState || 'No Data'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-orange-700">LATEST WARRANT</span>
+                    <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
+                      {currentPerson.latestWarrant || 'No Data'}
+                    </Badge>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-orange-700">ON PAROLE</span>
+                    <Badge variant="outline" className="ml-2 border-orange-500 text-orange-700">
+                      {currentPerson.onParole || 'No Data'}
+                    </Badge>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -537,7 +731,7 @@ const Index = () => {
                 <Separator className="my-6 bg-yellow-300" />
                 
                 <div className="text-xs text-yellow-700 font-mono text-center space-y-1">
-                  <p>DATABASE ACCESSED: 05JUN2025 10:08:25</p>
+                  <p>DATABASE ACCESSED: 09JUN2025 10:08:25</p>
                   <p>CLASSIFICATION: CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE</p>
                   <p>AUTHORIZED ACCESS ONLY - UNAUTHORIZED USE PROHIBITED</p>
                 </div>
