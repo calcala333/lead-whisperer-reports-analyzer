@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Handcuffs, Gun, Pill, FileText } from "lucide-react";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Zap, Target, Pill, FileText } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
@@ -845,7 +844,7 @@ const Index = () => {
             <Card className="shadow-2xl border-2 border-gray-300 bg-white">
               <CardHeader className="bg-red-500 text-white rounded-t-lg border-b-2 border-red-200">
                 <CardTitle className="flex items-center gap-3 text-2xl">
-                  <Handcuffs className="h-6 w-6" />
+                  <Zap className="h-6 w-6" />
                   CRIMINAL RECORD DETAILS
                 </CardTitle>
               </CardHeader>
@@ -909,7 +908,7 @@ const Index = () => {
             <Card className="shadow-2xl border-2 border-gray-300 bg-white">
               <CardHeader className="bg-orange-500 text-white rounded-t-lg border-b-2 border-orange-200">
                 <CardTitle className="flex items-center gap-3 text-2xl">
-                  <Gun className="h-6 w-6" />
+                  <Target className="h-6 w-6" />
                   WEAPONS ARREST RECORD
                 </CardTitle>
               </CardHeader>
