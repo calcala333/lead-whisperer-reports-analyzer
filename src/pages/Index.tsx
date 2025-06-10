@@ -675,7 +675,7 @@ const Index = () => {
               <CardHeader className="bg-red-600 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-3 text-3xl">
                   <AlertTriangle className="h-8 w-8 animate-pulse" />
-                  WANTED - ARMED & DANGEROUS
+                  SUSPECT INFORMATION
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6">
@@ -803,33 +803,6 @@ const Index = () => {
                       {currentPerson.onParole || 'No Data'}
                     </Badge>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Warning Notice */}
-            <Card className="shadow-2xl border-4 border-yellow-400 bg-yellow-50">
-              <CardContent className="p-6">
-                <div className="text-center space-y-4">
-                  <div className="flex items-center justify-center gap-2">
-                    <AlertTriangle className="h-8 w-8 text-yellow-600 animate-pulse" />
-                    <span className="text-2xl font-bold text-yellow-800">WARNING</span>
-                    <AlertTriangle className="h-8 w-8 text-yellow-600 animate-pulse" />
-                  </div>
-                  <p className="text-xl font-semibold text-yellow-800">
-                    DO NOT ATTEMPT TO APPREHEND. CONTACT LAW ENFORCEMENT IMMEDIATELY.
-                  </p>
-                  <p className="text-lg text-yellow-700">
-                    If you have information regarding this individual, contact your local authorities.
-                  </p>
-                </div>
-                
-                <Separator className="my-6 bg-yellow-300" />
-                
-                <div className="text-xs text-yellow-700 font-mono text-center space-y-1">
-                  <p>DATABASE ACCESSED: 09JUN2025 10:08:25</p>
-                  <p>CLASSIFICATION: CONFIDENTIAL - LAW ENFORCEMENT SENSITIVE</p>
-                  <p>AUTHORIZED ACCESS ONLY - UNAUTHORIZED USE PROHIBITED</p>
                 </div>
               </CardContent>
             </Card>
