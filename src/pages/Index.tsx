@@ -1,10 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Handcuffs, Gun, Pill, FileText } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
@@ -703,109 +704,322 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Suspect Information */}
+            {/* Subject Demographics */}
             <Card className="shadow-2xl border-2 border-gray-300 bg-white">
-              <CardHeader className="bg-gray-100 text-gray-800 rounded-t-lg border-b-2 border-gray-200">
+              <CardHeader className="bg-blue-500 text-white rounded-t-lg border-b-2 border-blue-200">
                 <CardTitle className="flex items-center gap-3 text-2xl">
                   <User className="h-6 w-6" />
-                  SUSPECT IDENTIFICATION
+                  SUBJECT DEMOGRAPHICS
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Last Name</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.lastName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">First Name</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.firstName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Middle Name</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.middleName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Sex</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.sex}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Race</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.race}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Age</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.age}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Birth Date
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.birthDate}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Deceased</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.deceased}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <Ruler className="h-3 w-3" />
+                      Height
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.height}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <Weight className="h-3 w-3" />
+                      Weight
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.weight}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Identification */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-green-500 text-white rounded-t-lg border-b-2 border-green-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <CreditCard className="h-6 w-6" />
+                  IDENTIFICATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Driver's License #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.driversLicenseNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Driver's License State</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.driversLicenseState}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Address of Residence */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-purple-500 text-white rounded-t-lg border-b-2 border-purple-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Home className="h-6 w-6" />
+                  ADDRESS OF RESIDENCE
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <span className="text-sm font-medium text-gray-500">Address of Residence</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.addressOfResidence}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.district}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Majority District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.majorityDistrict}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* IDOC Information */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-indigo-500 text-white rounded-t-lg border-b-2 border-indigo-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Building2 className="h-6 w-6" />
+                  IDOC INFORMATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">IDOC #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.idocNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.idocDistrict}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="text-sm font-medium text-gray-500">IDOC Address of Residence</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.idocAddressOfResidence}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Criminal Record Details */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-red-500 text-white rounded-t-lg border-b-2 border-red-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Handcuffs className="h-6 w-6" />
+                  CRIMINAL RECORD DETAILS
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest CB #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.latestArrestCB}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Felony Arrest CB #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.latestFelonyArrestCB}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">On Parole</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.onParole}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Contact</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestContact}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Contact District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestContactDistrict}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Warrant</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestWarrant}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="text-sm font-medium text-gray-500">Latest Investigative Alert</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestInvestigativeAlert}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Domestic Violence Arrest Record */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-pink-500 text-white rounded-t-lg border-b-2 border-pink-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <AlertTriangle className="h-6 w-6" />
+                  DOMESTIC VIOLENCE ARREST RECORD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Arrest Count</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.domesticViolenceArrestCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest Date</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestDomesticViolenceArrestDate}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Weapons Arrest Record */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-orange-500 text-white rounded-t-lg border-b-2 border-orange-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Gun className="h-6 w-6" />
+                  WEAPONS ARREST RECORD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Possession</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.weaponsPossession}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Arrest Count</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.weaponsArrestCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest Date</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestWeaponsArrestDate}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Narcotics Arrest Record */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-yellow-500 text-white rounded-t-lg border-b-2 border-yellow-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Pill className="h-6 w-6" />
+                  NARCOTICS ARREST RECORD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Possession</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.narcoticsPossession}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Arrest Count</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.narcoticsArrestCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest Date</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestNarcoticsArrestDate}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Additional Information */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-gray-600 text-white rounded-t-lg border-b-2 border-gray-300">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <FileText className="h-6 w-6" />
+                  ADDITIONAL INFORMATION
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 bg-white text-gray-800">
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-4xl font-bold text-red-600 mb-2">
-                      {currentPerson.name || `${currentPerson.lastName}, ${currentPerson.firstName} ${currentPerson.middleName}`.trim()}
-                    </h3>
-                    <p className="text-xl text-gray-700">Also Known As: <span className="font-semibold text-orange-600">{currentPerson.alias || 'Unknown'}</span></p>
+                    <span className="text-sm font-medium text-gray-500">Charges</span>
+                    <p className="text-xl font-bold text-red-600">{currentPerson.charges}</p>
                   </div>
-                  
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <MapPin className="h-5 w-5 text-red-500" />
-                    <span className="text-lg">Last Known Address: {currentPerson.address || currentPerson.addressOfResidence}</span>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Danger Level</span>
+                    <Badge 
+                      className={`ml-2 text-lg px-4 py-2 ${
+                        currentPerson.dangerLevel === "EXTREME" ? "bg-red-600" : 
+                        currentPerson.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
+                      }`}
+                    >
+                      {currentPerson.dangerLevel}
+                    </Badge>
                   </div>
-
-                  <div className="flex items-center gap-2 text-gray-700">
-                    <AlertTriangle className="h-5 w-5 text-orange-500" />
-                    <span className="text-lg font-semibold">Last Seen: {currentPerson.lastSeen}</span>
-                  </div>
-
-                  <Separator className="my-6 bg-gray-300" />
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">SEX</span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.sex}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        DOB
-                      </span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.dob || currentPerson.birthDate}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                        <Ruler className="h-3 w-3" />
-                        HEIGHT
-                      </span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.height}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                        <Weight className="h-3 w-3" />
-                        WEIGHT
-                      </span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.weight}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500">HAIR</span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.hair || 'Unknown'}</p>
-                    </div>
-                    <div>
-                      <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        EYES
-                      </span>
-                      <p className="text-xl font-bold text-gray-800">{currentPerson.eyes || 'Unknown'}</p>
-                    </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      Last Seen
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.lastSeen}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Criminal Charges */}
-            <Card className="shadow-2xl border-2 border-orange-300 bg-orange-50">
-              <CardHeader className="bg-orange-500 text-white rounded-t-lg">
-                <CardTitle className="text-2xl">CRIMINAL CHARGES</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 bg-orange-50 text-gray-800">
-                <div className="text-2xl font-bold text-orange-700">{currentPerson.charges}</div>
-                <Separator className="my-4 bg-orange-300" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div>
-                    <span className="text-sm font-medium text-orange-700">LICENSE NUMBER</span>
-                    <p className="text-lg font-mono font-bold text-gray-800">{currentPerson.driversLicenseNumber || 'No Data'}</p>
+            {/* Order of Protection */}
+            {currentPerson.orderOfProtection && (
+              <Card className="shadow-2xl border-2 border-purple-300 bg-purple-50">
+                <CardHeader className="bg-purple-600 text-white rounded-t-lg border-b-2 border-purple-300">
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <Shield className="h-6 w-6" />
+                    ORDER OF PROTECTION
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 bg-purple-50 text-gray-800">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <span className="text-sm font-medium text-purple-700">Status</span>
+                      <p className="text-xl font-bold text-purple-800">
+                        {isOrderOfProtectionActive(currentPerson) ? 'ACTIVE' : 'EXPIRED'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-purple-700">Protection Expiration Date</span>
+                      <p className="text-xl font-bold text-purple-800">
+                        {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-sm font-medium text-orange-700">LICENSE STATE</span>
-                    <p className="text-lg font-bold text-gray-800">{currentPerson.driversLicenseState || 'No Data'}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-orange-700">LATEST WARRANT</span>
-                    <Badge variant="destructive" className="ml-2 bg-red-600 text-white">
-                      {currentPerson.latestWarrant || 'No Data'}
-                    </Badge>
-                  </div>
-                  <div>
-                    <span className="text-sm font-medium text-orange-700">ON PAROLE</span>
-                    <Badge variant="outline" className="ml-2 border-orange-500 text-orange-700">
-                      {currentPerson.onParole || 'No Data'}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
 
