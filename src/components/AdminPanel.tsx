@@ -998,8 +998,8 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
-                  )}
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
@@ -1011,5 +1011,3 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
 };
 
 export default AdminPanel;
-
-}
