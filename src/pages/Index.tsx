@@ -79,6 +79,7 @@ const Index = () => {
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [photoIndexes, setPhotoIndexes] = useState<{[key: string]: number}>({});
+  const [systemName, setSystemName] = useState("Police Wanted System");
 
   // Mock data with multiple wanted persons - updated to match new interface
   const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
@@ -430,6 +431,10 @@ const Index = () => {
     return expirationDate > today;
   };
 
+  const handleUpdateSystemName = (newName: string) => {
+    setSystemName(newName);
+  };
+
   const currentPerson = selectedPerson || wantedPersons[0];
 
   return (
@@ -440,8 +445,18 @@ const Index = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <Shield className="h-12 w-12 text-blue-200" />
+              <h1 className="text-3xl font-bold">{systemName}</h1>
             </div>
             <div className="flex gap-4">
+              {showRecord && (
+                <Button
+                  onClick={() => setShowRecord(false)}
+                  className="bg-gray-800 hover:bg-gray-700 text-white"
+                >
+                  <Home className="h-5 w-5 mr-2" />
+                  Home
+                </Button>
+              )}
               <Button
                 onClick={() => setShowAdmin(true)}
                 className="bg-gray-800 hover:bg-gray-700 text-white"
@@ -1047,9 +1062,13 @@ const Index = () => {
         onDeletePerson={handleDeletePerson}
         isOpen={showAdmin}
         onClose={() => setShowAdmin(false)}
+        systemName={systemName}
+        onUpdateSystemName={handleUpdateSystemName}
       />
     </div>
   );
 };
 
 export default Index;
+
+</initial_code>
