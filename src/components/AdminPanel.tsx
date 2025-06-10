@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon, Settings } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Image as ImageIcon } from "lucide-react";
 
 interface WantedPerson {
   id: string;
@@ -80,17 +80,12 @@ interface AdminPanelProps {
   onDeletePerson: (id: string) => void;
   isOpen: boolean;
   onClose: () => void;
-  brandingName: string;
-  onBrandingChange: (name: string) => void;
 }
 
-const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen, onClose, brandingName, onBrandingChange }: AdminPanelProps) => {
+const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen, onClose }: AdminPanelProps) => {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [showBrandingSettings, setShowBrandingSettings] = useState(false);
-  const [tempBrandingName, setTempBrandingName] = useState(brandingName);
-
   const [formData, setFormData] = useState({
     // Subject Demographics
     lastName: "",
@@ -308,11 +303,6 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
     setIsAddingNew(true);
   };
 
-  const handleBrandingUpdate = () => {
-    onBrandingChange(tempBrandingName);
-    setShowBrandingSettings(false);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -320,62 +310,12 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
       <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-auto border-2 border-blue-200">
         <div className="flex items-center justify-between p-6 border-b border-blue-200 bg-blue-600">
           <h2 className="text-2xl font-bold text-white">Admin Panel - Manage Records</h2>
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={() => setShowBrandingSettings(true)}
-              className="text-white hover:bg-blue-700"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Branding
-            </Button>
-            <Button variant="ghost" onClick={onClose} className="text-white hover:bg-blue-700">
-              <X className="h-6 w-6" />
-            </Button>
-          </div>
+          <Button variant="ghost" onClick={onClose} className="text-white hover:bg-blue-700">
+            <X className="h-6 w-6" />
+          </Button>
         </div>
 
         <div className="p-6 space-y-6 bg-white">
-          {showBrandingSettings && (
-            <Card className="bg-white border-2 border-green-200">
-              <CardHeader className="bg-green-500 text-white rounded-t-lg">
-                <CardTitle>System Branding Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="bg-white p-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="brandingName" className="text-gray-700">System Name</Label>
-                    <Input
-                      id="brandingName"
-                      value={tempBrandingName}
-                      onChange={(e) => setTempBrandingName(e.target.value)}
-                      className="border-gray-300 text-gray-800"
-                      placeholder="Enter system name (e.g., Police Database System)"
-                    />
-                  </div>
-                  <div className="flex gap-4">
-                    <Button 
-                      onClick={handleBrandingUpdate}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      Update Branding
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        setShowBrandingSettings(false);
-                        setTempBrandingName(brandingName);
-                      }}
-                      className="border-gray-400 text-gray-700"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold text-gray-800">Database Records</h3>
             <Button 
@@ -998,8 +938,8 @@ const AdminPanel = ({ people, onAddPerson, onEditPerson, onDeletePerson, isOpen,
                           </div>
                         </TableCell>
                       </TableRow>
-                    );
-                  })}
+                    )}
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
