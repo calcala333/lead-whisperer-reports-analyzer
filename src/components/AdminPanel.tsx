@@ -430,7 +430,7 @@ const AdminPanel = ({
                         id="height"
                         value={formData.height}
                         onChange={(e) => handleInputChange('height', e.target.value)}
-                        placeholder="5'10\""
+                        placeholder="5'10&quot;"
                       />
                     </div>
                     <div>
