@@ -606,12 +606,25 @@ const Index = () => {
                           <div className="p-4 space-y-3">
                             {/* Name */}
                             <div>
-                              <h3 className="text-xl font-bold text-gray-900 tracking-wider">
+                              <h3 className="text-xl font-bold text-gray-900 tracking-wider cursor-pointer hover:text-blue-600 transition-colors">
                                 {person.name || `${person.lastName}, ${person.firstName} ${person.middleName}`.trim()}
                               </h3>
                               <p className="text-red-600 text-sm font-semibold">
                                 AKA: {person.alias || 'Unknown'}
                               </p>
+                              
+                              {/* Active Order of Protection - Prominently displayed under name */}
+                              {isProtectionActive && (
+                                <div className="mt-2 bg-purple-100 border-2 border-purple-400 rounded-lg p-2 shadow-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-purple-600 animate-pulse" />
+                                    <span className="text-purple-800 font-bold text-sm">ACTIVE ORDER OF PROTECTION</span>
+                                  </div>
+                                  <p className="text-purple-700 text-xs mt-1 font-medium">
+                                    Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                  </p>
+                                </div>
+                              )}
                             </div>
 
                             <Separator className="bg-gray-200" />
@@ -648,19 +661,6 @@ const Index = () => {
                                 {person.sex === 'M' ? 'Male' : 'Female'}, {person.age} years old, {person.height}, {person.weight} lbs, {person.hair || 'Unknown'} hair, {person.eyes || 'Unknown'} eyes
                               </p>
                             </div>
-
-                            {/* Order of Protection Status */}
-                            {isProtectionActive && (
-                              <div className="bg-purple-50 border border-purple-200 rounded p-2">
-                                <div className="flex items-center gap-2">
-                                  <Shield className="h-4 w-4 text-purple-600" />
-                                  <span className="text-purple-800 font-semibold text-xs">ACTIVE ORDER OF PROTECTION</span>
-                                </div>
-                                <p className="text-purple-700 text-xs mt-1">
-                                  Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
-                                </p>
-                              </div>
-                            )}
                           </div>
                         </div>
                       </Card>
