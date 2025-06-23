@@ -1,19 +1,18 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Settings, Users, User, Calendar, MapPin, AlertTriangle, Shield, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Ruler, Weight, Upload, X } from "lucide-react";
+import { Trash2, Edit, Plus, X, Settings } from "lucide-react";
 
 interface WantedPerson {
   id: string;
+  // Subject Demographics
   lastName: string;
   firstName: string;
   middleName: string;
@@ -24,14 +23,22 @@ interface WantedPerson {
   deceased: string;
   height: string;
   weight: string;
+  
+  // Identification
   driversLicenseNumber: string;
   driversLicenseState: string;
+  
+  // Address of Residence
   addressOfResidence: string;
   district: string;
   majorityDistrict: string;
+  
+  // IDOC Information
   idocNumber: string;
   idocAddressOfResidence: string;
   idocDistrict: string;
+  
+  // Criminal Record Details
   latestArrestCB: string;
   latestFelonyArrestCB: string;
   onParole: string;
@@ -39,14 +46,22 @@ interface WantedPerson {
   latestContactDistrict: string;
   latestWarrant: string;
   latestInvestigativeAlert: string;
+  
+  // Domestic Violence Arrest Record
   domesticViolenceArrestCount: string;
   latestDomesticViolenceArrestDate: string;
+  
+  // Weapons Arrest Record
   weaponsPossession: string;
   weaponsArrestCount: string;
   latestWeaponsArrestDate: string;
+  
+  // Narcotics Arrest Record
   narcoticsPossession: string;
   narcoticsArrestCount: string;
   latestNarcoticsArrestDate: string;
+
+  // Legacy fields for compatibility
   name?: string;
   alias?: string;
   address?: string;
@@ -70,846 +85,873 @@ interface AdminPanelProps {
   onClose: () => void;
   systemName: string;
   onUpdateSystemName: (name: string) => void;
+  disclaimerText: string;
+  onUpdateDisclaimer: (disclaimer: string) => void;
 }
 
-const AdminPanel = ({ 
-  people, 
-  onAddPerson, 
-  onEditPerson, 
-  onDeletePerson, 
-  isOpen, 
+const AdminPanel: React.FC<AdminPanelProps> = ({
+  people,
+  onAddPerson,
+  onEditPerson,
+  onDeletePerson,
+  isOpen,
   onClose,
   systemName,
-  onUpdateSystemName
-}: AdminPanelProps) => {
-  const [brandingName, setBrandingName] = useState(systemName);
+  onUpdateSystemName,
+  disclaimerText,
+  onUpdateDisclaimer,
+}) => {
+  const [activeTab, setActiveTab] = useState("add");
   const [editingPerson, setEditingPerson] = useState<WantedPerson | null>(null);
-  const [activeTab, setActiveTab] = useState("people");
-  const [formData, setFormData] = useState<Omit<WantedPerson, 'id'>>({
-    lastName: "",
-    firstName: "",
-    middleName: "",
-    sex: "",
-    race: "",
-    age: "",
-    birthDate: "",
-    deceased: "N",
-    height: "",
-    weight: "",
-    driversLicenseNumber: "",
-    driversLicenseState: "",
-    addressOfResidence: "",
-    district: "",
-    majorityDistrict: "",
-    idocNumber: "",
-    idocAddressOfResidence: "",
-    idocDistrict: "",
-    latestArrestCB: "",
-    latestFelonyArrestCB: "",
-    onParole: "",
-    latestContact: "",
-    latestContactDistrict: "",
-    latestWarrant: "",
-    latestInvestigativeAlert: "",
-    domesticViolenceArrestCount: "",
-    latestDomesticViolenceArrestDate: "",
-    weaponsPossession: "N",
-    weaponsArrestCount: "",
-    latestWeaponsArrestDate: "",
-    narcoticsPossession: "N",
-    narcoticsArrestCount: "",
-    latestNarcoticsArrestDate: "",
-    name: "",
-    alias: "",
-    address: "",
-    dob: "",
-    hair: "",
-    eyes: "",
-    charges: "",
-    dangerLevel: "LOW",
-    lastSeen: "",
-    orderOfProtection: false,
-    protectionExpirationDate: "",
-    photos: []
-  });
+  const [tempSystemName, setTempSystemName] = useState(systemName);
+  const [tempDisclaimerText, setTempDisclaimerText] = useState(disclaimerText);
 
-  const handleSaveBranding = () => {
-    onUpdateSystemName(brandingName);
-  };
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [sex, setSex] = useState("M");
+  const [race, setRace] = useState("WHI");
+  const [age, setAge] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [deceased, setDeceased] = useState("N");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [driversLicenseNumber, setDriversLicenseNumber] = useState("");
+  const [driversLicenseState, setDriversLicenseState] = useState("");
+  const [addressOfResidence, setAddressOfResidence] = useState("");
+  const [district, setDistrict] = useState("");
+  const [majorityDistrict, setMajorityDistrict] = useState("");
+  const [idocNumber, setIdocNumber] = useState("");
+  const [idocAddressOfResidence, setIdocAddressOfResidence] = useState("");
+  const [idocDistrict, setIdocDistrict] = useState("");
+  const [latestArrestCB, setLatestArrestCB] = useState("");
+  const [latestFelonyArrestCB, setLatestFelonyArrestCB] = useState("");
+  const [onParole, setOnParole] = useState("");
+  const [latestContact, setLatestContact] = useState("");
+  const [latestContactDistrict, setLatestContactDistrict] = useState("");
+  const [latestWarrant, setLatestWarrant] = useState("");
+  const [latestInvestigativeAlert, setLatestInvestigativeAlert] = useState("");
+  const [domesticViolenceArrestCount, setDomesticViolenceArrestCount] = useState("");
+  const [latestDomesticViolenceArrestDate, setLatestDomesticViolenceArrestDate] = useState("");
+  const [weaponsPossession, setWeaponsPossession] = useState("N");
+  const [weaponsArrestCount, setWeaponsArrestCount] = useState("");
+  const [latestWeaponsArrestDate, setLatestWeaponsArrestDate] = useState("");
+  const [narcoticsPossession, setNarcoticsPossession] = useState("N");
+  const [narcoticsArrestCount, setNarcoticsArrestCount] = useState("");
+  const [latestNarcoticsArrestDate, setLatestNarcoticsArrestDate] = useState("");
+  const [name, setName] = useState("");
+  const [alias, setAlias] = useState("");
+  const [address, setAddress] = useState("");
+  const [dob, setDob] = useState("");
+  const [hair, setHair] = useState("");
+  const [eyes, setEyes] = useState("");
+  const [charges, setCharges] = useState("");
+  const [dangerLevel, setDangerLevel] = useState("HIGH");
+  const [lastSeen, setLastSeen] = useState("");
+  const [orderOfProtection, setOrderOfProtection] = useState(false);
+  const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
 
-  const handleInputChange = (field: keyof typeof formData, value: string | boolean | string[]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const photoUrls = Array.from(files).map(file => URL.createObjectURL(file));
-      setFormData(prev => ({
-        ...prev,
-        photos: [...(prev.photos || []), ...photoUrls]
-      }));
-    }
-  };
-
-  const removePhoto = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      photos: prev.photos?.filter((_, i) => i !== index) || []
-    }));
-  };
-
-  const handleSubmitPerson = () => {
-    if (editingPerson) {
-      onEditPerson(editingPerson.id, formData);
-      setEditingPerson(null);
-    } else {
-      onAddPerson(formData);
-    }
-    resetForm();
-    setActiveTab("people"); // Switch back to people tab after saving
-  };
+  useEffect(() => {
+    setTempSystemName(systemName);
+    setTempDisclaimerText(disclaimerText);
+  }, [systemName, disclaimerText]);
 
   const resetForm = () => {
-    setFormData({
-      lastName: "",
-      firstName: "",
-      middleName: "",
-      sex: "",
-      race: "",
-      age: "",
-      birthDate: "",
-      deceased: "N",
-      height: "",
-      weight: "",
-      driversLicenseNumber: "",
-      driversLicenseState: "",
-      addressOfResidence: "",
-      district: "",
-      majorityDistrict: "",
-      idocNumber: "",
-      idocAddressOfResidence: "",
-      idocDistrict: "",
-      latestArrestCB: "",
-      latestFelonyArrestCB: "",
-      onParole: "",
-      latestContact: "",
-      latestContactDistrict: "",
-      latestWarrant: "",
-      latestInvestigativeAlert: "",
-      domesticViolenceArrestCount: "",
-      latestDomesticViolenceArrestDate: "",
-      weaponsPossession: "N",
-      weaponsArrestCount: "",
-      latestWeaponsArrestDate: "",
-      narcoticsPossession: "N",
-      narcoticsArrestCount: "",
-      latestNarcoticsArrestDate: "",
-      name: "",
-      alias: "",
-      address: "",
-      dob: "",
-      hair: "",
-      eyes: "",
-      charges: "",
-      dangerLevel: "LOW",
-      lastSeen: "",
-      orderOfProtection: false,
-      protectionExpirationDate: "",
-      photos: []
-    });
-    setEditingPerson(null);
+    setFirstName("");
+    setLastName("");
+    setMiddleName("");
+    setSex("M");
+    setRace("WHI");
+    setAge("");
+    setBirthDate("");
+    setDeceased("N");
+    setHeight("");
+    setWeight("");
+    setDriversLicenseNumber("");
+    setDriversLicenseState("");
+    setAddressOfResidence("");
+    setDistrict("");
+    setMajorityDistrict("");
+    setIdocNumber("");
+    setIdocAddressOfResidence("");
+    setIdocDistrict("");
+    setLatestArrestCB("");
+    setLatestFelonyArrestCB("");
+    setOnParole("");
+    setLatestContact("");
+    setLatestContactDistrict("");
+    setLatestWarrant("");
+    setLatestInvestigativeAlert("");
+    setDomesticViolenceArrestCount("");
+    setLatestDomesticViolenceArrestDate("");
+    setWeaponsPossession("N");
+    setWeaponsArrestCount("");
+    setLatestWeaponsArrestDate("");
+    setNarcoticsPossession("N");
+    setNarcoticsArrestCount("");
+    setLatestNarcoticsArrestDate("");
+    setName("");
+    setAlias("");
+    setAddress("");
+    setDob("");
+    setHair("");
+    setEyes("");
+    setCharges("");
+    setDangerLevel("HIGH");
+    setLastSeen("");
+    setOrderOfProtection(false);
+    setProtectionExpirationDate("");
+    setPhotos([]);
   };
 
-  const handleEditPerson = (person: WantedPerson) => {
-    setEditingPerson(person);
-    setActiveTab("add"); // Switch to add tab when editing
-    setFormData({
-      lastName: person.lastName,
-      firstName: person.firstName,
-      middleName: person.middleName,
-      sex: person.sex,
-      race: person.race,
-      age: person.age,
-      birthDate: person.birthDate,
-      deceased: person.deceased,
-      height: person.height,
-      weight: person.weight,
-      driversLicenseNumber: person.driversLicenseNumber,
-      driversLicenseState: person.driversLicenseState,
-      addressOfResidence: person.addressOfResidence,
-      district: person.district,
-      majorityDistrict: person.majorityDistrict,
-      idocNumber: person.idocNumber,
-      idocAddressOfResidence: person.idocAddressOfResidence,
-      idocDistrict: person.idocDistrict,
-      latestArrestCB: person.latestArrestCB,
-      latestFelonyArrestCB: person.latestFelonyArrestCB,
-      onParole: person.onParole,
-      latestContact: person.latestContact,
-      latestContactDistrict: person.latestContactDistrict,
-      latestWarrant: person.latestWarrant,
-      latestInvestigativeAlert: person.latestInvestigativeAlert,
-      domesticViolenceArrestCount: person.domesticViolenceArrestCount,
-      latestDomesticViolenceArrestDate: person.latestDomesticViolenceArrestDate,
-      weaponsPossession: person.weaponsPossession,
-      weaponsArrestCount: person.weaponsArrestCount,
-      latestWeaponsArrestDate: person.latestWeaponsArrestDate,
-      narcoticsPossession: person.narcoticsPossession,
-      narcoticsArrestCount: person.narcoticsArrestCount,
-      latestNarcoticsArrestDate: person.latestNarcoticsArrestDate,
-      name: person.name || "",
-      alias: person.alias || "",
-      address: person.address || "",
-      dob: person.dob || "",
-      hair: person.hair || "",
-      eyes: person.eyes || "",
-      charges: person.charges,
-      dangerLevel: person.dangerLevel,
-      lastSeen: person.lastSeen,
-      orderOfProtection: person.orderOfProtection || false,
-      protectionExpirationDate: person.protectionExpirationDate || "",
-      photos: person.photos || []
-    });
+  const handleAdd = () => {
+    const newPerson = {
+      lastName,
+      firstName,
+      middleName,
+      sex,
+      race,
+      age,
+      birthDate,
+      deceased,
+      height,
+      weight,
+      driversLicenseNumber,
+      driversLicenseState,
+      addressOfResidence,
+      district,
+      majorityDistrict,
+      idocNumber,
+      idocAddressOfResidence,
+      idocDistrict,
+      latestArrestCB,
+      latestFelonyArrestCB,
+      onParole,
+      latestContact,
+      latestContactDistrict,
+      latestWarrant,
+      latestInvestigativeAlert,
+      domesticViolenceArrestCount,
+      latestDomesticViolenceArrestDate,
+      weaponsPossession,
+      weaponsArrestCount,
+      latestWeaponsArrestDate,
+      narcoticsPossession,
+      narcoticsArrestCount,
+      latestNarcoticsArrestDate,
+      name,
+      alias,
+      address,
+      dob,
+      hair,
+      eyes,
+      charges,
+      dangerLevel,
+      lastSeen,
+      orderOfProtection,
+      protectionExpirationDate,
+      photos
+    };
+    onAddPerson(newPerson);
+    resetForm();
+    setActiveTab("manage");
   };
+
+  const handleEdit = (id: string) => {
+    if (editingPerson) {
+      const updatedPerson: Omit<WantedPerson, 'id'> = {
+        lastName,
+        firstName,
+        middleName,
+        sex,
+        race,
+        age,
+        birthDate,
+        deceased,
+        height,
+        weight,
+        driversLicenseNumber,
+        driversLicenseState,
+        addressOfResidence,
+        district,
+        majorityDistrict,
+        idocNumber,
+        idocAddressOfResidence,
+        idocDistrict,
+        latestArrestCB,
+        latestFelonyArrestCB,
+        onParole,
+        latestContact,
+        latestContactDistrict,
+        latestWarrant,
+        latestInvestigativeAlert,
+        domesticViolenceArrestCount,
+        latestDomesticViolenceArrestDate,
+        weaponsPossession,
+        weaponsArrestCount,
+        latestWeaponsArrestDate,
+        narcoticsPossession,
+        narcoticsArrestCount,
+        latestNarcoticsArrestDate,
+        name,
+        alias,
+        address,
+        dob,
+        hair,
+        eyes,
+        charges,
+        dangerLevel,
+        lastSeen,
+        orderOfProtection,
+        protectionExpirationDate,
+        photos
+      };
+      onEditPerson(id, updatedPerson);
+      setEditingPerson(null);
+      resetForm();
+      setActiveTab("manage");
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    onDeletePerson(id);
+  };
+
+  const startEditing = (person: WantedPerson) => {
+    setEditingPerson(person);
+    setFirstName(person.firstName);
+    setLastName(person.lastName);
+    setMiddleName(person.middleName);
+    setSex(person.sex);
+    setRace(person.race);
+    setAge(person.age);
+    setBirthDate(person.birthDate);
+    setDeceased(person.deceased);
+    setHeight(person.height);
+    setWeight(person.weight);
+    setDriversLicenseNumber(person.driversLicenseNumber);
+    setDriversLicenseState(person.driversLicenseState);
+    setAddressOfResidence(person.addressOfResidence);
+    setDistrict(person.district);
+    setMajorityDistrict(person.majorityDistrict);
+    setIdocNumber(person.idocNumber);
+    setIdocAddressOfResidence(person.idocAddressOfResidence);
+    setIdocDistrict(person.idocDistrict);
+    setLatestArrestCB(person.latestArrestCB);
+    setLatestFelonyArrestCB(person.latestFelonyArrestCB);
+    setOnParole(person.onParole);
+    setLatestContact(person.latestContact);
+    setLatestContactDistrict(person.latestContactDistrict);
+    setLatestWarrant(person.latestWarrant);
+    setLatestInvestigativeAlert(person.latestInvestigativeAlert);
+    setDomesticViolenceArrestCount(person.domesticViolenceArrestCount);
+    setLatestDomesticViolenceArrestDate(person.latestDomesticViolenceArrestDate);
+    setWeaponsPossession(person.weaponsPossession);
+    setWeaponsArrestCount(person.weaponsArrestCount);
+    setLatestWeaponsArrestDate(person.latestWeaponsArrestDate);
+    setNarcoticsPossession(person.narcoticsPossession);
+    setNarcoticsArrestCount(person.narcoticsArrestCount);
+    setLatestNarcoticsArrestDate(person.latestNarcoticsArrestDate);
+    setName(person.name || "");
+    setAlias(person.alias || "");
+    setAddress(person.address || "");
+    setDob(person.dob || "");
+    setHair(person.hair || "");
+    setEyes(person.eyes || "");
+    setCharges(person.charges);
+    setDangerLevel(person.dangerLevel);
+    setLastSeen(person.lastSeen);
+    setOrderOfProtection(person.orderOfProtection || false);
+    setProtectionExpirationDate(person.protectionExpirationDate || "");
+    setPhotos(person.photos || []);
+    setActiveTab("add");
+  };
+
+  const handleSystemSettingsSave = () => {
+    onUpdateSystemName(tempSystemName);
+    onUpdateDisclaimer(tempDisclaimerText);
+  };
+
+  if (!isOpen) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <Settings className="h-6 w-6" />
-            Admin Panel
-          </DialogTitle>
-          <DialogDescription>
-            Manage wanted persons database and system settings
-          </DialogDescription>
+          <DialogTitle className="text-2xl font-bold">Admin Panel</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="people" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Manage People
-            </TabsTrigger>
-            <TabsTrigger value="add" className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Add Person
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              System Settings
-            </TabsTrigger>
+            <TabsTrigger value="add">Add Person</TabsTrigger>
+            <TabsTrigger value="manage">Manage People</TabsTrigger>
+            <TabsTrigger value="settings">System Settings</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="people" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Manage People ({people.length} total)
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Alias</TableHead>
-                      <TableHead>Charges</TableHead>
-                      <TableHead>Danger Level</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {people.map((person) => (
-                      <TableRow key={person.id}>
-                        <TableCell className="font-medium">
-                          {person.name || `${person.lastName}, ${person.firstName}`}
-                        </TableCell>
-                        <TableCell>{person.alias || 'N/A'}</TableCell>
-                        <TableCell>{person.charges}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            className={
-                              person.dangerLevel === "EXTREME" ? "bg-red-600" : 
-                              person.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
-                            }
-                          >
-                            {person.dangerLevel}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditPerson(person)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => onDeletePerson(person.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
+          {/* Add Person Tab */}
           <TabsContent value="add" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Plus className="h-5 w-5" />
-                  {editingPerson ? 'Edit Person' : 'Add New Person'}
+                <CardTitle>
+                  {editingPerson ? "Edit Person" : "Add New Person"}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Photo Section */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <User className="h-5 w-5" />
-                    Photos
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="photos">Upload Photos</Label>
-                      <Input
-                        id="photos"
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handlePhotoUpload}
-                        className="mt-1"
-                      />
-                      <p className="text-sm text-gray-500 mt-1">Select multiple images to upload</p>
-                    </div>
-                    {formData.photos && formData.photos.length > 0 && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {formData.photos.map((photo, index) => (
-                          <div key={index} className="relative">
-                            <img
-                              src={photo}
-                              alt={`Photo ${index + 1}`}
-                              className="w-full h-32 object-cover rounded border"
-                            />
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              className="absolute top-1 right-1 h-6 w-6 p-0"
-                              onClick={() => removePhoto(index)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        ))}
+              <CardContent className="grid gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input
+                      type="text"
+                      id="firstName"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input
+                      type="text"
+                      id="lastName"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="middleName">Middle Name</Label>
+                    <Input
+                      type="text"
+                      id="middleName"
+                      value={middleName}
+                      onChange={(e) => setMiddleName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      type="text"
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="alias">Alias</Label>
+                    <Input
+                      type="text"
+                      id="alias"
+                      value={alias}
+                      onChange={(e) => setAlias(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      type="text"
+                      id="address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="dob">Date of Birth</Label>
+                    <Input
+                      type="text"
+                      id="dob"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="hair">Hair Color</Label>
+                    <Input
+                      type="text"
+                      id="hair"
+                      value={hair}
+                      onChange={(e) => setHair(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="eyes">Eye Color</Label>
+                    <Input
+                      type="text"
+                      id="eyes"
+                      value={eyes}
+                      onChange={(e) => setEyes(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="sex">Sex</Label>
+                    <Select value={sex} onValueChange={setSex}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="M">Male</SelectItem>
+                        <SelectItem value="F">Female</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="race">Race</Label>
+                    <Select value={race} onValueChange={setRace}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="WHI">White</SelectItem>
+                        <SelectItem value="BLK">Black</SelectItem>
+                        <SelectItem value="HIS">Hispanic</SelectItem>
+                        <SelectItem value="ASI">Asian</SelectItem>
+                        <SelectItem value="NAT">Native American</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="dangerLevel">Danger Level</Label>
+                    <Select value={dangerLevel} onValueChange={setDangerLevel}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="LOW">Low</SelectItem>
+                        <SelectItem value="HIGH">High</SelectItem>
+                        <SelectItem value="EXTREME">Extreme</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="age">Age</Label>
+                    <Input
+                      type="number"
+                      id="age"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="birthDate">Birth Date</Label>
+                    <Input
+                      type="text"
+                      id="birthDate"
+                      value={birthDate}
+                      onChange={(e) => setBirthDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="height">Height</Label>
+                    <Input
+                      type="text"
+                      id="height"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="weight">Weight</Label>
+                    <Input
+                      type="text"
+                      id="weight"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="charges">Charges</Label>
+                    <Textarea
+                      id="charges"
+                      value={charges}
+                      onChange={(e) => setCharges(e.target.value)}
+                      className="resize-none"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="lastSeen">Last Seen</Label>
+                    <Input
+                      type="text"
+                      id="lastSeen"
+                      value={lastSeen}
+                      onChange={(e) => setLastSeen(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="driversLicenseNumber">Driver's License Number</Label>
+                    <Input
+                      type="text"
+                      id="driversLicenseNumber"
+                      value={driversLicenseNumber}
+                      onChange={(e) => setDriversLicenseNumber(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="driversLicenseState">Driver's License State</Label>
+                    <Input
+                      type="text"
+                      id="driversLicenseState"
+                      value={driversLicenseState}
+                      onChange={(e) => setDriversLicenseState(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="addressOfResidence">Address of Residence</Label>
+                    <Input
+                      type="text"
+                      id="addressOfResidence"
+                      value={addressOfResidence}
+                      onChange={(e) => setAddressOfResidence(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="district">District</Label>
+                    <Input
+                      type="text"
+                      id="district"
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="majorityDistrict">Majority District</Label>
+                    <Input
+                      type="text"
+                      id="majorityDistrict"
+                      value={majorityDistrict}
+                      onChange={(e) => setMajorityDistrict(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="idocNumber">IDOC Number</Label>
+                    <Input
+                      type="text"
+                      id="idocNumber"
+                      value={idocNumber}
+                      onChange={(e) => setIdocNumber(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="idocAddressOfResidence">IDOC Address of Residence</Label>
+                    <Input
+                      type="text"
+                      id="idocAddressOfResidence"
+                      value={idocAddressOfResidence}
+                      onChange={(e) => setIdocAddressOfResidence(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="idocDistrict">IDOC District</Label>
+                    <Input
+                      type="text"
+                      id="idocDistrict"
+                      value={idocDistrict}
+                      onChange={(e) => setIdocDistrict(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latestArrestCB">Latest Arrest CB</Label>
+                    <Input
+                      type="text"
+                      id="latestArrestCB"
+                      value={latestArrestCB}
+                      onChange={(e) => setLatestArrestCB(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="latestFelonyArrestCB">Latest Felony Arrest CB</Label>
+                    <Input
+                      type="text"
+                      id="latestFelonyArrestCB"
+                      value={latestFelonyArrestCB}
+                      onChange={(e) => setLatestFelonyArrestCB(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="onParole">On Parole</Label>
+                    <Input
+                      type="text"
+                      id="onParole"
+                      value={onParole}
+                      onChange={(e) => setOnParole(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="latestContact">Latest Contact</Label>
+                    <Input
+                      type="text"
+                      id="latestContact"
+                      value={latestContact}
+                      onChange={(e) => setLatestContact(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latestContactDistrict">Latest Contact District</Label>
+                    <Input
+                      type="text"
+                      id="latestContactDistrict"
+                      value={latestContactDistrict}
+                      onChange={(e) => setLatestContactDistrict(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="latestWarrant">Latest Warrant</Label>
+                    <Input
+                      type="text"
+                      id="latestWarrant"
+                      value={latestWarrant}
+                      onChange={(e) => setLatestWarrant(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latestInvestigativeAlert">Latest Investigative Alert</Label>
+                    <Input
+                      type="text"
+                      id="latestInvestigativeAlert"
+                      value={latestInvestigativeAlert}
+                      onChange={(e) => setLatestInvestigativeAlert(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="domesticViolenceArrestCount">Domestic Violence Arrest Count</Label>
+                    <Input
+                      type="text"
+                      id="domesticViolenceArrestCount"
+                      value={domesticViolenceArrestCount}
+                      onChange={(e) => setDomesticViolenceArrestCount(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="latestDomesticViolenceArrestDate">Latest Domestic Violence Arrest Date</Label>
+                    <Input
+                      type="text"
+                      id="latestDomesticViolenceArrestDate"
+                      value={latestDomesticViolenceArrestDate}
+                      onChange={(e) => setLatestDomesticViolenceArrestDate(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="weaponsPossession">Weapons Possession</Label>
+                    <Select value={weaponsPossession} onValueChange={setWeaponsPossession}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Y">Yes</SelectItem>
+                        <SelectItem value="N">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="weaponsArrestCount">Weapons Arrest Count</Label>
+                    <Input
+                      type="text"
+                      id="weaponsArrestCount"
+                      value={weaponsArrestCount}
+                      onChange={(e) => setWeaponsArrestCount(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="latestWeaponsArrestDate">Latest Weapons Arrest Date</Label>
+                    <Input
+                      type="text"
+                      id="latestWeaponsArrestDate"
+                      value={latestWeaponsArrestDate}
+                      onChange={(e) => setLatestWeaponsArrestDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="narcoticsPossession">Narcotics Possession</Label>
+                    <Select value={narcoticsPossession} onValueChange={setNarcoticsPossession}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Y">Yes</SelectItem>
+                        <SelectItem value="N">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="narcoticsArrestCount">Narcotics Arrest Count</Label>
+                    <Input
+                      type="text"
+                      id="narcoticsArrestCount"
+                      value={narcoticsArrestCount}
+                      onChange={(e) => setNarcoticsArrestCount(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="latestNarcoticsArrestDate">Latest Narcotics Arrest Date</Label>
+                  <Input
+                    type="text"
+                    id="latestNarcoticsArrestDate"
+                    value={latestNarcoticsArrestDate}
+                    onChange={(e) => setLatestNarcoticsArrestDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="orderOfProtection">Order of Protection</Label>
+                    <Select
+                      value={orderOfProtection ? "true" : "false"}
+                      onValueChange={(value) => setOrderOfProtection(value === "true")}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Yes</SelectItem>
+                        <SelectItem value="false">No</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="protectionExpirationDate">Protection Expiration Date</Label>
+                    <Input
+                      type="text"
+                      id="protectionExpirationDate"
+                      value={protectionExpirationDate}
+                      onChange={(e) => setProtectionExpirationDate(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button onClick={() => {
+                  if (editingPerson) {
+                    handleEdit(editingPerson.id);
+                  } else {
+                    handleAdd();
+                  }
+                }}>
+                  {editingPerson ? "Update Person" : "Add Person"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Manage People Tab */}
+          <TabsContent value="manage" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Manage Existing People</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  {people.map((person) => (
+                    <div
+                      key={person.id}
+                      className="flex items-center justify-between p-4 rounded-md shadow-sm border"
+                    >
+                      <div>
+                        <h3 className="text-lg font-semibold">{person.name || `${person.firstName} ${person.lastName}`}</h3>
+                        <p className="text-sm text-gray-500">ID: {person.id}</p>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Subject Demographics */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Subject Demographics</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input
-                        id="lastName"
-                        value={formData.lastName}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        placeholder="Last Name"
-                      />
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => startEditing(person)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDelete(person.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div>
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input
-                        id="firstName"
-                        value={formData.firstName}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        placeholder="First Name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="middleName">Middle Name</Label>
-                      <Input
-                        id="middleName"
-                        value={formData.middleName}
-                        onChange={(e) => handleInputChange('middleName', e.target.value)}
-                        placeholder="Middle Name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="sex">Sex</Label>
-                      <Select value={formData.sex} onValueChange={(value) => handleInputChange('sex', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select sex" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="M">Male</SelectItem>
-                          <SelectItem value="F">Female</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="race">Race</Label>
-                      <Input
-                        id="race"
-                        value={formData.race}
-                        onChange={(e) => handleInputChange('race', e.target.value)}
-                        placeholder="Race (e.g., WHI, BLK, HIS)"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="age">Age</Label>
-                      <Input
-                        id="age"
-                        value={formData.age}
-                        onChange={(e) => handleInputChange('age', e.target.value)}
-                        placeholder="Age"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="birthDate">Birth Date</Label>
-                      <Input
-                        id="birthDate"
-                        value={formData.birthDate}
-                        onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                        placeholder="MM/DD/YYYY"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="deceased">Deceased</Label>
-                      <Select value={formData.deceased} onValueChange={(value) => handleInputChange('deceased', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="N">No</SelectItem>
-                          <SelectItem value="Y">Yes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="height">Height</Label>
-                      <Input
-                        id="height"
-                        value={formData.height}
-                        onChange={(e) => handleInputChange('height', e.target.value)}
-                        placeholder="6'00&quot;"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="weight">Weight</Label>
-                      <Input
-                        id="weight"
-                        value={formData.weight}
-                        onChange={(e) => handleInputChange('weight', e.target.value)}
-                        placeholder="Weight (lbs)"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="hair">Hair Color</Label>
-                      <Input
-                        id="hair"
-                        value={formData.hair}
-                        onChange={(e) => handleInputChange('hair', e.target.value)}
-                        placeholder="Hair color (e.g., BRO, BLK)"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="eyes">Eye Color</Label>
-                      <Input
-                        id="eyes"
-                        value={formData.eyes}
-                        onChange={(e) => handleInputChange('eyes', e.target.value)}
-                        placeholder="Eye color (e.g., BRO, BLU)"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Identification */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Identification</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="driversLicenseNumber">Driver's License #</Label>
-                      <Input
-                        id="driversLicenseNumber"
-                        value={formData.driversLicenseNumber}
-                        onChange={(e) => handleInputChange('driversLicenseNumber', e.target.value)}
-                        placeholder="Driver's License Number"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="driversLicenseState">Driver's License State</Label>
-                      <Input
-                        id="driversLicenseState"
-                        value={formData.driversLicenseState}
-                        onChange={(e) => handleInputChange('driversLicenseState', e.target.value)}
-                        placeholder="State"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Address Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Address of Residence</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <Label htmlFor="addressOfResidence">Address of Residence</Label>
-                      <Input
-                        id="addressOfResidence"
-                        value={formData.addressOfResidence}
-                        onChange={(e) => handleInputChange('addressOfResidence', e.target.value)}
-                        placeholder="Full Address"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="district">District</Label>
-                      <Input
-                        id="district"
-                        value={formData.district}
-                        onChange={(e) => handleInputChange('district', e.target.value)}
-                        placeholder="District"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="majorityDistrict">Majority District</Label>
-                      <Input
-                        id="majorityDistrict"
-                        value={formData.majorityDistrict}
-                        onChange={(e) => handleInputChange('majorityDistrict', e.target.value)}
-                        placeholder="Majority District"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* IDOC Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">IDOC Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="idocNumber">IDOC #</Label>
-                      <Input
-                        id="idocNumber"
-                        value={formData.idocNumber}
-                        onChange={(e) => handleInputChange('idocNumber', e.target.value)}
-                        placeholder="IDOC Number"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="idocDistrict">IDOC District</Label>
-                      <Input
-                        id="idocDistrict"
-                        value={formData.idocDistrict}
-                        onChange={(e) => handleInputChange('idocDistrict', e.target.value)}
-                        placeholder="IDOC District"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="idocAddressOfResidence">IDOC Address of Residence</Label>
-                      <Input
-                        id="idocAddressOfResidence"
-                        value={formData.idocAddressOfResidence}
-                        onChange={(e) => handleInputChange('idocAddressOfResidence', e.target.value)}
-                        placeholder="IDOC Address"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Criminal Record Details */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Criminal Record Details</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="latestArrestCB">Latest Arrest CB #</Label>
-                      <Input
-                        id="latestArrestCB"
-                        value={formData.latestArrestCB}
-                        onChange={(e) => handleInputChange('latestArrestCB', e.target.value)}
-                        placeholder="CB Number"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestFelonyArrestCB">Latest Felony Arrest CB #</Label>
-                      <Input
-                        id="latestFelonyArrestCB"
-                        value={formData.latestFelonyArrestCB}
-                        onChange={(e) => handleInputChange('latestFelonyArrestCB', e.target.value)}
-                        placeholder="Felony CB Number"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="onParole">On Parole</Label>
-                      <Input
-                        id="onParole"
-                        value={formData.onParole}
-                        onChange={(e) => handleInputChange('onParole', e.target.value)}
-                        placeholder="Parole Status"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestContact">Latest Contact</Label>
-                      <Input
-                        id="latestContact"
-                        value={formData.latestContact}
-                        onChange={(e) => handleInputChange('latestContact', e.target.value)}
-                        placeholder="DD MMM YYYY @ HH:MM"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestContactDistrict">Latest Contact District</Label>
-                      <Input
-                        id="latestContactDistrict"
-                        value={formData.latestContactDistrict}
-                        onChange={(e) => handleInputChange('latestContactDistrict', e.target.value)}
-                        placeholder="Contact District"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestWarrant">Latest Warrant</Label>
-                      <Input
-                        id="latestWarrant"
-                        value={formData.latestWarrant}
-                        onChange={(e) => handleInputChange('latestWarrant', e.target.value)}
-                        placeholder="Warrant Status"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="latestInvestigativeAlert">Latest Investigative Alert</Label>
-                      <Input
-                        id="latestInvestigativeAlert"
-                        value={formData.latestInvestigativeAlert}
-                        onChange={(e) => handleInputChange('latestInvestigativeAlert', e.target.value)}
-                        placeholder="Investigative Alert"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Domestic Violence Arrest Record */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Domestic Violence Arrest Record</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="domesticViolenceArrestCount">Arrest Count</Label>
-                      <Input
-                        id="domesticViolenceArrestCount"
-                        value={formData.domesticViolenceArrestCount}
-                        onChange={(e) => handleInputChange('domesticViolenceArrestCount', e.target.value)}
-                        placeholder="Number of arrests"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestDomesticViolenceArrestDate">Latest Arrest Date</Label>
-                      <Input
-                        id="latestDomesticViolenceArrestDate"
-                        value={formData.latestDomesticViolenceArrestDate}
-                        onChange={(e) => handleInputChange('latestDomesticViolenceArrestDate', e.target.value)}
-                        placeholder="DD MMM YYYY"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Weapons Arrest Record */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Weapons Arrest Record</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="weaponsPossession">Possession</Label>
-                      <Select value={formData.weaponsPossession} onValueChange={(value) => handleInputChange('weaponsPossession', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="N">No</SelectItem>
-                          <SelectItem value="Y">Yes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="weaponsArrestCount">Arrest Count</Label>
-                      <Input
-                        id="weaponsArrestCount"
-                        value={formData.weaponsArrestCount}
-                        onChange={(e) => handleInputChange('weaponsArrestCount', e.target.value)}
-                        placeholder="Number of arrests"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestWeaponsArrestDate">Latest Arrest Date</Label>
-                      <Input
-                        id="latestWeaponsArrestDate"
-                        value={formData.latestWeaponsArrestDate}
-                        onChange={(e) => handleInputChange('latestWeaponsArrestDate', e.target.value)}
-                        placeholder="DD MMM YYYY"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Narcotics Arrest Record */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Narcotics Arrest Record</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="narcoticsPossession">Possession</Label>
-                      <Select value={formData.narcoticsPossession} onValueChange={(value) => handleInputChange('narcoticsPossession', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="N">No</SelectItem>
-                          <SelectItem value="Y">Yes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="narcoticsArrestCount">Arrest Count</Label>
-                      <Input
-                        id="narcoticsArrestCount"
-                        value={formData.narcoticsArrestCount}
-                        onChange={(e) => handleInputChange('narcoticsArrestCount', e.target.value)}
-                        placeholder="Number of arrests"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="latestNarcoticsArrestDate">Latest Arrest Date</Label>
-                      <Input
-                        id="latestNarcoticsArrestDate"
-                        value={formData.latestNarcoticsArrestDate}
-                        onChange={(e) => handleInputChange('latestNarcoticsArrestDate', e.target.value)}
-                        placeholder="DD MMM YYYY"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Additional Information */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Additional Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="name">Full Name (Display)</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        placeholder="Full display name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="alias">Alias/Nickname</Label>
-                      <Input
-                        id="alias"
-                        value={formData.alias}
-                        onChange={(e) => handleInputChange('alias', e.target.value)}
-                        placeholder="Known aliases"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <Label htmlFor="charges">Charges</Label>
-                      <Textarea
-                        id="charges"
-                        value={formData.charges}
-                        onChange={(e) => handleInputChange('charges', e.target.value)}
-                        placeholder="List of charges"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="dangerLevel">Danger Level</Label>
-                      <Select value={formData.dangerLevel} onValueChange={(value) => handleInputChange('dangerLevel', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select danger level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="LOW">Low</SelectItem>
-                          <SelectItem value="MEDIUM">Medium</SelectItem>
-                          <SelectItem value="HIGH">High</SelectItem>
-                          <SelectItem value="EXTREME">Extreme</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="lastSeen">Last Seen</Label>
-                      <Input
-                        id="lastSeen"
-                        value={formData.lastSeen}
-                        onChange={(e) => handleInputChange('lastSeen', e.target.value)}
-                        placeholder="Last known location"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <Button onClick={handleSubmitPerson} className="bg-blue-600 hover:bg-blue-700">
-                    {editingPerson ? 'Update Person' : 'Add Person'}
-                  </Button>
-                  {editingPerson && (
-                    <Button variant="outline" onClick={resetForm}>
-                      Cancel Edit
-                    </Button>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* System Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
-                  System Branding
+                  System Configuration
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
                   <Label htmlFor="systemName">System Name</Label>
                   <Input
                     id="systemName"
-                    value={brandingName}
-                    onChange={(e) => setBrandingName(e.target.value)}
+                    value={tempSystemName}
+                    onChange={(e) => setTempSystemName(e.target.value)}
                     placeholder="Enter system name"
-                    className="mt-1"
                   />
                 </div>
-                <Button onClick={handleSaveBranding} className="bg-blue-600 hover:bg-blue-700">
-                  Save Branding
+
+                <div className="space-y-2">
+                  <Label htmlFor="disclaimerText">Disclaimer Text</Label>
+                  <Textarea
+                    id="disclaimerText"
+                    value={tempDisclaimerText}
+                    onChange={(e) => setTempDisclaimerText(e.target.value)}
+                    placeholder="Enter disclaimer text"
+                    rows={8}
+                    className="resize-none"
+                  />
+                </div>
+
+                <Button 
+                  onClick={handleSystemSettingsSave}
+                  className="w-full"
+                >
+                  Save System Settings
                 </Button>
               </CardContent>
             </Card>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Zap, Target, Pill, FileText } from "lucide-react";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Info } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
@@ -80,6 +80,7 @@ const Index = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [photoIndexes, setPhotoIndexes] = useState<{[key: string]: number}>({});
   const [systemName, setSystemName] = useState("Police Wanted System");
+  const [disclaimerText, setDisclaimerText] = useState("This system contains confidential and privileged information that is intended only for use by individuals who have received the permission of the Police Department to access this system. Personal should treat information on this site as confidential, privileged and law enforcement sensitive. If the Lincolnwood Police Department has not granted you authority, then you are hereby notified that any access, disclosure, dissemination, copying or distribution of the information contained herein is strictly prohibited.");
 
   // Mock data with multiple wanted persons - updated to match new interface
   const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
@@ -435,6 +436,10 @@ const Index = () => {
     setSystemName(newName);
   };
 
+  const handleUpdateDisclaimer = (newDisclaimer: string) => {
+    setDisclaimerText(newDisclaimer);
+  };
+
   const currentPerson = selectedPerson || wantedPersons[0];
 
   return (
@@ -470,6 +475,21 @@ const Index = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Disclaimer Box */}
+        <Card className="mb-8 shadow-2xl border-2 border-yellow-400 bg-yellow-50">
+          <CardHeader className="bg-yellow-500 text-black rounded-t-lg border-b-2 border-yellow-300">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <Info className="h-6 w-6" />
+              DISCLAIMER
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 bg-yellow-50">
+            <p className="text-black text-sm leading-relaxed font-medium">
+              {disclaimerText}
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Search Section */}
         <Card className="mb-8 shadow-2xl border-2 border-blue-200">
           <CardHeader className="bg-blue-500 text-white rounded-t-lg border-b-2 border-blue-300">
@@ -1064,6 +1084,8 @@ const Index = () => {
         onClose={() => setShowAdmin(false)}
         systemName={systemName}
         onUpdateSystemName={handleUpdateSystemName}
+        disclaimerText={disclaimerText}
+        onUpdateDisclaimer={handleUpdateDisclaimer}
       />
     </div>
   );
