@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -85,6 +84,7 @@ const AdminPanel = ({
 }: AdminPanelProps) => {
   const [brandingName, setBrandingName] = useState(systemName);
   const [editingPerson, setEditingPerson] = useState<WantedPerson | null>(null);
+  const [activeTab, setActiveTab] = useState("people");
   const [formData, setFormData] = useState<Omit<WantedPerson, 'id'>>({
     lastName: "",
     firstName: "",
@@ -167,6 +167,7 @@ const AdminPanel = ({
       onAddPerson(formData);
     }
     resetForm();
+    setActiveTab("people"); // Switch back to people tab after saving
   };
 
   const resetForm = () => {
@@ -222,6 +223,7 @@ const AdminPanel = ({
 
   const handleEditPerson = (person: WantedPerson) => {
     setEditingPerson(person);
+    setActiveTab("add"); // Switch to add tab when editing
     setFormData({
       lastName: person.lastName,
       firstName: person.firstName,
@@ -284,7 +286,7 @@ const AdminPanel = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="people" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="people" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
