@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -465,7 +466,7 @@ const AdminPanel = ({
                         id="race"
                         value={formData.race}
                         onChange={(e) => handleInputChange('race', e.target.value)}
-                        placeholder="Race"
+                        placeholder="Race (e.g., WHI, BLK, HIS)"
                       />
                     </div>
                     <div>
@@ -487,12 +488,24 @@ const AdminPanel = ({
                       />
                     </div>
                     <div>
+                      <Label htmlFor="deceased">Deceased</Label>
+                      <Select value={formData.deceased} onValueChange={(value) => handleInputChange('deceased', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="N">No</SelectItem>
+                          <SelectItem value="Y">Yes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
                       <Label htmlFor="height">Height</Label>
                       <Input
                         id="height"
                         value={formData.height}
                         onChange={(e) => handleInputChange('height', e.target.value)}
-                        placeholder="5'10&quot;"
+                        placeholder="6'00&quot;"
                       />
                     </div>
                     <div>
@@ -504,6 +517,51 @@ const AdminPanel = ({
                         placeholder="Weight (lbs)"
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="hair">Hair Color</Label>
+                      <Input
+                        id="hair"
+                        value={formData.hair}
+                        onChange={(e) => handleInputChange('hair', e.target.value)}
+                        placeholder="Hair color (e.g., BRO, BLK)"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="eyes">Eye Color</Label>
+                      <Input
+                        id="eyes"
+                        value={formData.eyes}
+                        onChange={(e) => handleInputChange('eyes', e.target.value)}
+                        placeholder="Eye color (e.g., BRO, BLU)"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Identification */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Identification</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="driversLicenseNumber">Driver's License #</Label>
+                      <Input
+                        id="driversLicenseNumber"
+                        value={formData.driversLicenseNumber}
+                        onChange={(e) => handleInputChange('driversLicenseNumber', e.target.value)}
+                        placeholder="Driver's License Number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="driversLicenseState">Driver's License State</Label>
+                      <Input
+                        id="driversLicenseState"
+                        value={formData.driversLicenseState}
+                        onChange={(e) => handleInputChange('driversLicenseState', e.target.value)}
+                        placeholder="State"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -511,7 +569,7 @@ const AdminPanel = ({
 
                 {/* Address Information */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Address Information</h3>
+                  <h3 className="text-lg font-semibold">Address of Residence</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <Label htmlFor="addressOfResidence">Address of Residence</Label>
@@ -545,10 +603,241 @@ const AdminPanel = ({
 
                 <Separator />
 
-                {/* Criminal Information */}
+                {/* IDOC Information */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Criminal Information</h3>
+                  <h3 className="text-lg font-semibold">IDOC Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="idocNumber">IDOC #</Label>
+                      <Input
+                        id="idocNumber"
+                        value={formData.idocNumber}
+                        onChange={(e) => handleInputChange('idocNumber', e.target.value)}
+                        placeholder="IDOC Number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="idocDistrict">IDOC District</Label>
+                      <Input
+                        id="idocDistrict"
+                        value={formData.idocDistrict}
+                        onChange={(e) => handleInputChange('idocDistrict', e.target.value)}
+                        placeholder="IDOC District"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="idocAddressOfResidence">IDOC Address of Residence</Label>
+                      <Input
+                        id="idocAddressOfResidence"
+                        value={formData.idocAddressOfResidence}
+                        onChange={(e) => handleInputChange('idocAddressOfResidence', e.target.value)}
+                        placeholder="IDOC Address"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Criminal Record Details */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Criminal Record Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="latestArrestCB">Latest Arrest CB #</Label>
+                      <Input
+                        id="latestArrestCB"
+                        value={formData.latestArrestCB}
+                        onChange={(e) => handleInputChange('latestArrestCB', e.target.value)}
+                        placeholder="CB Number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestFelonyArrestCB">Latest Felony Arrest CB #</Label>
+                      <Input
+                        id="latestFelonyArrestCB"
+                        value={formData.latestFelonyArrestCB}
+                        onChange={(e) => handleInputChange('latestFelonyArrestCB', e.target.value)}
+                        placeholder="Felony CB Number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="onParole">On Parole</Label>
+                      <Input
+                        id="onParole"
+                        value={formData.onParole}
+                        onChange={(e) => handleInputChange('onParole', e.target.value)}
+                        placeholder="Parole Status"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestContact">Latest Contact</Label>
+                      <Input
+                        id="latestContact"
+                        value={formData.latestContact}
+                        onChange={(e) => handleInputChange('latestContact', e.target.value)}
+                        placeholder="DD MMM YYYY @ HH:MM"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestContactDistrict">Latest Contact District</Label>
+                      <Input
+                        id="latestContactDistrict"
+                        value={formData.latestContactDistrict}
+                        onChange={(e) => handleInputChange('latestContactDistrict', e.target.value)}
+                        placeholder="Contact District"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestWarrant">Latest Warrant</Label>
+                      <Input
+                        id="latestWarrant"
+                        value={formData.latestWarrant}
+                        onChange={(e) => handleInputChange('latestWarrant', e.target.value)}
+                        placeholder="Warrant Status"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="latestInvestigativeAlert">Latest Investigative Alert</Label>
+                      <Input
+                        id="latestInvestigativeAlert"
+                        value={formData.latestInvestigativeAlert}
+                        onChange={(e) => handleInputChange('latestInvestigativeAlert', e.target.value)}
+                        placeholder="Investigative Alert"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Domestic Violence Arrest Record */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Domestic Violence Arrest Record</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="domesticViolenceArrestCount">Arrest Count</Label>
+                      <Input
+                        id="domesticViolenceArrestCount"
+                        value={formData.domesticViolenceArrestCount}
+                        onChange={(e) => handleInputChange('domesticViolenceArrestCount', e.target.value)}
+                        placeholder="Number of arrests"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestDomesticViolenceArrestDate">Latest Arrest Date</Label>
+                      <Input
+                        id="latestDomesticViolenceArrestDate"
+                        value={formData.latestDomesticViolenceArrestDate}
+                        onChange={(e) => handleInputChange('latestDomesticViolenceArrestDate', e.target.value)}
+                        placeholder="DD MMM YYYY"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Weapons Arrest Record */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Weapons Arrest Record</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="weaponsPossession">Possession</Label>
+                      <Select value={formData.weaponsPossession} onValueChange={(value) => handleInputChange('weaponsPossession', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="N">No</SelectItem>
+                          <SelectItem value="Y">Yes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="weaponsArrestCount">Arrest Count</Label>
+                      <Input
+                        id="weaponsArrestCount"
+                        value={formData.weaponsArrestCount}
+                        onChange={(e) => handleInputChange('weaponsArrestCount', e.target.value)}
+                        placeholder="Number of arrests"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestWeaponsArrestDate">Latest Arrest Date</Label>
+                      <Input
+                        id="latestWeaponsArrestDate"
+                        value={formData.latestWeaponsArrestDate}
+                        onChange={(e) => handleInputChange('latestWeaponsArrestDate', e.target.value)}
+                        placeholder="DD MMM YYYY"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Narcotics Arrest Record */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Narcotics Arrest Record</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="narcoticsPossession">Possession</Label>
+                      <Select value={formData.narcoticsPossession} onValueChange={(value) => handleInputChange('narcoticsPossession', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="N">No</SelectItem>
+                          <SelectItem value="Y">Yes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="narcoticsArrestCount">Arrest Count</Label>
+                      <Input
+                        id="narcoticsArrestCount"
+                        value={formData.narcoticsArrestCount}
+                        onChange={(e) => handleInputChange('narcoticsArrestCount', e.target.value)}
+                        placeholder="Number of arrests"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestNarcoticsArrestDate">Latest Arrest Date</Label>
+                      <Input
+                        id="latestNarcoticsArrestDate"
+                        value={formData.latestNarcoticsArrestDate}
+                        onChange={(e) => handleInputChange('latestNarcoticsArrestDate', e.target.value)}
+                        placeholder="DD MMM YYYY"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Additional Information */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Additional Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Full Name (Display)</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        placeholder="Full display name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="alias">Alias/Nickname</Label>
+                      <Input
+                        id="alias"
+                        value={formData.alias}
+                        onChange={(e) => handleInputChange('alias', e.target.value)}
+                        placeholder="Known aliases"
+                      />
+                    </div>
                     <div className="md:col-span-2">
                       <Label htmlFor="charges">Charges</Label>
                       <Textarea
@@ -579,15 +868,6 @@ const AdminPanel = ({
                         value={formData.lastSeen}
                         onChange={(e) => handleInputChange('lastSeen', e.target.value)}
                         placeholder="Last known location"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="alias">Alias</Label>
-                      <Input
-                        id="alias"
-                        value={formData.alias}
-                        onChange={(e) => handleInputChange('alias', e.target.value)}
-                        placeholder="Known aliases"
                       />
                     </div>
                   </div>
