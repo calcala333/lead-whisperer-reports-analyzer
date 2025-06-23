@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Settings, Users, User, Calendar, MapPin, AlertTriangle, Shield, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Ruler, Weight } from "lucide-react";
+import { Plus, Edit, Trash2, Settings, Users, User, Calendar, MapPin, AlertTriangle, Shield, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Ruler, Weight, Upload, X } from "lucide-react";
 
 interface WantedPerson {
   id: string;
@@ -139,6 +138,24 @@ const AdminPanel = ({
 
   const handleInputChange = (field: keyof typeof formData, value: string | boolean | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handlePhotoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const photoUrls = Array.from(files).map(file => URL.createObjectURL(file));
+      setFormData(prev => ({
+        ...prev,
+        photos: [...(prev.photos || []), ...photoUrls]
+      }));
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      photos: prev.photos?.filter((_, i) => i !== index) || []
+    }));
   };
 
   const handleSubmitPerson = () => {
@@ -354,6 +371,51 @@ const AdminPanel = ({
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Photo Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Photos
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="photos">Upload Photos</Label>
+                      <Input
+                        id="photos"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handlePhotoUpload}
+                        className="mt-1"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">Select multiple images to upload</p>
+                    </div>
+                    {formData.photos && formData.photos.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {formData.photos.map((photo, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={photo}
+                              alt={`Photo ${index + 1}`}
+                              className="w-full h-32 object-cover rounded border"
+                            />
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="absolute top-1 right-1 h-6 w-6 p-0"
+                              onClick={() => removePhoto(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
                 {/* Subject Demographics */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Subject Demographics</h3>
