@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, X, Settings } from "lucide-react";
+import { Trash2, Edit, Plus, X, Settings, Upload, FileText, Download } from "lucide-react";
 
 interface WantedPerson {
   id: string;
@@ -83,6 +83,11 @@ interface WantedPerson {
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
+  protectionDocuments?: Array<{
+    name: string;
+    url: string;
+    type: string;
+  }>;
   
   photos?: string[];
 }
@@ -170,12 +175,45 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
   const [protectionNotes, setProtectionNotes] = useState("");
   const [protectionDescription, setProtectionDescription] = useState("");
+  const [protectionDocuments, setProtectionDocuments] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
     setTempSystemName(systemName);
     setTempDisclaimerText(disclaimerText);
   }, [systemName, disclaimerText]);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'document' | 'photo') => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      if (type === 'document' && (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+        const url = URL.createObjectURL(file);
+        setProtectionDocuments(prev => [...prev, {
+          name: file.name,
+          url: url,
+          type: file.type
+        }]);
+      } else if (type === 'photo' && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target?.result) {
+            setPhotos(prev => [...prev, e.target!.result as string]);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
+  const removeDocument = (index: number) => {
+    setProtectionDocuments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== index));
+  };
 
   const resetForm = () => {
     setFirstName("");
@@ -228,6 +266,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionExpirationDate("");
     setProtectionNotes("");
     setProtectionDescription("");
+    setProtectionDocuments([]);
     setPhotos([]);
   };
 
@@ -283,6 +322,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       protectionExpirationDate,
       protectionNotes,
       protectionDescription,
+      protectionDocuments,
       photos
     };
     onAddPerson(newPerson);
@@ -343,6 +383,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         protectionExpirationDate,
         protectionNotes,
         protectionDescription,
+        protectionDocuments,
         photos
       };
       onEditPerson(id, updatedPerson);
@@ -408,6 +449,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionExpirationDate(person.protectionExpirationDate || "");
     setProtectionNotes(person.protectionNotes || "");
     setProtectionDescription(person.protectionDescription || "");
+    setProtectionDocuments(person.protectionDocuments || []);
     setPhotos(person.photos || []);
     setActiveTab("add");
   };
@@ -442,6 +484,39 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4">
+                {/* Photo Upload Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Photos</h3>
+                  <div>
+                    <Label htmlFor="photoUpload">Upload Photos</Label>
+                    <Input
+                      id="photoUpload"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'photo')}
+                      className="mt-1"
+                    />
+                    {photos.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-2">
+                        {photos.map((photo, index) => (
+                          <div key={index} className="relative">
+                            <img src={photo} alt={`Photo ${index + 1}`} className="w-full h-24 object-cover rounded" />
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="absolute top-1 right-1 h-6 w-6"
+                              onClick={() => removePhoto(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="firstName">First Name</Label>
@@ -508,21 +583,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                   <div>
                     <Label htmlFor="hair">Hair Color</Label>
-                    <Input
-                      type="text"
-                      id="hair"
-                      value={hair}
-                      onChange={(e) => setHair(e.target.value)}
-                    />
+                    <Select value={hair} onValueChange={setHair}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select hair color" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BLK">Black</SelectItem>
+                        <SelectItem value="BRO">Brown</SelectItem>
+                        <SelectItem value="BLN">Blonde</SelectItem>
+                        <SelectItem value="RED">Red</SelectItem>
+                        <SelectItem value="GRY">Gray</SelectItem>
+                        <SelectItem value="WHI">White</SelectItem>
+                        <SelectItem value="BAL">Bald</SelectItem>
+                        <SelectItem value="UNK">Unknown</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="eyes">Eye Color</Label>
-                    <Input
-                      type="text"
-                      id="eyes"
-                      value={eyes}
-                      onChange={(e) => setEyes(e.target.value)}
-                    />
+                    <Select value={eyes} onValueChange={setEyes}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select eye color" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="BRO">Brown</SelectItem>
+                        <SelectItem value="BLU">Blue</SelectItem>
+                        <SelectItem value="GRN">Green</SelectItem>
+                        <SelectItem value="HAZ">Hazel</SelectItem>
+                        <SelectItem value="GRY">Gray</SelectItem>
+                        <SelectItem value="BLK">Black</SelectItem>
+                        <SelectItem value="UNK">Unknown</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -563,7 +655,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div>
                     <Label htmlFor="sex">Sex</Label>
                     <Select value={sex} onValueChange={setSex}>
@@ -573,6 +665,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       <SelectContent>
                         <SelectItem value="M">Male</SelectItem>
                         <SelectItem value="F">Female</SelectItem>
+                        <SelectItem value="U">Unknown</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -588,19 +681,71 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <SelectItem value="HIS">Hispanic</SelectItem>
                         <SelectItem value="ASI">Asian</SelectItem>
                         <SelectItem value="NAT">Native American</SelectItem>
+                        <SelectItem value="UNK">Unknown</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="dangerLevel">Danger Level</Label>
-                    <Select value={dangerLevel} onValueChange={setDangerLevel}>
+                    <Label htmlFor="height">Height</Label>
+                    <Select value={height} onValueChange={setHeight}>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select" />
+                        <SelectValue placeholder="Select height" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="LOW">Low</SelectItem>
-                        <SelectItem value="HIGH">High</SelectItem>
-                        <SelectItem value="EXTREME">Extreme</SelectItem>
+                        <SelectItem value="4'0\"">4'0"</SelectItem>
+                        <SelectItem value="4'6\"">4'6"</SelectItem>
+                        <SelectItem value="5'0\"">5'0"</SelectItem>
+                        <SelectItem value="5'1\"">5'1"</SelectItem>
+                        <SelectItem value="5'2\"">5'2"</SelectItem>
+                        <SelectItem value="5'3\"">5'3"</SelectItem>
+                        <SelectItem value="5'4\"">5'4"</SelectItem>
+                        <SelectItem value="5'5\"">5'5"</SelectItem>
+                        <SelectItem value="5'6\"">5'6"</SelectItem>
+                        <SelectItem value="5'7\"">5'7"</SelectItem>
+                        <SelectItem value="5'8\"">5'8"</SelectItem>
+                        <SelectItem value="5'9\"">5'9"</SelectItem>
+                        <SelectItem value="5'10\"">5'10"</SelectItem>
+                        <SelectItem value="5'11\"">5'11"</SelectItem>
+                        <SelectItem value="6'0\"">6'0"</SelectItem>
+                        <SelectItem value="6'1\"">6'1"</SelectItem>
+                        <SelectItem value="6'2\"">6'2"</SelectItem>
+                        <SelectItem value="6'3\"">6'3"</SelectItem>
+                        <SelectItem value="6'4\"">6'4"</SelectItem>
+                        <SelectItem value="6'5\"">6'5"</SelectItem>
+                        <SelectItem value="6'6\"">6'6"</SelectItem>
+                        <SelectItem value="7'0\"">7'0"</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="weight">Weight</Label>
+                    <Select value={weight} onValueChange={setWeight}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select weight" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="90-100">90-100 lbs</SelectItem>
+                        <SelectItem value="100-110">100-110 lbs</SelectItem>
+                        <SelectItem value="110-120">110-120 lbs</SelectItem>
+                        <SelectItem value="120-130">120-130 lbs</SelectItem>
+                        <SelectItem value="130-140">130-140 lbs</SelectItem>
+                        <SelectItem value="140-150">140-150 lbs</SelectItem>
+                        <SelectItem value="150-160">150-160 lbs</SelectItem>
+                        <SelectItem value="160-170">160-170 lbs</SelectItem>
+                        <SelectItem value="170-180">170-180 lbs</SelectItem>
+                        <SelectItem value="180-190">180-190 lbs</SelectItem>
+                        <SelectItem value="190-200">190-200 lbs</SelectItem>
+                        <SelectItem value="200-210">200-210 lbs</SelectItem>
+                        <SelectItem value="210-220">210-220 lbs</SelectItem>
+                        <SelectItem value="220-230">220-230 lbs</SelectItem>
+                        <SelectItem value="230-240">230-240 lbs</SelectItem>
+                        <SelectItem value="240-250">240-250 lbs</SelectItem>
+                        <SelectItem value="250-260">250-260 lbs</SelectItem>
+                        <SelectItem value="260-270">260-270 lbs</SelectItem>
+                        <SelectItem value="270-280">270-280 lbs</SelectItem>
+                        <SelectItem value="280-290">280-290 lbs</SelectItem>
+                        <SelectItem value="290-300">290-300 lbs</SelectItem>
+                        <SelectItem value="300+">300+ lbs</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -627,25 +772,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="height">Height</Label>
-                    <Input
-                      type="text"
-                      id="height"
-                      value={height}
-                      onChange={(e) => setHeight(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="weight">Weight</Label>
-                    <Input
-                      type="text"
-                      id="weight"
-                      value={weight}
-                      onChange={(e) => setWeight(e.target.value)}
-                    />
-                  </div>
+                <div>
+                  <Label htmlFor="dangerLevel">Danger Level</Label>
+                  <Select value={dangerLevel} onValueChange={setDangerLevel}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="LOW">Low</SelectItem>
+                      <SelectItem value="HIGH">High</SelectItem>
+                      <SelectItem value="EXTREME">Extreme</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -742,6 +880,48 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           className="resize-none"
                           rows={2}
                         />
+                      </div>
+
+                      {/* Document Upload Section */}
+                      <div>
+                        <Label htmlFor="documentUpload">Upload Court Documents (PDF/DOCX)</Label>
+                        <Input
+                          id="documentUpload"
+                          type="file"
+                          multiple
+                          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          onChange={(e) => handleFileUpload(e, 'document')}
+                          className="mt-1"
+                        />
+                        {protectionDocuments.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            {protectionDocuments.map((doc, index) => (
+                              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <span className="text-sm">{doc.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => window.open(doc.url, '_blank')}
+                                  >
+                                    <Download className="h-3 w-3 mr-1" />
+                                    View
+                                  </Button>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={() => removeDocument(index)}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
