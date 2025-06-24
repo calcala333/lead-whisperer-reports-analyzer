@@ -691,7 +691,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     {orderOfProtection && (
                       <div>
                         <Label htmlFor="orderOfProtectionType">Type of Order</Label>
-                        <Select value={orderOfProtectionType} onValueChange={setOrderOfProtectionType}>
+                        <Select 
+                          value={orderOfProtectionType} 
+                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | '')}
+                        >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
