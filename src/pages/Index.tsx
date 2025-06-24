@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Info } from "lucide-react";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Info, Filter } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
@@ -20,6 +20,11 @@ interface WantedPerson {
   deceased: string;
   height: string;
   weight: string;
+  
+  // Physical Descriptors
+  tattoos?: string;
+  piercings?: string;
+  scars?: string;
   
   // Identification
   driversLicenseNumber: string;
@@ -68,8 +73,14 @@ interface WantedPerson {
   charges: string;
   dangerLevel: string;
   lastSeen: string;
+  
+  // Enhanced Order of Protection
   orderOfProtection?: boolean;
+  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | '';
   protectionExpirationDate?: string;
+  protectionNotes?: string;
+  protectionDescription?: string;
+  
   photos?: string[];
 }
 
@@ -81,6 +92,7 @@ const Index = () => {
   const [photoIndexes, setPhotoIndexes] = useState<{[key: string]: number}>({});
   const [systemName, setSystemName] = useState("Police Wanted System");
   const [disclaimerText, setDisclaimerText] = useState("This system contains confidential and privileged information that is intended only for use by individuals who have received the permission of the Police Department to access this system. Personal should treat information on this site as confidential, privileged and law enforcement sensitive. If the Lincolnwood Police Department has not granted you authority, then you are hereby notified that any access, disclosure, dissemination, copying or distribution of the information contained herein is strictly prohibited.");
+  const [filterByActiveProtection, setFilterByActiveProtection] = useState(false);
 
   // Mock data with multiple wanted persons - updated to match new interface
   const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
@@ -96,6 +108,9 @@ const Index = () => {
       deceased: "N",
       height: "5'05\"",
       weight: "160",
+      tattoos: "Dragon on left arm, skull on back",
+      piercings: "Left ear",
+      scars: "Scar above right eyebrow",
       driversLicenseNumber: "A210-9366-1331",
       driversLicenseState: "IL",
       addressOfResidence: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
@@ -129,7 +144,10 @@ const Index = () => {
       dangerLevel: "HIGH",
       lastSeen: "CHICAGO, IL",
       orderOfProtection: true,
+      orderOfProtectionType: "plenary",
       protectionExpirationDate: "2029-11-21",
+      protectionNotes: "Victim is ex-spouse, high risk of contact",
+      protectionDescription: "Subject prohibited from contacting victim or approaching within 500 feet of residence",
       photos: []
     },
     {
@@ -144,6 +162,9 @@ const Index = () => {
       deceased: "N",
       height: "5'07\"",
       weight: "135",
+      tattoos: "Rose on right shoulder",
+      piercings: "Nose, multiple ear piercings",
+      scars: "Knife scar on left hand",
       driversLicenseNumber: "No Data",
       driversLicenseState: "No Data",
       addressOfResidence: "1247 SUNSET BLVD  LOS ANGELES  90026",
@@ -190,6 +211,9 @@ const Index = () => {
       deceased: "N",
       height: "6'02\"",
       weight: "195",
+      tattoos: "Tribal on both arms",
+      piercings: "None",
+      scars: "Bullet wound scar on chest",
       driversLicenseNumber: "No Data",
       driversLicenseState: "No Data",
       addressOfResidence: "4521 MAPLE ST  DETROIT  48201",
@@ -223,7 +247,10 @@ const Index = () => {
       dangerLevel: "HIGH",
       lastSeen: "DETROIT, MI",
       orderOfProtection: true,
-      protectionExpirationDate: "2026-07-08"
+      orderOfProtectionType: "stalking",
+      protectionExpirationDate: "2026-07-08",
+      protectionNotes: "History of stalking behavior, multiple violations",
+      protectionDescription: "No contact order with victim and family members"
     },
     {
       id: "4",
@@ -316,6 +343,7 @@ const Index = () => {
       dangerLevel: "EXTREME",
       lastSeen: "MIAMI, FL",
       orderOfProtection: true,
+      orderOfProtectionType: "civil",
       protectionExpirationDate: "2035-05-30"
     },
     {
@@ -432,6 +460,19 @@ const Index = () => {
     return expirationDate > today;
   };
 
+  const getOrderOfProtectionTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'plenary':
+        return 'Plenary Order of Protection';
+      case 'stalking':
+        return 'Stalking No Contact Order';
+      case 'civil':
+        return 'Civil No-Contact Order';
+      default:
+        return 'Order of Protection';
+    }
+  };
+
   const handleUpdateSystemName = (newName: string) => {
     setSystemName(newName);
   };
@@ -439,6 +480,11 @@ const Index = () => {
   const handleUpdateDisclaimer = (newDisclaimer: string) => {
     setDisclaimerText(newDisclaimer);
   };
+
+  // Filter people based on active protection filter
+  const filteredPersons = filterByActiveProtection 
+    ? wantedPersons.filter(person => isOrderOfProtectionActive(person))
+    : wantedPersons;
 
   const currentPerson = selectedPerson || wantedPersons[0];
 
@@ -499,7 +545,7 @@ const Index = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 bg-white">
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-4">
               <Input
                 placeholder="Enter Name or Alias"
                 value={searchQuery}
@@ -515,6 +561,24 @@ const Index = () => {
                 SEARCH
               </Button>
             </div>
+            
+            {/* Filter for Active Orders of Protection */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={filterByActiveProtection ? "default" : "outline"}
+                onClick={() => setFilterByActiveProtection(!filterByActiveProtection)}
+                className="flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                {filterByActiveProtection ? "Show All" : "Active Orders Only"}
+              </Button>
+              {filterByActiveProtection && (
+                <Badge variant="secondary">
+                  Showing {filteredPersons.length} people with active orders
+                </Badge>
+              )}
+            </div>
+            
             <div className="mt-4 text-gray-600">
               <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.firstName).join(', ')}</p>
             </div>
@@ -526,11 +590,13 @@ const Index = () => {
           <div className="mb-8">
             <Card className="shadow-2xl border-2 border-blue-200">
               <CardHeader className="bg-blue-500 text-white rounded-t-lg">
-                <CardTitle className="text-3xl text-center">Wanted Individuals</CardTitle>
+                <CardTitle className="text-3xl text-center">
+                  {filterByActiveProtection ? "Active Orders of Protection" : "Wanted Individuals"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="p-6 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {wantedPersons.slice(0, 6).map((person) => {
+                  {filteredPersons.slice(0, 6).map((person) => {
                     const currentPhotoIndex = getCurrentPhotoIndex(person.id);
                     const hasPhotos = person.photos && person.photos.length > 0;
                     const hasMultiplePhotos = person.photos && person.photos.length > 1;
@@ -613,7 +679,7 @@ const Index = () => {
                                   </div>
                                   {/* Tooltip */}
                                   <div className="absolute right-0 top-10 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                    Order of Protection
+                                    {getOrderOfProtectionTypeLabel(person.orderOfProtectionType)}
                                     <br />
                                     Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
                                   </div>
@@ -638,10 +704,27 @@ const Index = () => {
                                 <div className="mt-2 bg-purple-100 border-2 border-purple-400 rounded-lg p-2 shadow-sm">
                                   <div className="flex items-center gap-2">
                                     <Shield className="h-4 w-4 text-purple-600 animate-pulse" />
-                                    <span className="text-purple-800 font-bold text-sm">ACTIVE ORDER OF PROTECTION</span>
+                                    <span className="text-purple-800 font-bold text-sm">
+                                      ACTIVE {getOrderOfProtectionTypeLabel(person.orderOfProtectionType).toUpperCase()}
+                                    </span>
                                   </div>
                                   <p className="text-purple-700 text-xs mt-1 font-medium">
                                     Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {/* Expired Order of Protection */}
+                              {person.orderOfProtection && !isProtectionActive && (
+                                <div className="mt-2 bg-gray-100 border-2 border-gray-400 rounded-lg p-2 shadow-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-gray-600" />
+                                    <span className="text-gray-800 font-bold text-sm">
+                                      EXPIRED {getOrderOfProtectionTypeLabel(person.orderOfProtectionType).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <p className="text-gray-700 text-xs mt-1 font-medium">
+                                    Expired: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
                                   </p>
                                 </div>
                               )}
@@ -726,11 +809,11 @@ const Index = () => {
                       {currentPerson.dangerLevel}
                     </Badge>
                   </div>
-                  {isOrderOfProtectionActive(currentPerson) && (
+                  {currentPerson.orderOfProtection && (
                     <div className="text-center">
                       <span className="text-sm font-medium text-red-700">ORDER OF PROTECTION</span>
                       <div className="text-xl font-bold text-purple-600">
-                        Active - Expires: {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                        {isOrderOfProtectionActive(currentPerson) ? 'Active' : 'Expired'} - Expires: {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
                       </div>
                     </div>
                   )}
@@ -796,6 +879,32 @@ const Index = () => {
                       Weight
                     </span>
                     <p className="text-xl font-bold text-gray-800">{currentPerson.weight}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Physical Descriptors */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-teal-500 text-white rounded-t-lg border-b-2 border-teal-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Eye className="h-6 w-6" />
+                  PHYSICAL DESCRIPTORS
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Tattoos</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.tattoos || 'None reported'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Piercings</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.piercings || 'None reported'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Scars</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.scars || 'None reported'}</p>
                   </div>
                 </div>
               </CardContent>
@@ -1027,29 +1136,49 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Order of Protection */}
+            {/* Enhanced Order of Protection */}
             {currentPerson.orderOfProtection && (
               <Card className="shadow-2xl border-2 border-purple-300 bg-purple-50">
                 <CardHeader className="bg-purple-600 text-white rounded-t-lg border-b-2 border-purple-300">
                   <CardTitle className="flex items-center gap-3 text-2xl">
                     <Shield className="h-6 w-6" />
-                    ORDER OF PROTECTION
+                    {getOrderOfProtectionTypeLabel(currentPerson.orderOfProtectionType).toUpperCase()}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 bg-purple-50 text-gray-800">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <span className="text-sm font-medium text-purple-700">Status</span>
-                      <p className="text-xl font-bold text-purple-800">
-                        {isOrderOfProtectionActive(currentPerson) ? 'ACTIVE' : 'EXPIRED'}
-                      </p>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Status</span>
+                        <p className="text-xl font-bold text-purple-800">
+                          {isOrderOfProtectionActive(currentPerson) ? 'ACTIVE' : 'EXPIRED'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Expiration Date</span>
+                        <p className="text-xl font-bold text-purple-800">
+                          {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-sm font-medium text-purple-700">Protection Expiration Date</span>
-                      <p className="text-xl font-bold text-purple-800">
-                        {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
-                      </p>
-                    </div>
+                    
+                    {currentPerson.protectionDescription && (
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Description</span>
+                        <p className="text-lg text-purple-800 mt-2 p-3 bg-white rounded-lg border border-purple-200">
+                          {currentPerson.protectionDescription}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {currentPerson.protectionNotes && (
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Notes</span>
+                        <p className="text-lg text-purple-800 mt-2 p-3 bg-white rounded-lg border border-purple-200">
+                          {currentPerson.protectionNotes}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>

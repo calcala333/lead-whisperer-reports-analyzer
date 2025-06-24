@@ -24,6 +24,11 @@ interface WantedPerson {
   height: string;
   weight: string;
   
+  // Physical Descriptors
+  tattoos?: string;
+  piercings?: string;
+  scars?: string;
+  
   // Identification
   driversLicenseNumber: string;
   driversLicenseState: string;
@@ -71,8 +76,14 @@ interface WantedPerson {
   charges: string;
   dangerLevel: string;
   lastSeen: string;
+  
+  // Enhanced Order of Protection
   orderOfProtection?: boolean;
+  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | '';
   protectionExpirationDate?: string;
+  protectionNotes?: string;
+  protectionDescription?: string;
+  
   photos?: string[];
 }
 
@@ -116,6 +127,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [deceased, setDeceased] = useState("N");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  
+  // New physical descriptor fields
+  const [tattoos, setTattoos] = useState("");
+  const [piercings, setPiercings] = useState("");
+  const [scars, setScars] = useState("");
+  
   const [driversLicenseNumber, setDriversLicenseNumber] = useState("");
   const [driversLicenseState, setDriversLicenseState] = useState("");
   const [addressOfResidence, setAddressOfResidence] = useState("");
@@ -149,7 +166,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [dangerLevel, setDangerLevel] = useState("HIGH");
   const [lastSeen, setLastSeen] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
+  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
+  const [protectionNotes, setProtectionNotes] = useState("");
+  const [protectionDescription, setProtectionDescription] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -168,6 +188,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setDeceased("N");
     setHeight("");
     setWeight("");
+    setTattoos("");
+    setPiercings("");
+    setScars("");
     setDriversLicenseNumber("");
     setDriversLicenseState("");
     setAddressOfResidence("");
@@ -201,7 +224,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setDangerLevel("HIGH");
     setLastSeen("");
     setOrderOfProtection(false);
+    setOrderOfProtectionType('');
     setProtectionExpirationDate("");
+    setProtectionNotes("");
+    setProtectionDescription("");
     setPhotos([]);
   };
 
@@ -217,6 +243,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       deceased,
       height,
       weight,
+      tattoos,
+      piercings,
+      scars,
       driversLicenseNumber,
       driversLicenseState,
       addressOfResidence,
@@ -250,7 +279,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       dangerLevel,
       lastSeen,
       orderOfProtection,
+      orderOfProtectionType,
       protectionExpirationDate,
+      protectionNotes,
+      protectionDescription,
       photos
     };
     onAddPerson(newPerson);
@@ -271,6 +303,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         deceased,
         height,
         weight,
+        tattoos,
+        piercings,
+        scars,
         driversLicenseNumber,
         driversLicenseState,
         addressOfResidence,
@@ -304,7 +339,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         dangerLevel,
         lastSeen,
         orderOfProtection,
+        orderOfProtectionType,
         protectionExpirationDate,
+        protectionNotes,
+        protectionDescription,
         photos
       };
       onEditPerson(id, updatedPerson);
@@ -330,6 +368,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setDeceased(person.deceased);
     setHeight(person.height);
     setWeight(person.weight);
+    setTattoos(person.tattoos || "");
+    setPiercings(person.piercings || "");
+    setScars(person.scars || "");
     setDriversLicenseNumber(person.driversLicenseNumber);
     setDriversLicenseState(person.driversLicenseState);
     setAddressOfResidence(person.addressOfResidence);
@@ -363,7 +404,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setDangerLevel(person.dangerLevel);
     setLastSeen(person.lastSeen);
     setOrderOfProtection(person.orderOfProtection || false);
+    setOrderOfProtectionType(person.orderOfProtectionType || '');
     setProtectionExpirationDate(person.protectionExpirationDate || "");
+    setProtectionNotes(person.protectionNotes || "");
+    setProtectionDescription(person.protectionDescription || "");
     setPhotos(person.photos || []);
     setActiveTab("add");
   };
@@ -482,6 +526,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
+                {/* Physical Descriptors Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Physical Descriptors</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="tattoos">Tattoos</Label>
+                      <Textarea
+                        id="tattoos"
+                        value={tattoos}
+                        onChange={(e) => setTattoos(e.target.value)}
+                        placeholder="Describe tattoos..."
+                        className="resize-none"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="piercings">Piercings</Label>
+                      <Textarea
+                        id="piercings"
+                        value={piercings}
+                        onChange={(e) => setPiercings(e.target.value)}
+                        placeholder="Describe piercings..."
+                        className="resize-none"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="scars">Scars</Label>
+                      <Textarea
+                        id="scars"
+                        value={scars}
+                        onChange={(e) => setScars(e.target.value)}
+                        placeholder="Describe scars..."
+                        className="resize-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="sex">Sex</Label>
@@ -586,6 +667,81 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       onChange={(e) => setLastSeen(e.target.value)}
                     />
                   </div>
+                </div>
+
+                {/* Enhanced Order of Protection Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-700">Order of Protection</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="orderOfProtection">Order of Protection</Label>
+                      <Select
+                        value={orderOfProtection ? "true" : "false"}
+                        onValueChange={(value) => setOrderOfProtection(value === "true")}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Yes</SelectItem>
+                          <SelectItem value="false">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {orderOfProtection && (
+                      <div>
+                        <Label htmlFor="orderOfProtectionType">Type of Order</Label>
+                        <Select value={orderOfProtectionType} onValueChange={setOrderOfProtectionType}>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="plenary">Plenary Order of Protection</SelectItem>
+                            <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
+                            <SelectItem value="civil">Civil No-Contact Order</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {orderOfProtection && (
+                    <>
+                      <div>
+                        <Label htmlFor="protectionExpirationDate">Protection Expiration Date</Label>
+                        <Input
+                          type="date"
+                          id="protectionExpirationDate"
+                          value={protectionExpirationDate}
+                          onChange={(e) => setProtectionExpirationDate(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="protectionDescription">Protection Description</Label>
+                        <Textarea
+                          id="protectionDescription"
+                          value={protectionDescription}
+                          onChange={(e) => setProtectionDescription(e.target.value)}
+                          placeholder="Describe the protection order details..."
+                          className="resize-none"
+                          rows={2}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="protectionNotes">Protection Notes</Label>
+                        <Textarea
+                          id="protectionNotes"
+                          value={protectionNotes}
+                          onChange={(e) => setProtectionNotes(e.target.value)}
+                          placeholder="Additional notes about the protection order..."
+                          className="resize-none"
+                          rows={2}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -833,33 +989,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     value={latestNarcoticsArrestDate}
                     onChange={(e) => setLatestNarcoticsArrestDate(e.target.value)}
                   />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="orderOfProtection">Order of Protection</Label>
-                    <Select
-                      value={orderOfProtection ? "true" : "false"}
-                      onValueChange={(value) => setOrderOfProtection(value === "true")}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="true">Yes</SelectItem>
-                        <SelectItem value="false">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="protectionExpirationDate">Protection Expiration Date</Label>
-                    <Input
-                      type="text"
-                      id="protectionExpirationDate"
-                      value={protectionExpirationDate}
-                      onChange={(e) => setProtectionExpirationDate(e.target.value)}
-                    />
-                  </div>
                 </div>
 
                 <Button onClick={() => {
