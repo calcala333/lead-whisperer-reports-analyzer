@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit, Plus, X, Settings, Upload, FileText } from "lucide-react";
+import { Trash2, Edit, Plus, X, Settings } from "lucide-react";
 
 interface WantedPerson {
   id: string;
@@ -83,12 +83,6 @@ interface WantedPerson {
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
-  protectionDocuments?: Array<{
-    name: string;
-    url: string;
-    type: string;
-    uploadDate: string;
-  }>;
   
   photos?: string[];
 }
@@ -176,12 +170,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
   const [protectionNotes, setProtectionNotes] = useState("");
   const [protectionDescription, setProtectionDescription] = useState("");
-  const [protectionDocuments, setProtectionDocuments] = useState<Array<{
-    name: string;
-    url: string;
-    type: string;
-    uploadDate: string;
-  }>>([]);
   const [photos, setPhotos] = useState<string[]>([]);
 
   useEffect(() => {
@@ -241,35 +229,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionNotes("");
     setProtectionDescription("");
     setPhotos([]);
-    setProtectionDocuments([]);
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files) return;
-
-    Array.from(files).forEach(file => {
-      if (file.type === 'application/pdf' || 
-          file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-          file.type === 'application/msword') {
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const newDocument = {
-            name: file.name,
-            url: e.target?.result as string,
-            type: file.type,
-            uploadDate: new Date().toISOString()
-          };
-          setProtectionDocuments(prev => [...prev, newDocument]);
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  };
-
-  const removeDocument = (index: number) => {
-    setProtectionDocuments(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleAdd = () => {
@@ -324,8 +283,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       protectionExpirationDate,
       protectionNotes,
       protectionDescription,
-      photos,
-      protectionDocuments
+      photos
     };
     onAddPerson(newPerson);
     resetForm();
@@ -385,8 +343,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         protectionExpirationDate,
         protectionNotes,
         protectionDescription,
-        photos,
-        protectionDocuments
+        photos
       };
       onEditPerson(id, updatedPerson);
       setEditingPerson(null);
@@ -452,7 +409,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionNotes(person.protectionNotes || "");
     setProtectionDescription(person.protectionDescription || "");
     setPhotos(person.photos || []);
-    setProtectionDocuments(person.protectionDocuments || []);
     setActiveTab("add");
   };
 
@@ -786,45 +742,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           className="resize-none"
                           rows={2}
                         />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="protectionDocuments">Supporting Documents</Label>
-                        <div className="space-y-2">
-                          <Input
-                            type="file"
-                            id="protectionDocuments"
-                            accept=".pdf,.doc,.docx"
-                            multiple
-                            onChange={handleFileUpload}
-                          />
-                          <p className="text-sm text-gray-500">Upload PDF or DOCX files (multiple files allowed)</p>
-                          
-                          {protectionDocuments.length > 0 && (
-                            <div className="mt-4 space-y-2">
-                              <Label>Uploaded Documents:</Label>
-                              {protectionDocuments.map((doc, index) => (
-                                <div key={index} className="flex items-center justify-between p-2 border rounded-md bg-gray-50">
-                                  <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4" />
-                                    <span className="text-sm">{doc.name}</span>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {new Date(doc.uploadDate).toLocaleDateString()}
-                                    </Badge>
-                                  </div>
-                                  <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="sm"
-                                    onClick={() => removeDocument(index)}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
                       </div>
                     </>
                   )}

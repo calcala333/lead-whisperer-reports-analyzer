@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Search, User, Calendar, MapPin, Eye, Ruler, Weight, AlertTriangle, Shield, Settings, Users, ChevronLeft, ChevronRight, CreditCard, Home, Building2, Zap, Target, Pill, FileText, Info, Filter } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
-import { Settings, Search, Shield, FileText, Download } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface WantedPerson {
   id: string;
+  // Subject Demographics
   lastName: string;
   firstName: string;
   middleName: string;
@@ -23,17 +20,27 @@ interface WantedPerson {
   deceased: string;
   height: string;
   weight: string;
+  
+  // Physical Descriptors
   tattoos?: string;
   piercings?: string;
   scars?: string;
+  
+  // Identification
   driversLicenseNumber: string;
   driversLicenseState: string;
+  
+  // Address of Residence
   addressOfResidence: string;
   district: string;
   majorityDistrict: string;
+  
+  // IDOC Information
   idocNumber: string;
   idocAddressOfResidence: string;
   idocDistrict: string;
+  
+  // Criminal Record Details
   latestArrestCB: string;
   latestFelonyArrestCB: string;
   onParole: string;
@@ -41,14 +48,22 @@ interface WantedPerson {
   latestContactDistrict: string;
   latestWarrant: string;
   latestInvestigativeAlert: string;
+  
+  // Domestic Violence Arrest Record
   domesticViolenceArrestCount: string;
   latestDomesticViolenceArrestDate: string;
+  
+  // Weapons Arrest Record
   weaponsPossession: string;
   weaponsArrestCount: string;
   latestWeaponsArrestDate: string;
+  
+  // Narcotics Arrest Record
   narcoticsPossession: string;
   narcoticsArrestCount: string;
   latestNarcoticsArrestDate: string;
+
+  // Legacy fields for compatibility
   name?: string;
   alias?: string;
   address?: string;
@@ -58,346 +73,385 @@ interface WantedPerson {
   charges: string;
   dangerLevel: string;
   lastSeen: string;
+  
+  // Enhanced Order of Protection
   orderOfProtection?: boolean;
   orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | '';
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
-  protectionDocuments?: Array<{
-    name: string;
-    url: string;
-    type: string;
-    uploadDate: string;
-  }>;
+  
   photos?: string[];
 }
 
-const mockData: WantedPerson[] = [
-  {
-    id: "WP001",
-    lastName: "Johnson",
-    firstName: "Michael",
-    middleName: "Robert",
-    sex: "Male",
-    race: "White",
-    age: "32",
-    birthDate: "1991-03-15",
-    deceased: "No",
-    height: "6'2\"",
-    weight: "185 lbs",
-    tattoos: "Dragon on left arm, 'REBEL' on knuckles",
-    piercings: "Ear piercings",
-    scars: "Scar above left eyebrow",
-    driversLicenseNumber: "D123456789",
-    driversLicenseState: "IL",
-    addressOfResidence: "123 Main St, Chicago, IL",
-    district: "District 1",
-    majorityDistrict: "District 1",
-    idocNumber: "",
-    idocAddressOfResidence: "",
-    idocDistrict: "",
-    latestArrestCB: "2024-01-15",
-    latestFelonyArrestCB: "2023-08-20",
-    onParole: "No",
-    latestContact: "2024-02-10",
-    latestContactDistrict: "District 1",
-    latestWarrant: "Active",
-    latestInvestigativeAlert: "None",
-    domesticViolenceArrestCount: "3",
-    latestDomesticViolenceArrestDate: "2024-01-15",
-    weaponsPossession: "Yes",
-    weaponsArrestCount: "2",
-    latestWeaponsArrestDate: "2023-11-05",
-    narcoticsPossession: "No",
-    narcoticsArrestCount: "0",
-    latestNarcoticsArrestDate: "",
-    charges: "Domestic Battery, Aggravated Assault",
-    dangerLevel: "EXTREME",
-    lastSeen: "Downtown Chicago - 2024-06-20",
-    orderOfProtection: true,
-    orderOfProtectionType: "plenary",
-    protectionExpirationDate: "2025-01-15",
-    protectionNotes: "Subject has history of violent behavior toward ex-spouse",
-    protectionDescription: "Full no-contact order including residence and workplace",
-    protectionDocuments: [
-      {
-        name: "Protection_Order_Johnson.pdf",
-        url: "blob:mock-url-1",
-        type: "application/pdf",
-        uploadDate: "2024-01-16"
-      }
-    ]
-  },
-  {
-    id: "WP002",
-    lastName: "Smith",
-    firstName: "Sarah",
-    middleName: "Ann",
-    sex: "Female",
-    race: "Black",
-    age: "28",
-    birthDate: "1995-07-22",
-    deceased: "No",
-    height: "5'6\"",
-    weight: "140 lbs",
-    tattoos: "Rose on ankle",
-    piercings: "Nose ring, multiple ear piercings",
-    scars: "None visible",
-    driversLicenseNumber: "D987654321",
-    driversLicenseState: "IL",
-    addressOfResidence: "456 Oak Ave, Chicago, IL",
-    district: "District 2",
-    majorityDistrict: "District 2",
-    idocNumber: "",
-    idocAddressOfResidence: "",
-    idocDistrict: "",
-    latestArrestCB: "2024-03-10",
-    latestFelonyArrestCB: "2024-03-10",
-    onParole: "Yes",
-    latestContact: "2024-06-15",
-    latestContactDistrict: "District 2",
-    latestWarrant: "None",
-    latestInvestigativeAlert: "Drug Activity",
-    domesticViolenceArrestCount: "0",
-    latestDomesticViolenceArrestDate: "",
-    weaponsPossession: "No",
-    weaponsArrestCount: "0",
-    latestWeaponsArrestDate: "",
-    narcoticsPossession: "Yes",
-    narcoticsArrestCount: "4",
-    latestNarcoticsArrestDate: "2024-03-10",
-    charges: "Possession with Intent to Distribute",
-    dangerLevel: "HIGH",
-    lastSeen: "West Side - 2024-06-22"
-  },
-  {
-    id: "WP003",
-    lastName: "Garcia",
-    firstName: "Carlos",
-    middleName: "Luis",
-    sex: "Male",
-    race: "Hispanic",
-    age: "45",
-    birthDate: "1978-11-08",
-    deceased: "No",
-    height: "5'10\"",
-    weight: "200 lbs",
-    tattoos: "Sleeve on right arm, cross on chest",
-    piercings: "None",
-    scars: "Bullet wound scar on left shoulder",
-    driversLicenseNumber: "D555666777",
-    driversLicenseState: "IL",
-    addressOfResidence: "789 Pine St, Chicago, IL",
-    district: "District 3",
-    majorityDistrict: "District 3",
-    idocNumber: "I123456",
-    idocAddressOfResidence: "Stateville Correctional Center",
-    idocDistrict: "IDOC District 3",
-    latestArrestCB: "2023-12-05",
-    latestFelonyArrestCB: "2023-12-05",
-    onParole: "No",
-    latestContact: "2024-05-20",
-    latestContactDistrict: "District 3",
-    latestWarrant: "Active",
-    latestInvestigativeAlert: "Gang Activity",
-    domesticViolenceArrestCount: "1",
-    latestDomesticViolenceArrestDate: "2022-06-10",
-    weaponsPossession: "Yes",
-    weaponsArrestCount: "5",
-    latestWeaponsArrestDate: "2023-12-05",
-    narcoticsPossession: "Yes",
-    narcoticsArrestCount: "3",
-    latestNarcoticsArrestDate: "2023-09-15",
-    charges: "Armed Robbery, Unlawful Use of Weapon",
-    dangerLevel: "EXTREME",
-    lastSeen: "South Side - 2024-06-18",
-    orderOfProtection: true,
-    orderOfProtectionType: "stalking",
-    protectionExpirationDate: "2024-05-15",
-    protectionNotes: "Order has expired - subject was stalking neighbor",
-    protectionDescription: "No-contact order for stalking behavior",
-    protectionDocuments: [
-      {
-        name: "Stalking_Order_Garcia.pdf",
-        url: "blob:mock-url-2",
-        type: "application/pdf",
-        uploadDate: "2023-05-16"
-      }
-    ]
-  },
-  {
-    id: "WP004",
-    lastName: "Williams",
-    firstName: "James",
-    middleName: "David",
-    sex: "Male",
-    race: "Black",
-    age: "38",
-    birthDate: "1985-04-12",
-    deceased: "No",
-    height: "6'0\"",
-    weight: "175 lbs",
-    tattoos: "None visible",
-    piercings: "None",
-    scars: "Knife scar on right hand",
-    driversLicenseNumber: "D111222333",
-    driversLicenseState: "IL",
-    addressOfResidence: "321 Elm St, Chicago, IL",
-    district: "District 4",
-    majorityDistrict: "District 4",
-    idocNumber: "",
-    idocAddressOfResidence: "",
-    idocDistrict: "",
-    latestArrestCB: "2024-02-28",
-    latestFelonyArrestCB: "2023-10-12",
-    onParole: "Yes",
-    latestContact: "2024-06-20",
-    latestContactDistrict: "District 4",
-    latestWarrant: "None",
-    latestInvestigativeAlert: "None",
-    domesticViolenceArrestCount: "2",
-    latestDomesticViolenceArrestDate: "2024-02-28",
-    weaponsPossession: "No",
-    weaponsArrestCount: "1",
-    latestWeaponsArrestDate: "2022-03-20",
-    narcoticsPossession: "No",
-    narcoticsArrestCount: "0",
-    latestNarcoticsArrestDate: "",
-    charges: "Domestic Battery, Violation of Order of Protection",
-    dangerLevel: "HIGH",
-    lastSeen: "North Side - 2024-06-23",
-    orderOfProtection: true,
-    orderOfProtectionType: "civil",
-    protectionExpirationDate: "2025-02-28",
-    protectionNotes: "Civil order related to domestic dispute with ex-girlfriend",
-    protectionDescription: "No-contact order with 500ft restriction",
-    protectionDocuments: [
-      {
-        name: "Civil_Order_Williams.docx",
-        url: "blob:mock-url-3",
-        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        uploadDate: "2024-03-01"
-      },
-      {
-        name: "Court_Filing_Williams.pdf",
-        url: "blob:mock-url-4",
-        type: "application/pdf",
-        uploadDate: "2024-03-01"
-      }
-    ]
-  },
-  {
-    id: "WP005",
-    lastName: "Thompson",
-    firstName: "Lisa",
-    middleName: "Marie",
-    sex: "Female",
-    race: "White",
-    age: "29",
-    birthDate: "1994-09-30",
-    deceased: "No",
-    height: "5'4\"",
-    weight: "125 lbs",
-    tattoos: "Butterfly on shoulder blade",
-    piercings: "Belly button, ears",
-    scars: "Small scar on chin",
-    driversLicenseNumber: "D777888999",
-    driversLicenseState: "IL",
-    addressOfResidence: "654 Maple Dr, Chicago, IL",
-    district: "District 5",
-    majorityDistrict: "District 5",
-    idocNumber: "",
-    idocAddressOfResidence: "",
-    idocDistrict: "",
-    latestArrestCB: "2024-04-05",
-    latestFelonyArrestCB: "2024-04-05",
-    onParole: "No",
-    latestContact: "2024-06-10",
-    latestContactDistrict: "District 5",
-    latestWarrant: "Active",
-    latestInvestigativeAlert: "Fraud",
-    domesticViolenceArrestCount: "0",
-    latestDomesticViolenceArrestDate: "",
-    weaponsPossession: "No",
-    weaponsArrestCount: "0",
-    latestWeaponsArrestDate: "",
-    narcoticsPossession: "No",
-    narcoticsArrestCount: "1",
-    latestNarcoticsArrestDate: "2023-01-15",
-    charges: "Identity Theft, Credit Card Fraud",
-    dangerLevel: "MODERATE",
-    lastSeen: "Downtown - 2024-06-24"
-  }
-];
-
 const Index = () => {
-  const [people, setPeople] = useState<WantedPerson[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showRecord, setShowRecord] = useState(false);
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
-  const [systemName, setSystemName] = useState("Law Enforcement Database");
-  const [disclaimerText, setDisclaimerText] = useState("");
-  const [isLoaded, setIsLoaded] = useState(false);
-  const { toast } = useToast();
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [photoIndexes, setPhotoIndexes] = useState<{[key: string]: number}>({});
+  const [systemName, setSystemName] = useState("Police Wanted System");
+  const [disclaimerText, setDisclaimerText] = useState("This system contains confidential and privileged information that is intended only for use by individuals who have received the permission of the Police Department to access this system. Personal should treat information on this site as confidential, privileged and law enforcement sensitive. If the Lincolnwood Police Department has not granted you authority, then you are hereby notified that any access, disclosure, dissemination, copying or distribution of the information contained herein is strictly prohibited.");
+  const [filterByActiveProtection, setFilterByActiveProtection] = useState(false);
 
-  useEffect(() => {
-    const storedPeople = localStorage.getItem("people");
-    const storedSystemName = localStorage.getItem("systemName");
-    const storedDisclaimer = localStorage.getItem("disclaimer");
-
-    if (storedPeople) {
-      setPeople(JSON.parse(storedPeople));
-    } else {
-      // Load mock data if no stored data exists
-      setPeople(mockData);
+  // Mock data with multiple wanted persons - updated to match new interface
+  const [wantedPersons, setWantedPersons] = useState<WantedPerson[]>([
+    {
+      id: "1",
+      lastName: "ASHBY JR",
+      firstName: "WILLIAM",
+      middleName: "R",
+      sex: "M",
+      race: "WHI",
+      age: "62",
+      birthDate: "11/21/1961",
+      deceased: "N",
+      height: "5'05\"",
+      weight: "160",
+      tattoos: "Dragon on left arm, skull on back",
+      piercings: "Left ear",
+      scars: "Scar above right eyebrow",
+      driversLicenseNumber: "A210-9366-1331",
+      driversLicenseState: "IL",
+      addressOfResidence: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
+      district: "011",
+      majorityDistrict: "011",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "HX123456",
+      latestFelonyArrestCB: "No Data",
+      onParole: "No Data",
+      latestContact: "15 NOV 2024 @ 14:30",
+      latestContactDistrict: "011",
+      latestWarrant: "No Data",
+      latestInvestigativeAlert: "No Data",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "N",
+      weaponsArrestCount: "No Data",
+      latestWeaponsArrestDate: "No Data",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
+      name: "ASHBY JR WILLIAM R",
+      alias: "BILLY ASHBY",
+      address: "3550 W EVERGREEN AVE FL 2  CHICAGO  60651",
+      dob: "11/21/1961",
+      hair: "BRO",
+      eyes: "BRO",
+      charges: "IDENTITY THEFT, FRAUD, FORGERY",
+      dangerLevel: "HIGH",
+      lastSeen: "CHICAGO, IL",
+      orderOfProtection: true,
+      orderOfProtectionType: "plenary",
+      protectionExpirationDate: "2029-11-21",
+      protectionNotes: "Victim is ex-spouse, high risk of contact",
+      protectionDescription: "Subject prohibited from contacting victim or approaching within 500 feet of residence",
+      photos: []
+    },
+    {
+      id: "2",
+      lastName: "RODRIGUEZ",
+      firstName: "MARIA",
+      middleName: "ELENA",
+      sex: "F",
+      race: "HIS",
+      age: "39",
+      birthDate: "03/15/1985",
+      deceased: "N",
+      height: "5'07\"",
+      weight: "135",
+      tattoos: "Rose on right shoulder",
+      piercings: "Nose, multiple ear piercings",
+      scars: "Knife scar on left hand",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "1247 SUNSET BLVD  LOS ANGELES  90026",
+      district: "Unknown",
+      majorityDistrict: "Unknown",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "LA987654",
+      latestFelonyArrestCB: "LA987654",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "Unknown",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "Armed & Dangerous",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "3",
+      latestWeaponsArrestDate: "12 JAN 2024",
+      narcoticsPossession: "Y",
+      narcoticsArrestCount: "5",
+      latestNarcoticsArrestDate: "20 FEB 2024",
+      name: "RODRIGUEZ MARIA ELENA",
+      alias: "LA SOMBRA",
+      address: "1247 SUNSET BLVD  LOS ANGELES  90026",
+      dob: "03/15/1985",
+      hair: "BLK",
+      eyes: "BRO",
+      charges: "DRUG TRAFFICKING, MONEY LAUNDERING, RACKETEERING",
+      dangerLevel: "EXTREME",
+      lastSeen: "TIJUANA, MEXICO",
+      orderOfProtection: false
+    },
+    {
+      id: "3",
+      lastName: "THOMPSON",
+      firstName: "JAMES",
+      middleName: "ROBERT",
+      sex: "M",
+      race: "BLK",
+      age: "46",
+      birthDate: "07/08/1978",
+      deceased: "N",
+      height: "6'02\"",
+      weight: "195",
+      tattoos: "Tribal on both arms",
+      piercings: "None",
+      scars: "Bullet wound scar on chest",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "4521 MAPLE ST  DETROIT  48201",
+      district: "003",
+      majorityDistrict: "003",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "DT456789",
+      latestFelonyArrestCB: "DT456789",
+      onParole: "No Data",
+      latestContact: "08 OCT 2024 @ 09:15",
+      latestContactDistrict: "003",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "No Data",
+      domesticViolenceArrestCount: "2",
+      latestDomesticViolenceArrestDate: "15 SEP 2024",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "1",
+      latestWeaponsArrestDate: "08 OCT 2024",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
+      name: "THOMPSON JAMES ROBERT",
+      alias: "GHOST",
+      address: "4521 MAPLE ST  DETROIT  48201",
+      dob: "07/08/1978",
+      hair: "BLD",
+      eyes: "BLU",
+      charges: "ARMED ROBBERY, ASSAULT WITH DEADLY WEAPON",
+      dangerLevel: "HIGH",
+      lastSeen: "DETROIT, MI",
+      orderOfProtection: true,
+      orderOfProtectionType: "stalking",
+      protectionExpirationDate: "2026-07-08",
+      protectionNotes: "History of stalking behavior, multiple violations",
+      protectionDescription: "No contact order with victim and family members"
+    },
+    {
+      id: "4",
+      lastName: "CHEN",
+      firstName: "WEI",
+      middleName: "MING",
+      sex: "M",
+      race: "ASI",
+      age: "34",
+      birthDate: "12/22/1990",
+      deceased: "N",
+      height: "5'09\"",
+      weight: "170",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "789 BROADWAY  NEW YORK  10003",
+      district: "001",
+      majorityDistrict: "001",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "NY112233",
+      latestFelonyArrestCB: "NY112233",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "001",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "Cyber Criminal",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "N",
+      weaponsArrestCount: "No Data",
+      latestWeaponsArrestDate: "No Data",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
+      name: "CHEN WEI MING",
+      alias: "THE PHANTOM",
+      address: "789 BROADWAY  NEW YORK  10003",
+      dob: "12/22/1990",
+      hair: "BLK",
+      eyes: "BRO",
+      charges: "CYBERCRIME, IDENTITY THEFT, WIRE FRAUD",
+      dangerLevel: "HIGH",
+      lastSeen: "HONG KONG",
+      orderOfProtection: false
+    },
+    {
+      id: "5",
+      lastName: "JACKSON",
+      firstName: "TYRONE",
+      middleName: "MARCUS",
+      sex: "M",
+      race: "BLK",
+      age: "41",
+      birthDate: "05/30/1983",
+      deceased: "N",
+      height: "5'11\"",
+      weight: "185",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "2156 MLK JR BLVD  ATLANTA  30309",
+      district: "005",
+      majorityDistrict: "005",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "AT789012",
+      latestFelonyArrestCB: "AT789012",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "005",
+      latestWarrant: "Active",
+      latestInvestigativeAlert: "Extremely Dangerous",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "4",
+      latestWeaponsArrestDate: "18 MAR 2024",
+      narcoticsPossession: "Y",
+      narcoticsArrestCount: "2",
+      latestNarcoticsArrestDate: "05 JAN 2024",
+      name: "JACKSON TYRONE MARCUS",
+      alias: "T-BONE",
+      address: "2156 MLK JR BLVD  ATLANTA  30309",
+      dob: "05/30/1983",
+      hair: "BLK",
+      eyes: "BRO",
+      charges: "MURDER, CONSPIRACY, RACKETEERING",
+      dangerLevel: "EXTREME",
+      lastSeen: "MIAMI, FL",
+      orderOfProtection: true,
+      orderOfProtectionType: "civil",
+      protectionExpirationDate: "2035-05-30"
+    },
+    {
+      id: "6",
+      lastName: "VOLKOV",
+      firstName: "DIMITRI",
+      middleName: "ALEXEI",
+      sex: "M",
+      race: "WHI",
+      age: "49",
+      birthDate: "01/12/1975",
+      deceased: "N",
+      height: "6'04\"",
+      weight: "240",
+      driversLicenseNumber: "No Data",
+      driversLicenseState: "No Data",
+      addressOfResidence: "UNKNOWN",
+      district: "Unknown",
+      majorityDistrict: "Unknown",
+      idocNumber: "No Data",
+      idocAddressOfResidence: "No Data",
+      idocDistrict: "No Data",
+      latestArrestCB: "No Data",
+      latestFelonyArrestCB: "No Data",
+      onParole: "No Data",
+      latestContact: "No Data",
+      latestContactDistrict: "Unknown",
+      latestWarrant: "International",
+      latestInvestigativeAlert: "Terrorist",
+      domesticViolenceArrestCount: "No Data",
+      latestDomesticViolenceArrestDate: "No Data",
+      weaponsPossession: "Y",
+      weaponsArrestCount: "Unknown",
+      latestWeaponsArrestDate: "No Data",
+      narcoticsPossession: "N",
+      narcoticsArrestCount: "No Data",
+      latestNarcoticsArrestDate: "No Data",
+      name: "VOLKOV DIMITRI ALEXEI",
+      alias: "THE BEAR",
+      address: "UNKNOWN",
+      dob: "01/12/1975",
+      hair: "BRO",
+      eyes: "GRN",
+      charges: "TERRORISM, WEAPONS TRAFFICKING, MURDER",
+      dangerLevel: "EXTREME",
+      lastSeen: "MOSCOW, RUSSIA",
+      orderOfProtection: false
     }
-    if (storedSystemName) {
-      setSystemName(storedSystemName);
+  ]);
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      const found = wantedPersons.find(person => 
+        (person.name && person.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (person.alias && person.alias.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        `${person.lastName} ${person.firstName}`.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      
+      if (found) {
+        setSelectedPerson(found);
+        setShowRecord(true);
+      } else {
+        // If not found, show the first person as example
+        setSelectedPerson(wantedPersons[0]);
+        setShowRecord(true);
+      }
     }
-    if (storedDisclaimer) {
-      setDisclaimerText(storedDisclaimer);
-    }
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("people", JSON.stringify(people));
-  }, [people]);
-
-  useEffect(() => {
-    localStorage.setItem("systemName", systemName);
-  }, [systemName]);
-
-  useEffect(() => {
-    localStorage.setItem("disclaimer", disclaimerText);
-  }, [disclaimerText]);
-
-  const handleAddPerson = (person: Omit<WantedPerson, 'id'>) => {
-    const newPerson = { ...person, id: Math.random().toString(36).substring(7) };
-    setPeople([...people, newPerson]);
-    toast({
-      title: "Person Added",
-      description: "The person has been successfully added to the database.",
-    });
   };
 
-  const handleEditPerson = (id: string, person: Omit<WantedPerson, 'id'>) => {
-    const updatedPeople = people.map((p) => (p.id === id ? { ...person, id } : p));
-    setPeople(updatedPeople);
-    toast({
-      title: "Person Updated",
-      description: "The person's information has been successfully updated.",
-    });
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleAddPerson = (personData: Omit<WantedPerson, 'id'>) => {
+    const newPerson: WantedPerson = {
+      ...personData,
+      id: Math.random().toString(36).substr(2, 9)
+    };
+    setWantedPersons([...wantedPersons, newPerson]);
+  };
+
+  const handleEditPerson = (id: string, personData: Omit<WantedPerson, 'id'>) => {
+    setWantedPersons(wantedPersons.map(person => 
+      person.id === id ? { ...personData, id } : person
+    ));
   };
 
   const handleDeletePerson = (id: string) => {
-    setPeople(people.filter((person) => person.id !== id));
-    toast({
-      title: "Person Deleted",
-      description: "The person has been successfully deleted from the database.",
-    });
+    setWantedPersons(wantedPersons.filter(person => person.id !== id));
   };
+
+  const nextPhoto = (personId: string, totalPhotos: number) => {
+    setPhotoIndexes(prev => ({
+      ...prev,
+      [personId]: ((prev[personId] || 0) + 1) % totalPhotos
+    }));
+  };
+
+  const prevPhoto = (personId: string, totalPhotos: number) => {
+    setPhotoIndexes(prev => ({
+      ...prev,
+      [personId]: ((prev[personId] || 0) - 1 + totalPhotos) % totalPhotos
+    }));
+  };
+
+  const getCurrentPhotoIndex = (personId: string) => photoIndexes[personId] || 0;
 
   const isOrderOfProtectionActive = (person: WantedPerson) => {
     if (!person.orderOfProtection || !person.protectionExpirationDate) return false;
@@ -406,14 +460,7 @@ const Index = () => {
     return expirationDate > today;
   };
 
-  const isOrderOfProtectionExpired = (person: WantedPerson) => {
-    if (!person.orderOfProtection || !person.protectionExpirationDate) return false;
-    const expirationDate = new Date(person.protectionExpirationDate);
-    const today = new Date();
-    return expirationDate <= today;
-  };
-
-  const getOrderOfProtectionTypeDisplay = (type: string) => {
+  const getOrderOfProtectionTypeLabel = (type?: string) => {
     switch (type) {
       case 'plenary':
         return 'Plenary Order of Protection';
@@ -426,275 +473,748 @@ const Index = () => {
     }
   };
 
-  const handleViewDocument = (doc: { name: string; url: string; type: string }) => {
-    // Create a temporary link to download/view the document
-    const link = document.createElement('a');
-    link.href = doc.url;
-    link.download = doc.name;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleUpdateSystemName = (newName: string) => {
+    setSystemName(newName);
   };
 
-  const filteredPeople = people.filter((person) => {
-    const fullName = `${person.firstName || ''} ${person.lastName || ''} ${person.name || ''}`.toLowerCase();
-    const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
-      person.charges.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      person.id.toLowerCase().includes(searchTerm.toLowerCase());
+  const handleUpdateDisclaimer = (newDisclaimer: string) => {
+    setDisclaimerText(newDisclaimer);
+  };
 
-    if (filterType === "all") return matchesSearch;
-    if (filterType === "high") return matchesSearch && person.dangerLevel === "HIGH";
-    if (filterType === "extreme") return matchesSearch && person.dangerLevel === "EXTREME";
-    if (filterType === "active-protection") return matchesSearch && isOrderOfProtectionActive(person);
-    
-    return matchesSearch;
-  });
+  // Filter people based on active protection filter
+  const filteredPersons = filterByActiveProtection 
+    ? wantedPersons.filter(person => isOrderOfProtectionActive(person))
+    : wantedPersons;
 
-  if (!isLoaded) return null;
+  const currentPerson = selectedPerson || wantedPersons[0];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-blue-900 text-white p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">{systemName}</h1>
-          <Button
-            onClick={() => setIsAdminOpen(true)}
-            variant="secondary"
-            className="flex items-center gap-2"
-          >
-            <Settings className="h-4 w-4" />
-            Admin Panel
-          </Button>
-        </div>
-      </header>
-
-      {/* Disclaimer */}
-      {disclaimerText && (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mx-4 mt-4 rounded-r-md">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <Shield className="h-5 w-5 text-yellow-400" />
+      <div className="bg-blue-600 text-white py-8 shadow-2xl border-b-4 border-blue-800">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <Shield className="h-12 w-12 text-blue-200" />
+              <h1 className="text-3xl font-bold">{systemName}</h1>
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-yellow-700 whitespace-pre-wrap">{disclaimerText}</p>
+            <div className="flex gap-4">
+              {showRecord && (
+                <Button
+                  onClick={() => setShowRecord(false)}
+                  className="bg-gray-800 hover:bg-gray-700 text-white"
+                >
+                  <Home className="h-5 w-5 mr-2" />
+                  Home
+                </Button>
+              )}
+              <Button
+                onClick={() => setShowAdmin(true)}
+                className="bg-gray-800 hover:bg-gray-700 text-white"
+              >
+                <Settings className="h-5 w-5 mr-2" />
+                Admin Panel
+              </Button>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Search and Filter Controls */}
-      <div className="max-w-7xl mx-auto p-4">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search by name, charges, or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <div className="md:w-64">
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All People</SelectItem>
-                <SelectItem value="high">High Danger</SelectItem>
-                <SelectItem value="extreme">Extreme Danger</SelectItem>
-                <SelectItem value="active-protection">Active Order of Protection</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Disclaimer Box */}
+        <Card className="mb-8 shadow-2xl border-2 border-yellow-400 bg-yellow-50">
+          <CardHeader className="bg-yellow-500 text-black rounded-t-lg border-b-2 border-yellow-300">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <Info className="h-6 w-6" />
+              DISCLAIMER
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 bg-yellow-50">
+            <p className="text-black text-sm leading-relaxed font-medium">
+              {disclaimerText}
+            </p>
+          </CardContent>
+        </Card>
 
-        {/* Results Summary */}
-        <div className="mb-4">
-          <p className="text-gray-600">
-            Showing {filteredPeople.length} of {people.length} people
-          </p>
-        </div>
+        {/* Search Section */}
+        <Card className="mb-8 shadow-2xl border-2 border-blue-200">
+          <CardHeader className="bg-blue-500 text-white rounded-t-lg border-b-2 border-blue-300">
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <Search className="h-6 w-6" />
+              Search Database
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 bg-white">
+            <div className="flex gap-4 mb-4">
+              <Input
+                placeholder="Enter Name or Alias"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1 text-lg border-gray-300"
+              />
+              <Button 
+                onClick={handleSearch}
+                className="bg-blue-600 hover:bg-blue-700 px-8 text-lg font-bold"
+              >
+                <Search className="h-5 w-5 mr-2" />
+                SEARCH
+              </Button>
+            </div>
+            
+            {/* Filter for Active Orders of Protection */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant={filterByActiveProtection ? "default" : "outline"}
+                onClick={() => setFilterByActiveProtection(!filterByActiveProtection)}
+                className="flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                {filterByActiveProtection ? "Show All" : "Active Orders Only"}
+              </Button>
+              {filterByActiveProtection && (
+                <Badge variant="secondary">
+                  Showing {filteredPersons.length} people with active orders
+                </Badge>
+              )}
+            </div>
+            
+            <div className="mt-4 text-gray-600">
+              <p className="text-sm">Try searching: {wantedPersons.slice(0, 3).map(p => p.firstName).join(', ')}</p>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* People Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPeople.map((person) => (
-            <Card key={person.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedPerson(person)}>
-              <CardHeader>
-                <CardTitle className="flex justify-between items-start">
-                  <span>{person.name || `${person.firstName} ${person.lastName}`}</span>
-                  <Badge 
-                    variant={person.dangerLevel === "EXTREME" ? "destructive" : person.dangerLevel === "HIGH" ? "secondary" : "default"}
-                  >
-                    {person.dangerLevel}
-                  </Badge>
+        {/* Top Wanted Gallery */}
+        {!showRecord && (
+          <div className="mb-8">
+            <Card className="shadow-2xl border-2 border-blue-200">
+              <CardHeader className="bg-blue-500 text-white rounded-t-lg">
+                <CardTitle className="text-3xl text-center">
+                  {filterByActiveProtection ? "Active Orders of Protection" : "Wanted Individuals"}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <p><strong>ID:</strong> {person.id}</p>
-                  <p><strong>Age:</strong> {person.age}</p>
-                  <p><strong>Charges:</strong> {person.charges}</p>
-                  <p><strong>Last Seen:</strong> {person.lastSeen}</p>
-                  
-                  {/* Order of Protection Status */}
-                  {person.orderOfProtection && (
-                    <div className="mt-3 p-2 rounded-md bg-red-50 border border-red-200">
-                      <div className="flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-red-600" />
-                        <span className="text-sm font-semibold text-red-800">
-                          {isOrderOfProtectionActive(person) ? 'Active' : 'Expired'} {getOrderOfProtectionTypeDisplay(person.orderOfProtectionType || '')}
-                        </span>
+              <CardContent className="p-6 bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredPersons.slice(0, 6).map((person) => {
+                    const currentPhotoIndex = getCurrentPhotoIndex(person.id);
+                    const hasPhotos = person.photos && person.photos.length > 0;
+                    const hasMultiplePhotos = person.photos && person.photos.length > 1;
+                    const isProtectionActive = isOrderOfProtectionActive(person);
+                    
+                    return (
+                      <Card 
+                        key={person.id} 
+                        className="bg-white border-gray-300 cursor-pointer hover:bg-gray-50 transition-all duration-300 hover:scale-105 overflow-hidden relative shadow-lg"
+                        onClick={() => {
+                          setSelectedPerson(person);
+                          setShowRecord(true);
+                        }}
+                      >
+                        <div className="relative">
+                          {/* Photo placeholder with overlay */}
+                          <div className="h-64 bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center relative">
+                            {hasPhotos ? (
+                              <img 
+                                src={person.photos[currentPhotoIndex]} 
+                                alt={`${person.firstName} ${person.lastName}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="h-20 w-20 text-gray-500" />
+                            )}
+                            
+                            {/* Photo navigation for multiple photos */}
+                            {hasMultiplePhotos && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    prevPhoto(person.id, person.photos!.length);
+                                  }}
+                                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    nextPhoto(person.id, person.photos!.length);
+                                  }}
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70"
+                                >
+                                  <ChevronRight className="h-4 w-4" />
+                                </button>
+                                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-1">
+                                  {person.photos!.map((_, index) => (
+                                    <div
+                                      key={index}
+                                      className={`w-2 h-2 rounded-full ${
+                                        index === currentPhotoIndex ? 'bg-white' : 'bg-white/50'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                              </>
+                            )}
+                            
+                            {/* High Risk Badge */}
+                            <div className="absolute top-3 left-3">
+                              <Badge 
+                                className={`text-white font-bold px-3 py-1 ${
+                                  person.dangerLevel === "EXTREME" ? "bg-red-600" : 
+                                  person.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
+                                }`}
+                              >
+                                {person.dangerLevel} RISK
+                              </Badge>
+                            </div>
+
+                            {/* Order of Protection Bubble */}
+                            {isProtectionActive && (
+                              <div className="absolute top-3 right-3">
+                                <div className="relative group">
+                                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center animate-pulse">
+                                    <Shield className="h-5 w-5 text-white" />
+                                  </div>
+                                  {/* Tooltip */}
+                                  <div className="absolute right-0 top-10 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                    {getOrderOfProtectionTypeLabel(person.orderOfProtectionType)}
+                                    <br />
+                                    Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Person Details */}
+                          <div className="p-4 space-y-3">
+                            {/* Name */}
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-900 tracking-wider cursor-pointer hover:text-blue-600 transition-colors">
+                                {person.name || `${person.lastName}, ${person.firstName} ${person.middleName}`.trim()}
+                              </h3>
+                              <p className="text-red-600 text-sm font-semibold">
+                                AKA: {person.alias || 'Unknown'}
+                              </p>
+                              
+                              {/* Active Order of Protection - Prominently displayed under name */}
+                              {isProtectionActive && (
+                                <div className="mt-2 bg-purple-100 border-2 border-purple-400 rounded-lg p-2 shadow-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-purple-600 animate-pulse" />
+                                    <span className="text-purple-800 font-bold text-sm">
+                                      ACTIVE {getOrderOfProtectionTypeLabel(person.orderOfProtectionType).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <p className="text-purple-700 text-xs mt-1 font-medium">
+                                    Expires: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {/* Expired Order of Protection */}
+                              {person.orderOfProtection && !isProtectionActive && (
+                                <div className="mt-2 bg-gray-100 border-2 border-gray-400 rounded-lg p-2 shadow-sm">
+                                  <div className="flex items-center gap-2">
+                                    <Shield className="h-4 w-4 text-gray-600" />
+                                    <span className="text-gray-800 font-bold text-sm">
+                                      EXPIRED {getOrderOfProtectionTypeLabel(person.orderOfProtectionType).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <p className="text-gray-700 text-xs mt-1 font-medium">
+                                    Expired: {person.protectionExpirationDate ? new Date(person.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+
+                            <Separator className="bg-gray-200" />
+
+                            {/* Charges */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-red-500" />
+                                <span className="text-red-600 font-semibold text-sm">CHARGES</span>
+                              </div>
+                              <p className="text-gray-800 text-sm">
+                                {person.charges.length > 50 ? 
+                                  person.charges.substring(0, 50) + "..." : 
+                                  person.charges
+                                }
+                              </p>
+                            </div>
+
+                            {/* Last Seen */}
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-4 w-4 text-orange-500" />
+                                <span className="text-orange-600 font-semibold text-sm">LAST SEEN</span>
+                              </div>
+                              <p className="text-gray-800 text-sm">{person.lastSeen}</p>
+                            </div>
+
+                            <Separator className="bg-gray-200" />
+
+                            {/* Description */}
+                            <div className="space-y-1">
+                              <span className="text-gray-700 font-semibold text-sm">DESCRIPTION</span>
+                              <p className="text-gray-600 text-xs">
+                                {person.sex === 'M' ? 'Male' : 'Female'}, {person.age} years old, {person.height}, {person.weight} lbs, {person.hair || 'Unknown'} hair, {person.eyes || 'Unknown'} eyes
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Wanted Person Display */}
+        {showRecord && currentPerson && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <Button
+                onClick={() => setShowRecord(false)}
+                variant="outline"
+                className="border-gray-400 text-gray-700"
+              >
+                ← Back to Gallery
+              </Button>
+            </div>
+
+            {/* Alert Header */}
+            <Card className="shadow-2xl border-4 border-red-600 bg-red-50">
+              <CardHeader className="bg-red-600 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-3xl">
+                  <AlertTriangle className="h-8 w-8 animate-pulse" />
+                  SUSPECT INFORMATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="text-center">
+                    <span className="text-sm font-medium text-red-700">DANGER LEVEL</span>
+                    <Badge 
+                      variant="destructive" 
+                      className={`ml-2 text-lg px-4 py-2 ${
+                        currentPerson.dangerLevel === "EXTREME" ? "bg-red-600" : "bg-orange-600"
+                      }`}
+                    >
+                      {currentPerson.dangerLevel}
+                    </Badge>
+                  </div>
+                  {currentPerson.orderOfProtection && (
+                    <div className="text-center">
+                      <span className="text-sm font-medium text-red-700">ORDER OF PROTECTION</span>
+                      <div className="text-xl font-bold text-purple-600">
+                        {isOrderOfProtectionActive(currentPerson) ? 'Active' : 'Expired'} - Expires: {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
                       </div>
-                      {person.protectionExpirationDate && (
-                        <p className="text-xs text-red-600 mt-1">
-                          Expires: {new Date(person.protectionExpirationDate).toLocaleDateString()}
-                        </p>
-                      )}
                     </div>
                   )}
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </div>
 
-      {/* Person Details Modal */}
-      {selectedPerson && (
-        <Dialog open={!!selectedPerson} onOpenChange={() => setSelectedPerson(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">
-                {selectedPerson.name || `${selectedPerson.firstName} ${selectedPerson.lastName}`}
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Basic Information</h3>
-                <div className="space-y-2">
-                  <p><strong>ID:</strong> {selectedPerson.id}</p>
-                  <p><strong>Name:</strong> {selectedPerson.name || `${selectedPerson.firstName} ${selectedPerson.lastName}`}</p>
-                  {selectedPerson.alias && <p><strong>Alias:</strong> {selectedPerson.alias}</p>}
-                  <p><strong>Age:</strong> {selectedPerson.age}</p>
-                  <p><strong>Sex:</strong> {selectedPerson.sex}</p>
-                  <p><strong>Race:</strong> {selectedPerson.race}</p>
-                  <p><strong>Height:</strong> {selectedPerson.height}</p>
-                  <p><strong>Weight:</strong> {selectedPerson.weight}</p>
-                  <div className="flex items-center gap-2">
-                    <span><strong>Danger Level:</strong></span>
-                    <Badge variant={selectedPerson.dangerLevel === "EXTREME" ? "destructive" : selectedPerson.dangerLevel === "HIGH" ? "secondary" : "default"}>
-                      {selectedPerson.dangerLevel}
+            {/* Subject Demographics */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-blue-500 text-white rounded-t-lg border-b-2 border-blue-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <User className="h-6 w-6" />
+                  SUBJECT DEMOGRAPHICS
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Last Name</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.lastName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">First Name</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.firstName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Middle Name</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.middleName}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Sex</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.sex}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Race</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.race}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Age</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.age}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      Birth Date
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.birthDate}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Deceased</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.deceased}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <Ruler className="h-3 w-3" />
+                      Height
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.height}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <Weight className="h-3 w-3" />
+                      Weight
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.weight}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Physical Descriptors */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-teal-500 text-white rounded-t-lg border-b-2 border-teal-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Eye className="h-6 w-6" />
+                  PHYSICAL DESCRIPTORS
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Tattoos</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.tattoos || 'None reported'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Piercings</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.piercings || 'None reported'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Scars</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.scars || 'None reported'}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Identification */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-green-500 text-white rounded-t-lg border-b-2 border-green-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <CreditCard className="h-6 w-6" />
+                  IDENTIFICATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Driver's License #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.driversLicenseNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Driver's License State</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.driversLicenseState}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Address of Residence */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-purple-500 text-white rounded-t-lg border-b-2 border-purple-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Home className="h-6 w-6" />
+                  ADDRESS OF RESIDENCE
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2">
+                    <span className="text-sm font-medium text-gray-500">Address of Residence</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.addressOfResidence}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.district}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Majority District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.majorityDistrict}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* IDOC Information */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-indigo-500 text-white rounded-t-lg border-b-2 border-indigo-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Building2 className="h-6 w-6" />
+                  IDOC INFORMATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">IDOC #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.idocNumber}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.idocDistrict}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="text-sm font-medium text-gray-500">IDOC Address of Residence</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.idocAddressOfResidence}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Criminal Record Details */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-red-500 text-white rounded-t-lg border-b-2 border-red-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Zap className="h-6 w-6" />
+                  CRIMINAL RECORD DETAILS
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest CB #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.latestArrestCB}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Felony Arrest CB #</span>
+                    <p className="text-xl font-mono font-bold text-gray-800">{currentPerson.latestFelonyArrestCB}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">On Parole</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.onParole}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Contact</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestContact}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Contact District</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestContactDistrict}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Warrant</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestWarrant}</p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <span className="text-sm font-medium text-gray-500">Latest Investigative Alert</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestInvestigativeAlert}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Domestic Violence Arrest Record */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-pink-500 text-white rounded-t-lg border-b-2 border-pink-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <AlertTriangle className="h-6 w-6" />
+                  DOMESTIC VIOLENCE ARREST RECORD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Arrest Count</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.domesticViolenceArrestCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest Date</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestDomesticViolenceArrestDate}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Weapons Arrest Record */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-orange-500 text-white rounded-t-lg border-b-2 border-orange-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Target className="h-6 w-6" />
+                  WEAPONS ARREST RECORD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Possession</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.weaponsPossession}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Arrest Count</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.weaponsArrestCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest Date</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestWeaponsArrestDate}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Narcotics Arrest Record */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-yellow-500 text-white rounded-t-lg border-b-2 border-yellow-200">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <Pill className="h-6 w-6" />
+                  NARCOTICS ARREST RECORD
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Possession</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.narcoticsPossession}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Arrest Count</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.narcoticsArrestCount}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Latest Arrest Date</span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.latestNarcoticsArrestDate}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Additional Information */}
+            <Card className="shadow-2xl border-2 border-gray-300 bg-white">
+              <CardHeader className="bg-gray-600 text-white rounded-t-lg border-b-2 border-gray-300">
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <FileText className="h-6 w-6" />
+                  ADDITIONAL INFORMATION
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 bg-white text-gray-800">
+                <div className="space-y-6">
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Charges</span>
+                    <p className="text-xl font-bold text-red-600">{currentPerson.charges}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm font-medium text-gray-500">Danger Level</span>
+                    <Badge 
+                      className={`ml-2 text-lg px-4 py-2 ${
+                        currentPerson.dangerLevel === "EXTREME" ? "bg-red-600" : 
+                        currentPerson.dangerLevel === "HIGH" ? "bg-orange-600" : "bg-yellow-600"
+                      }`}
+                    >
+                      {currentPerson.dangerLevel}
                     </Badge>
                   </div>
-                </div>
-
-                {/* Physical Descriptors */}
-                {(selectedPerson.tattoos || selectedPerson.piercings || selectedPerson.scars) && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">Physical Descriptors</h4>
-                    {selectedPerson.tattoos && <p><strong>Tattoos:</strong> {selectedPerson.tattoos}</p>}
-                    {selectedPerson.piercings && <p><strong>Piercings:</strong> {selectedPerson.piercings}</p>}
-                    {selectedPerson.scars && <p><strong>Scars:</strong> {selectedPerson.scars}</p>}
+                  <div>
+                    <span className="text-sm font-medium text-gray-500 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      Last Seen
+                    </span>
+                    <p className="text-xl font-bold text-gray-800">{currentPerson.lastSeen}</p>
                   </div>
-                )}
-              </div>
-
-              {/* Criminal Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Criminal Information</h3>
-                <div className="space-y-2">
-                  <p><strong>Charges:</strong> {selectedPerson.charges}</p>
-                  <p><strong>Last Seen:</strong> {selectedPerson.lastSeen}</p>
-                  {selectedPerson.latestArrestCB && <p><strong>Latest Arrest:</strong> {selectedPerson.latestArrestCB}</p>}
-                  {selectedPerson.latestWarrant && <p><strong>Latest Warrant:</strong> {selectedPerson.latestWarrant}</p>}
                 </div>
+              </CardContent>
+            </Card>
 
-                {/* Order of Protection */}
-                {selectedPerson.orderOfProtection && (
-                  <div className="space-y-3">
-                    <h4 className="font-semibold text-red-800">Order of Protection</h4>
-                    <div className="p-3 rounded-md bg-red-50 border border-red-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Shield className="h-5 w-5 text-red-600" />
-                        <span className="font-semibold text-red-800">
-                          {isOrderOfProtectionActive(selectedPerson) ? 'Active' : 'Expired'} {getOrderOfProtectionTypeDisplay(selectedPerson.orderOfProtectionType || '')}
-                        </span>
+            {/* Enhanced Order of Protection */}
+            {currentPerson.orderOfProtection && (
+              <Card className="shadow-2xl border-2 border-purple-300 bg-purple-50">
+                <CardHeader className="bg-purple-600 text-white rounded-t-lg border-b-2 border-purple-300">
+                  <CardTitle className="flex items-center gap-3 text-2xl">
+                    <Shield className="h-6 w-6" />
+                    {getOrderOfProtectionTypeLabel(currentPerson.orderOfProtectionType).toUpperCase()}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 bg-purple-50 text-gray-800">
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Status</span>
+                        <p className="text-xl font-bold text-purple-800">
+                          {isOrderOfProtectionActive(currentPerson) ? 'ACTIVE' : 'EXPIRED'}
+                        </p>
                       </div>
-                      
-                      {selectedPerson.protectionExpirationDate && (
-                        <p className="text-sm text-red-600 mb-2">
-                          <strong>Expires:</strong> {new Date(selectedPerson.protectionExpirationDate).toLocaleDateString()}
-                          {isOrderOfProtectionExpired(selectedPerson) && <span className="ml-2 text-red-800 font-semibold">(EXPIRED)</span>}
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Expiration Date</span>
+                        <p className="text-xl font-bold text-purple-800">
+                          {currentPerson.protectionExpirationDate ? new Date(currentPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
                         </p>
-                      )}
-                      
-                      {selectedPerson.protectionDescription && (
-                        <p className="text-sm text-red-700 mb-2">
-                          <strong>Description:</strong> {selectedPerson.protectionDescription}
-                        </p>
-                      )}
-                      
-                      {selectedPerson.protectionNotes && (
-                        <p className="text-sm text-red-700">
-                          <strong>Notes:</strong> {selectedPerson.protectionNotes}
-                        </p>
-                      )}
-
-                      {/* Supporting Documents */}
-                      {selectedPerson.protectionDocuments && selectedPerson.protectionDocuments.length > 0 && (
-                        <div className="mt-3">
-                          <p className="text-sm font-semibold text-red-800 mb-2">Supporting Documents:</p>
-                          <div className="space-y-2">
-                            {selectedPerson.protectionDocuments.map((doc, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 bg-white border border-red-200 rounded">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-4 w-4 text-red-600" />
-                                  <span className="text-sm text-red-800">{doc.name}</span>
-                                  <Badge variant="outline" className="text-xs">
-                                    {new Date(doc.uploadDate).toLocaleDateString()}
-                                  </Badge>
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewDocument(doc)}
-                                  className="text-red-600 border-red-300 hover:bg-red-50"
-                                >
-                                  <Download className="h-3 w-3 mr-1" />
-                                  View
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      </div>
                     </div>
+                    
+                    {currentPerson.protectionDescription && (
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Description</span>
+                        <p className="text-lg text-purple-800 mt-2 p-3 bg-white rounded-lg border border-purple-200">
+                          {currentPerson.protectionDescription}
+                        </p>
+                      </div>
+                    )}
+                    
+                    {currentPerson.protectionNotes && (
+                      <div>
+                        <span className="text-sm font-medium text-purple-700">Notes</span>
+                        <p className="text-lg text-purple-800 mt-2 p-3 bg-white rounded-lg border border-purple-200">
+                          {currentPerson.protectionNotes}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+
+        {!showRecord && (
+          <div className="text-center py-16">
+            <div className="space-y-4">
+              <Shield className="h-24 w-24 text-gray-400 mx-auto opacity-50" />
+              <div className="text-gray-600 text-2xl font-semibold">
+              </div>
+              <div className="text-gray-400 text-lg">
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="bg-gray-800 text-white py-8 mt-12 border-t-4 border-blue-600">
+      </div>
 
       {/* Admin Panel */}
       <AdminPanel
-        people={people}
+        people={wantedPersons}
         onAddPerson={handleAddPerson}
         onEditPerson={handleEditPerson}
         onDeletePerson={handleDeletePerson}
-        isOpen={isAdminOpen}
-        onClose={() => setIsAdminOpen(false)}
+        isOpen={showAdmin}
+        onClose={() => setShowAdmin(false)}
         systemName={systemName}
-        onUpdateSystemName={setSystemName}
+        onUpdateSystemName={handleUpdateSystemName}
         disclaimerText={disclaimerText}
-        onUpdateDisclaimer={setDisclaimerText}
+        onUpdateDisclaimer={handleUpdateDisclaimer}
       />
     </div>
   );
