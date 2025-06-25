@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,7 +79,7 @@ interface WantedPerson {
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | '';
+  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | '';
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
@@ -174,7 +173,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [lastSeen, setLastSeen] = useState("");
   const [lastKnownVehicle, setLastKnownVehicle] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
-  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | ''>('');
+  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
   const [protectionNotes, setProtectionNotes] = useState("");
   const [protectionDescription, setProtectionDescription] = useState("");
@@ -863,7 +862,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Label htmlFor="orderOfProtectionType">Type of Order</Label>
                         <Select 
                           value={orderOfProtectionType} 
-                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | 'order' | '')}
+                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | '')}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select type" />
@@ -873,6 +872,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
                             <SelectItem value="civil">Civil No-Contact Order</SelectItem>
                             <SelectItem value="order">Order of Protection</SelectItem>
+                            <SelectItem value="emergency">Emergency Order of Protection</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
