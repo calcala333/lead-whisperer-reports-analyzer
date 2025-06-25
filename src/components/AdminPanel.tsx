@@ -135,7 +135,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   
-  // New physical descriptor fields
+  // Physical descriptor fields
   const [tattoos, setTattoos] = useState("");
   const [piercings, setPiercings] = useState("");
   const [scars, setScars] = useState("");
@@ -839,7 +839,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   />
                 </div>
 
-                {/* Enhanced Order of Protection Section */}
+                {/* Order of Protection Section */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-gray-700">Order of Protection</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
