@@ -454,7 +454,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setOnParole(person.onParole);
     setLatestContact(person.latestContact);
     setLatestContactDistrict(person.latestContactDistrict);
-    setLatestWarrent(person.latestWarrent);
+    setLatestWarrant(person.latestWarrant);
     setLatestInvestigativeAlert(person.latestInvestigativeAlert);
     setDomesticViolenceArrestCount(person.domesticViolenceArrestCount);
     setLatestDomesticViolenceArrestDate(person.latestDomesticViolenceArrestDate);
