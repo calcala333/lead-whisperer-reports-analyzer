@@ -14,7 +14,6 @@ interface WantedPerson {
   sex: string;
   race: string;
   age: string;
-  birthDate: string;
   deceased: string;
   height: string;
   weight: string;
@@ -53,11 +52,14 @@ interface WantedPerson {
   charges: string;
   dangerLevel: string;
   lastSeen: string;
+  lastKnownVehicle?: string;
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | '';
+  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | '';
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
+  protectionPetitioner?: string;
+  protectionRespondent?: string;
   protectionDocuments?: Array<{
     name: string;
     url: string;
@@ -143,6 +145,8 @@ const Index = () => {
         return 'Stalking No Contact Order';
       case 'civil':
         return 'Civil No-Contact Order';
+      case 'order':
+        return 'Order of Protection';
       default:
         return 'Order of Protection';
     }
@@ -225,6 +229,7 @@ const Index = () => {
                     {person.hair && <p><strong>Hair:</strong> {person.hair}</p>}
                     {person.eyes && <p><strong>Eyes:</strong> {person.eyes}</p>}
                     <p><strong>Last Seen:</strong> {person.lastSeen || 'Unknown'}</p>
+                    {person.lastKnownVehicle && <p><strong>Vehicle:</strong> {person.lastKnownVehicle}</p>}
                     
                     {person.orderOfProtection && (
                       <div className="flex items-center gap-1 text-red-600 font-semibold">
@@ -277,7 +282,7 @@ const Index = () => {
                     <p><strong>Name:</strong> {selectedPerson.name || `${selectedPerson.firstName} ${selectedPerson.lastName}`}</p>
                     {selectedPerson.alias && <p><strong>Alias:</strong> {selectedPerson.alias}</p>}
                     <p><strong>Age:</strong> {selectedPerson.age}</p>
-                    <p><strong>DOB:</strong> {selectedPerson.dob || selectedPerson.birthDate}</p>
+                    <p><strong>DOB:</strong> {selectedPerson.dob}</p>
                     <p><strong>Sex:</strong> {selectedPerson.sex}</p>
                     <p><strong>Race:</strong> {selectedPerson.race}</p>
                     <p><strong>Height:</strong> {selectedPerson.height}</p>
@@ -290,7 +295,7 @@ const Index = () => {
                 {/* Physical Descriptors */}
                 {(selectedPerson.tattoos || selectedPerson.piercings || selectedPerson.scars) && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Physical Descriptors</h3>
+                    <h3 className="text-lg font-bold mb-2">Physical Descriptors</h3>
                     <div className="space-y-2 text-sm">
                       {selectedPerson.tattoos && <p><strong>Tattoos:</strong> {selectedPerson.tattoos}</p>}
                       {selectedPerson.piercings && <p><strong>Piercings:</strong> {selectedPerson.piercings}</p>}
@@ -302,13 +307,19 @@ const Index = () => {
                 {/* Order of Protection */}
                 {selectedPerson.orderOfProtection && (
                   <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                    <h3 className="text-lg font-semibold mb-2 text-red-700 flex items-center gap-2">
+                    <h3 className="text-lg font-bold mb-2 text-red-700 flex items-center gap-2">
                       <Shield className="h-5 w-5" />
                       Order of Protection Active
                     </h3>
                     <div className="space-y-2 text-sm">
                       {selectedPerson.orderOfProtectionType && (
                         <p><strong>Type:</strong> {getOrderOfProtectionTypeLabel(selectedPerson.orderOfProtectionType)}</p>
+                      )}
+                      {selectedPerson.protectionPetitioner && (
+                        <p><strong>Petitioner:</strong> {selectedPerson.protectionPetitioner}</p>
+                      )}
+                      {selectedPerson.protectionRespondent && (
+                        <p><strong>Respondent:</strong> {selectedPerson.protectionRespondent}</p>
                       )}
                       {selectedPerson.protectionExpirationDate && (
                         <p><strong>Expiration Date:</strong> {selectedPerson.protectionExpirationDate}</p>
@@ -360,6 +371,9 @@ const Index = () => {
                   <div className="space-y-2 text-sm">
                     <p><strong>Address:</strong> {selectedPerson.address || selectedPerson.addressOfResidence}</p>
                     <p><strong>Last Seen:</strong> {selectedPerson.lastSeen}</p>
+                    {selectedPerson.lastKnownVehicle && (
+                      <p><strong>Last Known Vehicle:</strong> {selectedPerson.lastKnownVehicle}</p>
+                    )}
                   </div>
                 </div>
               </div>

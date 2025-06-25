@@ -19,7 +19,6 @@ interface WantedPerson {
   sex: string;
   race: string;
   age: string;
-  birthDate: string;
   deceased: string;
   height: string;
   weight: string;
@@ -76,13 +75,16 @@ interface WantedPerson {
   charges: string;
   dangerLevel: string;
   lastSeen: string;
+  lastKnownVehicle?: string;
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | '';
+  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | '';
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
+  protectionPetitioner?: string;
+  protectionRespondent?: string;
   protectionDocuments?: Array<{
     name: string;
     url: string;
@@ -128,7 +130,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [sex, setSex] = useState("M");
   const [race, setRace] = useState("WHI");
   const [age, setAge] = useState("");
-  const [birthDate, setBirthDate] = useState("");
   const [deceased, setDeceased] = useState("N");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -170,11 +171,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [charges, setCharges] = useState("");
   const [dangerLevel, setDangerLevel] = useState("HIGH");
   const [lastSeen, setLastSeen] = useState("");
+  const [lastKnownVehicle, setLastKnownVehicle] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
-  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | ''>('');
+  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
   const [protectionNotes, setProtectionNotes] = useState("");
   const [protectionDescription, setProtectionDescription] = useState("");
+  const [protectionPetitioner, setProtectionPetitioner] = useState("");
+  const [protectionRespondent, setProtectionRespondent] = useState("");
   const [protectionDocuments, setProtectionDocuments] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const [photos, setPhotos] = useState<string[]>([]);
 
@@ -182,6 +186,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setTempSystemName(systemName);
     setTempDisclaimerText(disclaimerText);
   }, [systemName, disclaimerText]);
+
+  // Calculate age from DOB
+  const calculateAge = (dobString: string) => {
+    if (!dobString) return "";
+    const birthDate = new Date(dobString);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age.toString();
+  };
+
+  const handleDobChange = (dobValue: string) => {
+    setDob(dobValue);
+    const calculatedAge = calculateAge(dobValue);
+    setAge(calculatedAge);
+  };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'document' | 'photo') => {
     const files = event.target.files;
@@ -222,7 +245,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setSex("M");
     setRace("WHI");
     setAge("");
-    setBirthDate("");
     setDeceased("N");
     setHeight("");
     setWeight("");
@@ -261,11 +283,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setCharges("");
     setDangerLevel("HIGH");
     setLastSeen("");
+    setLastKnownVehicle("");
     setOrderOfProtection(false);
     setOrderOfProtectionType('');
     setProtectionExpirationDate("");
     setProtectionNotes("");
     setProtectionDescription("");
+    setProtectionPetitioner("");
+    setProtectionRespondent("");
     setProtectionDocuments([]);
     setPhotos([]);
   };
@@ -278,7 +303,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       sex,
       race,
       age,
-      birthDate,
       deceased,
       height,
       weight,
@@ -317,11 +341,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       charges,
       dangerLevel,
       lastSeen,
+      lastKnownVehicle,
       orderOfProtection,
       orderOfProtectionType,
       protectionExpirationDate,
       protectionNotes,
       protectionDescription,
+      protectionPetitioner,
+      protectionRespondent,
       protectionDocuments,
       photos
     };
@@ -339,7 +366,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         sex,
         race,
         age,
-        birthDate,
         deceased,
         height,
         weight,
@@ -378,11 +404,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         charges,
         dangerLevel,
         lastSeen,
+        lastKnownVehicle,
         orderOfProtection,
         orderOfProtectionType,
         protectionExpirationDate,
         protectionNotes,
         protectionDescription,
+        protectionPetitioner,
+        protectionRespondent,
         protectionDocuments,
         photos
       };
@@ -405,7 +434,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setSex(person.sex);
     setRace(person.race);
     setAge(person.age);
-    setBirthDate(person.birthDate);
     setDeceased(person.deceased);
     setHeight(person.height);
     setWeight(person.weight);
@@ -444,11 +472,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setCharges(person.charges);
     setDangerLevel(person.dangerLevel);
     setLastSeen(person.lastSeen);
+    setLastKnownVehicle(person.lastKnownVehicle || "");
     setOrderOfProtection(person.orderOfProtection || false);
     setOrderOfProtectionType(person.orderOfProtectionType || '');
     setProtectionExpirationDate(person.protectionExpirationDate || "");
     setProtectionNotes(person.protectionNotes || "");
     setProtectionDescription(person.protectionDescription || "");
+    setProtectionPetitioner(person.protectionPetitioner || "");
+    setProtectionRespondent(person.protectionRespondent || "");
     setProtectionDocuments(person.protectionDocuments || []);
     setPhotos(person.photos || []);
     setActiveTab("add");
@@ -475,7 +506,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
             <TabsTrigger value="settings">System Settings</TabsTrigger>
           </TabsList>
 
-          {/* Add Person Tab */}
           <TabsContent value="add" className="space-y-6">
             <Card>
               <CardHeader>
@@ -575,10 +605,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div>
                     <Label htmlFor="dob">Date of Birth</Label>
                     <Input
-                      type="text"
+                      type="date"
                       id="dob"
                       value={dob}
-                      onChange={(e) => setDob(e.target.value)}
+                      onChange={(e) => handleDobChange(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="age">Age (Auto-calculated)</Label>
+                    <Input
+                      type="text"
+                      id="age"
+                      value={age}
+                      readOnly
+                      className="bg-gray-50"
                     />
                   </div>
                   <div>
@@ -620,7 +660,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 {/* Physical Descriptors Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Physical Descriptors</h3>
+                  <h3 className="text-lg font-bold text-gray-700">Physical Descriptors</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="tattoos">Tattoos</Label>
@@ -751,27 +791,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="age">Age</Label>
-                    <Input
-                      type="number"
-                      id="age"
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="birthDate">Birth Date</Label>
-                    <Input
-                      type="text"
-                      id="birthDate"
-                      value={birthDate}
-                      onChange={(e) => setBirthDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-
                 <div>
                   <Label htmlFor="dangerLevel">Danger Level</Label>
                   <Select value={dangerLevel} onValueChange={setDangerLevel}>
@@ -807,9 +826,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
+                <div>
+                  <Label htmlFor="lastKnownVehicle">Last Known Registered Vehicle</Label>
+                  <Input
+                    type="text"
+                    id="lastKnownVehicle"
+                    value={lastKnownVehicle}
+                    onChange={(e) => setLastKnownVehicle(e.target.value)}
+                    placeholder="Make, model, year, color, license plate..."
+                  />
+                </div>
+
                 {/* Enhanced Order of Protection Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-700">Order of Protection</h3>
+                  <h3 className="text-lg font-bold text-gray-700">Order of Protection</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="orderOfProtection">Order of Protection</Label>
@@ -831,7 +861,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Label htmlFor="orderOfProtectionType">Type of Order</Label>
                         <Select 
                           value={orderOfProtectionType} 
-                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | '')}
+                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | 'order' | '')}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select type" />
@@ -840,6 +870,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             <SelectItem value="plenary">Plenary Order of Protection</SelectItem>
                             <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
                             <SelectItem value="civil">Civil No-Contact Order</SelectItem>
+                            <SelectItem value="order">Order of Protection</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -848,6 +879,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   
                   {orderOfProtection && (
                     <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="protectionPetitioner">Petitioner</Label>
+                          <Input
+                            type="text"
+                            id="protectionPetitioner"
+                            value={protectionPetitioner}
+                            onChange={(e) => setProtectionPetitioner(e.target.value)}
+                            placeholder="Name of petitioner..."
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="protectionRespondent">Respondent</Label>
+                          <Input
+                            type="text"
+                            id="protectionRespondent"
+                            value={protectionRespondent}
+                            onChange={(e) => setProtectionRespondent(e.target.value)}
+                            placeholder="Name of respondent..."
+                          />
+                        </div>
+                      </div>
+
                       <div>
                         <Label htmlFor="protectionExpirationDate">Protection Expiration Date</Label>
                         <Input
@@ -925,253 +979,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                     </>
                   )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="driversLicenseNumber">Driver's License Number</Label>
-                    <Input
-                      type="text"
-                      id="driversLicenseNumber"
-                      value={driversLicenseNumber}
-                      onChange={(e) => setDriversLicenseNumber(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="driversLicenseState">Driver's License State</Label>
-                    <Input
-                      type="text"
-                      id="driversLicenseState"
-                      value={driversLicenseState}
-                      onChange={(e) => setDriversLicenseState(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="addressOfResidence">Address of Residence</Label>
-                    <Input
-                      type="text"
-                      id="addressOfResidence"
-                      value={addressOfResidence}
-                      onChange={(e) => setAddressOfResidence(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="district">District</Label>
-                    <Input
-                      type="text"
-                      id="district"
-                      value={district}
-                      onChange={(e) => setDistrict(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="majorityDistrict">Majority District</Label>
-                    <Input
-                      type="text"
-                      id="majorityDistrict"
-                      value={majorityDistrict}
-                      onChange={(e) => setMajorityDistrict(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="idocNumber">IDOC Number</Label>
-                    <Input
-                      type="text"
-                      id="idocNumber"
-                      value={idocNumber}
-                      onChange={(e) => setIdocNumber(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="idocAddressOfResidence">IDOC Address of Residence</Label>
-                    <Input
-                      type="text"
-                      id="idocAddressOfResidence"
-                      value={idocAddressOfResidence}
-                      onChange={(e) => setIdocAddressOfResidence(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="idocDistrict">IDOC District</Label>
-                    <Input
-                      type="text"
-                      id="idocDistrict"
-                      value={idocDistrict}
-                      onChange={(e) => setIdocDistrict(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="latestArrestCB">Latest Arrest CB</Label>
-                    <Input
-                      type="text"
-                      id="latestArrestCB"
-                      value={latestArrestCB}
-                      onChange={(e) => setLatestArrestCB(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="latestFelonyArrestCB">Latest Felony Arrest CB</Label>
-                    <Input
-                      type="text"
-                      id="latestFelonyArrestCB"
-                      value={latestFelonyArrestCB}
-                      onChange={(e) => setLatestFelonyArrestCB(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="onParole">On Parole</Label>
-                    <Input
-                      type="text"
-                      id="onParole"
-                      value={onParole}
-                      onChange={(e) => setOnParole(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="latestContact">Latest Contact</Label>
-                    <Input
-                      type="text"
-                      id="latestContact"
-                      value={latestContact}
-                      onChange={(e) => setLatestContact(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="latestContactDistrict">Latest Contact District</Label>
-                    <Input
-                      type="text"
-                      id="latestContactDistrict"
-                      value={latestContactDistrict}
-                      onChange={(e) => setLatestContactDistrict(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="latestWarrant">Latest Warrant</Label>
-                    <Input
-                      type="text"
-                      id="latestWarrant"
-                      value={latestWarrant}
-                      onChange={(e) => setLatestWarrant(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="latestInvestigativeAlert">Latest Investigative Alert</Label>
-                    <Input
-                      type="text"
-                      id="latestInvestigativeAlert"
-                      value={latestInvestigativeAlert}
-                      onChange={(e) => setLatestInvestigativeAlert(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="domesticViolenceArrestCount">Domestic Violence Arrest Count</Label>
-                    <Input
-                      type="text"
-                      id="domesticViolenceArrestCount"
-                      value={domesticViolenceArrestCount}
-                      onChange={(e) => setDomesticViolenceArrestCount(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="latestDomesticViolenceArrestDate">Latest Domestic Violence Arrest Date</Label>
-                    <Input
-                      type="text"
-                      id="latestDomesticViolenceArrestDate"
-                      value={latestDomesticViolenceArrestDate}
-                      onChange={(e) => setLatestDomesticViolenceArrestDate(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="weaponsPossession">Weapons Possession</Label>
-                    <Select value={weaponsPossession} onValueChange={setWeaponsPossession}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Y">Yes</SelectItem>
-                        <SelectItem value="N">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="weaponsArrestCount">Weapons Arrest Count</Label>
-                    <Input
-                      type="text"
-                      id="weaponsArrestCount"
-                      value={weaponsArrestCount}
-                      onChange={(e) => setWeaponsArrestCount(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="latestWeaponsArrestDate">Latest Weapons Arrest Date</Label>
-                    <Input
-                      type="text"
-                      id="latestWeaponsArrestDate"
-                      value={latestWeaponsArrestDate}
-                      onChange={(e) => setLatestWeaponsArrestDate(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="narcoticsPossession">Narcotics Possession</Label>
-                    <Select value={narcoticsPossession} onValueChange={setNarcoticsPossession}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Y">Yes</SelectItem>
-                        <SelectItem value="N">No</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="narcoticsArrestCount">Narcotics Arrest Count</Label>
-                    <Input
-                      type="text"
-                      id="narcoticsArrestCount"
-                      value={narcoticsArrestCount}
-                      onChange={(e) => setNarcoticsArrestCount(e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="latestNarcoticsArrestDate">Latest Narcotics Arrest Date</Label>
-                  <Input
-                    type="text"
-                    id="latestNarcoticsArrestDate"
-                    value={latestNarcoticsArrestDate}
-                    onChange={(e) => setLatestNarcoticsArrestDate(e.target.value)}
-                  />
                 </div>
 
                 <Button onClick={() => {
