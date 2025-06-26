@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -734,28 +733,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <SelectValue placeholder="Select height" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="4'0\"">4'0"</SelectItem>
-                        <SelectItem value="4'6\"">4'6"</SelectItem>
-                        <SelectItem value="5'0\"">5'0"</SelectItem>
-                        <SelectItem value="5'1\"">5'1"</SelectItem>
-                        <SelectItem value="5'2\"">5'2"</SelectItem>
-                        <SelectItem value="5'3\"">5'3"</SelectItem>
-                        <SelectItem value="5'4\"">5'4"</SelectItem>
-                        <SelectItem value="5'5\"">5'5"</SelectItem>
-                        <SelectItem value="5'6\"">5'6"</SelectItem>
-                        <SelectItem value="5'7\"">5'7"</SelectItem>
-                        <SelectItem value="5'8\"">5'8"</SelectItem>
-                        <SelectItem value="5'9\"">5'9"</SelectItem>
-                        <SelectItem value="5'10\"">5'10"</SelectItem>
-                        <SelectItem value="5'11\"">5'11"</SelectItem>
-                        <SelectItem value="6'0\"">6'0"</SelectItem>
-                        <SelectItem value="6'1\"">6'1"</SelectItem>
-                        <SelectItem value="6'2\"">6'2"</SelectItem>
-                        <SelectItem value="6'3\"">6'3"</SelectItem>
-                        <SelectItem value="6'4\"">6'4"</SelectItem>
-                        <SelectItem value="6'5\"">6'5"</SelectItem>
-                        <SelectItem value="6'6\"">6'6"</SelectItem>
-                        <SelectItem value="7'0\"">7'0"</SelectItem>
+                        <SelectItem value="4'0&quot;">4'0"</SelectItem>
+                        <SelectItem value="4'6&quot;">4'6"</SelectItem>
+                        <SelectItem value="5'0&quot;">5'0"</SelectItem>
+                        <SelectItem value="5'1&quot;">5'1"</SelectItem>
+                        <SelectItem value="5'2&quot;">5'2"</SelectItem>
+                        <SelectItem value="5'3&quot;">5'3"</SelectItem>
+                        <SelectItem value="5'4&quot;">5'4"</SelectItem>
+                        <SelectItem value="5'5&quot;">5'5"</SelectItem>
+                        <SelectItem value="5'6&quot;">5'6"</SelectItem>
+                        <SelectItem value="5'7&quot;">5'7"</SelectItem>
+                        <SelectItem value="5'8&quot;">5'8"</SelectItem>
+                        <SelectItem value="5'9&quot;">5'9"</SelectItem>
+                        <SelectItem value="5'10&quot;">5'10"</SelectItem>
+                        <SelectItem value="5'11&quot;">5'11"</SelectItem>
+                        <SelectItem value="6'0&quot;">6'0"</SelectItem>
+                        <SelectItem value="6'1&quot;">6'1"</SelectItem>
+                        <SelectItem value="6'2&quot;">6'2"</SelectItem>
+                        <SelectItem value="6'3&quot;">6'3"</SelectItem>
+                        <SelectItem value="6'4&quot;">6'4"</SelectItem>
+                        <SelectItem value="6'5&quot;">6'5"</SelectItem>
+                        <SelectItem value="6'6&quot;">6'6"</SelectItem>
+                        <SelectItem value="7'0&quot;">7'0"</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
