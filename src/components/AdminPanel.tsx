@@ -79,7 +79,7 @@ interface WantedPerson {
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | '';
+  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | '';
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
@@ -173,7 +173,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [lastSeen, setLastSeen] = useState("");
   const [lastKnownVehicle, setLastKnownVehicle] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
-  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | ''>('');
+  const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
   const [protectionNotes, setProtectionNotes] = useState("");
   const [protectionDescription, setProtectionDescription] = useState("");
@@ -659,6 +659,289 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
+                {/* Identification Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Identification</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="driversLicenseNumber">Driver&apos;s License #</Label>
+                      <Input
+                        type="text"
+                        id="driversLicenseNumber"
+                        value={driversLicenseNumber}
+                        onChange={(e) => setDriversLicenseNumber(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="driversLicenseState">Driver&apos;s License State</Label>
+                      <Input
+                        type="text"
+                        id="driversLicenseState"
+                        value={driversLicenseState}
+                        onChange={(e) => setDriversLicenseState(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address of Residence Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Address of Residence</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="addressOfResidence">Address of Residence</Label>
+                      <Input
+                        type="text"
+                        id="addressOfResidence"
+                        value={addressOfResidence}
+                        onChange={(e) => setAddressOfResidence(e.target.value)}
+                        placeholder="e.g., 6400 N CICERO AVE"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="district">District</Label>
+                      <Input
+                        type="text"
+                        id="district"
+                        value={district}
+                        onChange={(e) => setDistrict(e.target.value)}
+                        placeholder="e.g., 31"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="majorityDistrict">Majority District</Label>
+                      <Input
+                        type="text"
+                        id="majorityDistrict"
+                        value={majorityDistrict}
+                        onChange={(e) => setMajorityDistrict(e.target.value)}
+                        placeholder="e.g., 16"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* IDOC Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">IDOC Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="idocNumber">IDOC #</Label>
+                      <Input
+                        type="text"
+                        id="idocNumber"
+                        value={idocNumber}
+                        onChange={(e) => setIdocNumber(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="idocAddressOfResidence">IDOC Address of Residence</Label>
+                      <Input
+                        type="text"
+                        id="idocAddressOfResidence"
+                        value={idocAddressOfResidence}
+                        onChange={(e) => setIdocAddressOfResidence(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="idocDistrict">District</Label>
+                      <Input
+                        type="text"
+                        id="idocDistrict"
+                        value={idocDistrict}
+                        onChange={(e) => setIdocDistrict(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Criminal Record Details Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Criminal Record Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="latestArrestCB">Latest Arrest CB #</Label>
+                      <Input
+                        type="text"
+                        id="latestArrestCB"
+                        value={latestArrestCB}
+                        onChange={(e) => setLatestArrestCB(e.target.value)}
+                        placeholder="e.g., 30421811"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestFelonyArrestCB">Latest Felony Arrest CB #</Label>
+                      <Input
+                        type="text"
+                        id="latestFelonyArrestCB"
+                        value={latestFelonyArrestCB}
+                        onChange={(e) => setLatestFelonyArrestCB(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="onParole">On Parole</Label>
+                      <Input
+                        type="text"
+                        id="onParole"
+                        value={onParole}
+                        onChange={(e) => setOnParole(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestContact">Latest Contact</Label>
+                      <Input
+                        type="text"
+                        id="latestContact"
+                        value={latestContact}
+                        onChange={(e) => setLatestContact(e.target.value)}
+                        placeholder="e.g., 23 DEC 2024 @ 15:09"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestContactDistrict">Latest Contact District</Label>
+                      <Input
+                        type="text"
+                        id="latestContactDistrict"
+                        value={latestContactDistrict}
+                        onChange={(e) => setLatestContactDistrict(e.target.value)}
+                        placeholder="e.g., 31"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestWarrant">Latest Warrant</Label>
+                      <Input
+                        type="text"
+                        id="latestWarrant"
+                        value={latestWarrant}
+                        onChange={(e) => setLatestWarrant(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestInvestigativeAlert">Latest Investigative Alert</Label>
+                      <Input
+                        type="text"
+                        id="latestInvestigativeAlert"
+                        value={latestInvestigativeAlert}
+                        onChange={(e) => setLatestInvestigativeAlert(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Domestic Violence Arrest Record Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Domestic Violence Arrest Record</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="domesticViolenceArrestCount">Arrest Count</Label>
+                      <Input
+                        type="text"
+                        id="domesticViolenceArrestCount"
+                        value={domesticViolenceArrestCount}
+                        onChange={(e) => setDomesticViolenceArrestCount(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestDomesticViolenceArrestDate">Latest Arrest Date</Label>
+                      <Input
+                        type="text"
+                        id="latestDomesticViolenceArrestDate"
+                        value={latestDomesticViolenceArrestDate}
+                        onChange={(e) => setLatestDomesticViolenceArrestDate(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weapons Arrest Record Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Weapons Arrest Record</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="weaponsPossession">Possession</Label>
+                      <Select value={weaponsPossession} onValueChange={setWeaponsPossession}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Y">Y</SelectItem>
+                          <SelectItem value="N">N</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="weaponsArrestCount">Arrest Count</Label>
+                      <Input
+                        type="text"
+                        id="weaponsArrestCount"
+                        value={weaponsArrestCount}
+                        onChange={(e) => setWeaponsArrestCount(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestWeaponsArrestDate">Latest Arrest Date</Label>
+                      <Input
+                        type="text"
+                        id="latestWeaponsArrestDate"
+                        value={latestWeaponsArrestDate}
+                        onChange={(e) => setLatestWeaponsArrestDate(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Narcotics Arrest Record Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Narcotics Arrest Record</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="narcoticsPossession">Possession</Label>
+                      <Select value={narcoticsPossession} onValueChange={setNarcoticsPossession}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Y">Y</SelectItem>
+                          <SelectItem value="N">N</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="narcoticsArrestCount">Arrest Count</Label>
+                      <Input
+                        type="text"
+                        id="narcoticsArrestCount"
+                        value={narcoticsArrestCount}
+                        onChange={(e) => setNarcoticsArrestCount(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="latestNarcoticsArrestDate">Latest Arrest Date</Label>
+                      <Input
+                        type="text"
+                        id="latestNarcoticsArrestDate"
+                        value={latestNarcoticsArrestDate}
+                        onChange={(e) => setLatestNarcoticsArrestDate(e.target.value)}
+                        placeholder="No Data"
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Physical Descriptors Section */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-gray-700">Physical Descriptors</h3>
@@ -733,28 +1016,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <SelectValue placeholder="Select height" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="4'0&quot;">4'0"</SelectItem>
-                        <SelectItem value="4'6&quot;">4'6"</SelectItem>
-                        <SelectItem value="5'0&quot;">5'0"</SelectItem>
-                        <SelectItem value="5'1&quot;">5'1"</SelectItem>
-                        <SelectItem value="5'2&quot;">5'2"</SelectItem>
-                        <SelectItem value="5'3&quot;">5'3"</SelectItem>
-                        <SelectItem value="5'4&quot;">5'4"</SelectItem>
-                        <SelectItem value="5'5&quot;">5'5"</SelectItem>
-                        <SelectItem value="5'6&quot;">5'6"</SelectItem>
-                        <SelectItem value="5'7&quot;">5'7"</SelectItem>
-                        <SelectItem value="5'8&quot;">5'8"</SelectItem>
-                        <SelectItem value="5'9&quot;">5'9"</SelectItem>
-                        <SelectItem value="5'10&quot;">5'10"</SelectItem>
-                        <SelectItem value="5'11&quot;">5'11"</SelectItem>
-                        <SelectItem value="6'0&quot;">6'0"</SelectItem>
-                        <SelectItem value="6'1&quot;">6'1"</SelectItem>
-                        <SelectItem value="6'2&quot;">6'2"</SelectItem>
-                        <SelectItem value="6'3&quot;">6'3"</SelectItem>
-                        <SelectItem value="6'4&quot;">6'4"</SelectItem>
-                        <SelectItem value="6'5&quot;">6'5"</SelectItem>
-                        <SelectItem value="6'6&quot;">6'6"</SelectItem>
-                        <SelectItem value="7'0&quot;">7'0"</SelectItem>
+                        <SelectItem value="4&apos;0&quot;">4&apos;0&quot;</SelectItem>
+                        <SelectItem value="4&apos;6&quot;">4&apos;6&quot;</SelectItem>
+                        <SelectItem value="5&apos;0&quot;">5&apos;0&quot;</SelectItem>
+                        <SelectItem value="5&apos;1&quot;">5&apos;1&quot;</SelectItem>
+                        <SelectItem value="5&apos;2&quot;">5&apos;2&quot;</SelectItem>
+                        <SelectItem value="5&apos;3&quot;">5&apos;3&quot;</SelectItem>
+                        <SelectItem value="5&apos;4&quot;">5&apos;4&quot;</SelectItem>
+                        <SelectItem value="5&apos;5&quot;">5&apos;5&quot;</SelectItem>
+                        <SelectItem value="5&apos;6&quot;">5&apos;6&quot;</SelectItem>
+                        <SelectItem value="5&apos;7&quot;">5&apos;7&quot;</SelectItem>
+                        <SelectItem value="5&apos;8&quot;">5&apos;8&quot;</SelectItem>
+                        <SelectItem value="5&apos;9&quot;">5&apos;9&quot;</SelectItem>
+                        <SelectItem value="5&apos;10&quot;">5&apos;10&quot;</SelectItem>
+                        <SelectItem value="5&apos;11&quot;">5&apos;11&quot;</SelectItem>
+                        <SelectItem value="6&apos;0&quot;">6&apos;0&quot;</SelectItem>
+                        <SelectItem value="6&apos;1&quot;">6&apos;1&quot;</SelectItem>
+                        <SelectItem value="6&apos;2&quot;">6&apos;2&quot;</SelectItem>
+                        <SelectItem value="6&apos;3&quot;">6&apos;3&quot;</SelectItem>
+                        <SelectItem value="6&apos;4&quot;">6&apos;4&quot;</SelectItem>
+                        <SelectItem value="6&apos;5&quot;">6&apos;5&quot;</SelectItem>
+                        <SelectItem value="6&apos;6&quot;">6&apos;6&quot;</SelectItem>
+                        <SelectItem value="7&apos;0&quot;">7&apos;0&quot;</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -829,13 +1112,25 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 <div>
                   <Label htmlFor="lastKnownVehicle">Last Known Registered Vehicle</Label>
-                  <Input
-                    type="text"
-                    id="lastKnownVehicle"
-                    value={lastKnownVehicle}
-                    onChange={(e) => setLastKnownVehicle(e.target.value)}
-                    placeholder="Make, model, year, color, license plate..."
-                  />
+                  <Select value={lastKnownVehicle} onValueChange={setLastKnownVehicle}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select vehicle type or enter custom..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Sedan">Sedan</SelectItem>
+                      <SelectItem value="SUV">SUV</SelectItem>
+                      <SelectItem value="Truck">Truck</SelectItem>
+                      <SelectItem value="Coupe">Coupe</SelectItem>
+                      <SelectItem value="Hatchback">Hatchback</SelectItem>
+                      <SelectItem value="Convertible">Convertible</SelectItem>
+                      <SelectItem value="Van">Van</SelectItem>
+                      <SelectItem value="Minivan">Minivan</SelectItem>
+                      <SelectItem value="Pickup Truck">Pickup Truck</SelectItem>
+                      <SelectItem value="Motorcycle">Motorcycle</SelectItem>
+                      <SelectItem value="Unknown">Unknown</SelectItem>
+                      <SelectItem value="No Vehicle">No Vehicle</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {/* Order of Protection Section */}
@@ -862,12 +1157,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Label htmlFor="orderOfProtectionType">Type of Order</Label>
                         <Select 
                           value={orderOfProtectionType} 
-                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | '')}
+                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | '')}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent>
+                            <SelectItem value="no-contact">Order of Protection-No Contact</SelectItem>
+                            <SelectItem value="no-unlawful-contact">Order of Protection-No Unlawful Contact</SelectItem>
+                            <SelectItem value="stalking-emergency">Stalking No Contact Order--Emergency</SelectItem>
+                            <SelectItem value="sexual-assault">Sexual Assault No Contact Order</SelectItem>
                             <SelectItem value="plenary">Plenary Order of Protection</SelectItem>
                             <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
                             <SelectItem value="civil">Civil No-Contact Order</SelectItem>
