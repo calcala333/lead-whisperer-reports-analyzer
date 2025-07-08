@@ -66,6 +66,11 @@ interface WantedPerson {
     type: string;
   }>;
   photos?: string[];
+  knownAssailants?: string;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  vehicleColor?: string;
+  vehiclePlate?: string;
 }
 
 const Index = () => {
@@ -387,57 +392,117 @@ const Index = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {people.map((person) => (
-              <Card 
-                key={person.id} 
-                className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => setSelectedPerson(person)}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex justify-between items-start">
-                    <CardTitle className="text-lg">
-                      {person.name || `${person.firstName} ${person.lastName}`}
-                    </CardTitle>
-                    <Badge className={getDangerLevelColor(person.dangerLevel)}>
-                      {person.dangerLevel}
+          <div className="space-y-6">
+            {/* Orders of Protection Header */}
+            <div className="bg-blue-600 text-white p-4 rounded-lg text-center">
+              <h2 className="text-2xl font-bold">Active Orders of Protection</h2>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {people.map((person) => (
+                <Card 
+                  key={person.id} 
+                  className="cursor-pointer hover:shadow-lg transition-shadow relative bg-gray-100"
+                  onClick={() => setSelectedPerson(person)}
+                >
+                  {/* Risk Level Badge */}
+                  <div className="absolute top-3 left-3 z-10">
+                    <Badge className={`${getDangerLevelColor(person.dangerLevel)} text-xs font-bold`}>
+                      {person.dangerLevel} RISK
                     </Badge>
                   </div>
-                  {person.alias && (
-                    <p className="text-sm text-gray-600">AKA: {person.alias}</p>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  {/* Display first photo if available */}
-                  {person.photos && person.photos.length > 0 && (
-                    <div className="mb-3">
-                      <img 
-                        src={person.photos[0]} 
-                        alt={person.name || `${person.firstName} ${person.lastName}`}
-                        className="w-full h-32 object-cover rounded"
-                      />
+                  
+                  {/* Order Type Badge */}
+                  {person.orderOfProtection && (
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="bg-purple-500 text-white p-2 rounded-full">
+                        <Shield className="h-4 w-4" />
+                      </div>
                     </div>
                   )}
-                  
-                  <div className="space-y-2 text-sm">
-                    {person.age && <p><strong>Age:</strong> {person.age}</p>}
-                    {person.height && <p><strong>Height:</strong> {person.height}</p>}
-                    {person.weight && <p><strong>Weight:</strong> {person.weight}</p>}
-                    {person.hair && <p><strong>Hair:</strong> {person.hair}</p>}
-                    {person.eyes && <p><strong>Eyes:</strong> {person.eyes}</p>}
-                    <p><strong>Last Seen:</strong> {person.lastSeen || 'Unknown'}</p>
-                    {person.lastKnownVehicle && <p><strong>Vehicle:</strong> {person.lastKnownVehicle}</p>}
-                    
+
+                  <CardContent className="p-6">
+                    {/* Photo Section */}
+                    <div className="flex justify-center mb-4">
+                      {person.photos && person.photos.length > 0 ? (
+                        <img 
+                          src={person.photos[0]} 
+                          alt={person.name || `${person.firstName} ${person.lastName}`}
+                          className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-lg"
+                        />
+                      ) : (
+                        <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                          <svg className="w-12 h-12 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Name and Alias */}
+                    <div className="text-center mb-4">
+                      <h3 className="text-lg font-bold text-gray-900">
+                        {(person.lastName && person.firstName) 
+                          ? `${person.lastName} ${person.firstName}`.toUpperCase()
+                          : (person.name || 'Unknown Name').toUpperCase()
+                        }
+                      </h3>
+                      {person.alias && (
+                        <p className="text-sm text-purple-600 font-medium">AKA: {person.alias}</p>
+                      )}
+                    </div>
+
+                    {/* Order of Protection Info */}
                     {person.orderOfProtection && (
-                      <div className="flex items-center gap-1 text-red-600 font-semibold">
-                        <Shield className="h-4 w-4" />
-                        <span>Order of Protection</span>
+                      <div className="mb-4 p-3 bg-purple-100 rounded-lg">
+                        <div className="text-center">
+                          <Badge className="bg-purple-600 text-white mb-2">
+                            {getOrderOfProtectionTypeLabel(person.orderOfProtectionType || '')}
+                          </Badge>
+                          {person.protectionExpirationDate && (
+                            <p className="text-xs text-gray-600">
+                              Expires: {new Date(person.protectionExpirationDate).toLocaleDateString()}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                    {/* Charges Section */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1 text-red-600 mb-2">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="text-sm font-bold">CHARGES</span>
+                      </div>
+                      <p className="text-xs text-gray-700 uppercase font-medium">
+                        {person.charges || 'No charges listed'}
+                      </p>
+                    </div>
+
+                    {/* Last Seen Section */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-1 text-orange-600 mb-2">
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="text-sm font-bold">LAST SEEN</span>
+                      </div>
+                      <p className="text-xs text-gray-700 uppercase">
+                        {person.lastSeen || 'Unknown'}
+                      </p>
+                    </div>
+
+                    {/* Physical Description */}
+                    <div>
+                      <h4 className="text-sm font-bold text-gray-900 mb-2">DESCRIPTION</h4>
+                      <p className="text-xs text-gray-700">
+                        {person.sex}, {person.age} years old. {person.height}, {person.weight}. {person.hair} hair, {person.eyes} eyes
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         )}
 
@@ -562,15 +627,36 @@ const Index = () => {
                   <p className="text-sm bg-gray-50 p-3 rounded">{selectedPerson.charges}</p>
                 </div>
 
+                {/* Known Assailants */}
+                {selectedPerson.knownAssailants && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Known Assailants</h3>
+                    <p className="text-sm bg-gray-50 p-3 rounded">{selectedPerson.knownAssailants}</p>
+                  </div>
+                )}
+
+                {/* Vehicle Information */}
+                {(selectedPerson.vehicleMake || selectedPerson.vehicleModel || selectedPerson.vehicleColor || selectedPerson.vehiclePlate || selectedPerson.lastKnownVehicle) && (
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">Vehicle Information</h3>
+                    <div className="space-y-2 text-sm">
+                      {selectedPerson.vehicleMake && <p><strong>Make:</strong> {selectedPerson.vehicleMake}</p>}
+                      {selectedPerson.vehicleModel && <p><strong>Model:</strong> {selectedPerson.vehicleModel}</p>}
+                      {selectedPerson.vehicleColor && <p><strong>Color:</strong> {selectedPerson.vehicleColor}</p>}
+                      {selectedPerson.vehiclePlate && <p><strong>License Plate:</strong> {selectedPerson.vehiclePlate}</p>}
+                      {selectedPerson.lastKnownVehicle && (
+                        <p><strong>Legacy Vehicle Info:</strong> {selectedPerson.lastKnownVehicle}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Contact Information */}
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Last Known Information</h3>
                   <div className="space-y-2 text-sm">
                     <p><strong>Address:</strong> {selectedPerson.address || selectedPerson.addressOfResidence}</p>
                     <p><strong>Last Seen:</strong> {selectedPerson.lastSeen}</p>
-                    {selectedPerson.lastKnownVehicle && (
-                      <p><strong>Last Known Vehicle:</strong> {selectedPerson.lastKnownVehicle}</p>
-                    )}
                   </div>
                 </div>
               </div>

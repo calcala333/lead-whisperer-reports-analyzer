@@ -76,6 +76,11 @@ interface WantedPerson {
   dangerLevel: string;
   lastSeen: string;
   lastKnownVehicle?: string;
+  knownAssailants?: string;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  vehicleColor?: string;
+  vehiclePlate?: string;
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
@@ -172,6 +177,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [dangerLevel, setDangerLevel] = useState("HIGH");
   const [lastSeen, setLastSeen] = useState("");
   const [lastKnownVehicle, setLastKnownVehicle] = useState("");
+  const [knownAssailants, setKnownAssailants] = useState("");
+  const [vehicleMake, setVehicleMake] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
+  const [vehicleColor, setVehicleColor] = useState("");
+  const [vehiclePlate, setVehiclePlate] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
   const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
@@ -284,6 +294,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setDangerLevel("HIGH");
     setLastSeen("");
     setLastKnownVehicle("");
+    setKnownAssailants("");
+    setVehicleMake("");
+    setVehicleModel("");
+    setVehicleColor("");
+    setVehiclePlate("");
     setOrderOfProtection(false);
     setOrderOfProtectionType('');
     setProtectionExpirationDate("");
@@ -342,6 +357,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       dangerLevel,
       lastSeen,
       lastKnownVehicle,
+      knownAssailants,
+      vehicleMake,
+      vehicleModel,
+      vehicleColor,
+      vehiclePlate,
       orderOfProtection,
       orderOfProtectionType,
       protectionExpirationDate,
@@ -405,6 +425,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         dangerLevel,
         lastSeen,
         lastKnownVehicle,
+        knownAssailants,
+        vehicleMake,
+        vehicleModel,
+        vehicleColor,
+        vehiclePlate,
         orderOfProtection,
         orderOfProtectionType,
         protectionExpirationDate,
@@ -473,6 +498,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setDangerLevel(person.dangerLevel);
     setLastSeen(person.lastSeen);
     setLastKnownVehicle(person.lastKnownVehicle || "");
+    setKnownAssailants(person.knownAssailants || "");
+    setVehicleMake(person.vehicleMake || "");
+    setVehicleModel(person.vehicleModel || "");
+    setVehicleColor(person.vehicleColor || "");
+    setVehiclePlate(person.vehiclePlate || "");
     setOrderOfProtection(person.orderOfProtection || false);
     setOrderOfProtectionType(person.orderOfProtectionType || '');
     setProtectionExpirationDate(person.protectionExpirationDate || "");
@@ -1111,26 +1141,116 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 </div>
 
                 <div>
-                  <Label htmlFor="lastKnownVehicle">Last Known Registered Vehicle</Label>
-                  <Select value={lastKnownVehicle} onValueChange={setLastKnownVehicle}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select vehicle type or enter custom..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Sedan">Sedan</SelectItem>
-                      <SelectItem value="SUV">SUV</SelectItem>
-                      <SelectItem value="Truck">Truck</SelectItem>
-                      <SelectItem value="Coupe">Coupe</SelectItem>
-                      <SelectItem value="Hatchback">Hatchback</SelectItem>
-                      <SelectItem value="Convertible">Convertible</SelectItem>
-                      <SelectItem value="Van">Van</SelectItem>
-                      <SelectItem value="Minivan">Minivan</SelectItem>
-                      <SelectItem value="Pickup Truck">Pickup Truck</SelectItem>
-                      <SelectItem value="Motorcycle">Motorcycle</SelectItem>
-                      <SelectItem value="Unknown">Unknown</SelectItem>
-                      <SelectItem value="No Vehicle">No Vehicle</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="knownAssailants">Known Assailants</Label>
+                  <Textarea
+                    id="knownAssailants"
+                    value={knownAssailants}
+                    onChange={(e) => setKnownAssailants(e.target.value)}
+                    placeholder="List known associates or accomplices..."
+                    className="resize-none"
+                  />
+                </div>
+
+                {/* Vehicle Information Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Last Known Registered Vehicle</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <Label htmlFor="vehicleMake">Make</Label>
+                      <Select value={vehicleMake} onValueChange={setVehicleMake}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select make" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Acura">Acura</SelectItem>
+                          <SelectItem value="Audi">Audi</SelectItem>
+                          <SelectItem value="BMW">BMW</SelectItem>
+                          <SelectItem value="Buick">Buick</SelectItem>
+                          <SelectItem value="Cadillac">Cadillac</SelectItem>
+                          <SelectItem value="Chevrolet">Chevrolet</SelectItem>
+                          <SelectItem value="Chrysler">Chrysler</SelectItem>
+                          <SelectItem value="Dodge">Dodge</SelectItem>
+                          <SelectItem value="Ford">Ford</SelectItem>
+                          <SelectItem value="GMC">GMC</SelectItem>
+                          <SelectItem value="Honda">Honda</SelectItem>
+                          <SelectItem value="Hyundai">Hyundai</SelectItem>
+                          <SelectItem value="Infiniti">Infiniti</SelectItem>
+                          <SelectItem value="Jeep">Jeep</SelectItem>
+                          <SelectItem value="Kia">Kia</SelectItem>
+                          <SelectItem value="Lexus">Lexus</SelectItem>
+                          <SelectItem value="Lincoln">Lincoln</SelectItem>
+                          <SelectItem value="Mazda">Mazda</SelectItem>
+                          <SelectItem value="Mercedes-Benz">Mercedes-Benz</SelectItem>
+                          <SelectItem value="Mitsubishi">Mitsubishi</SelectItem>
+                          <SelectItem value="Nissan">Nissan</SelectItem>
+                          <SelectItem value="Pontiac">Pontiac</SelectItem>
+                          <SelectItem value="Ram">Ram</SelectItem>
+                          <SelectItem value="Subaru">Subaru</SelectItem>
+                          <SelectItem value="Tesla">Tesla</SelectItem>
+                          <SelectItem value="Toyota">Toyota</SelectItem>
+                          <SelectItem value="Volkswagen">Volkswagen</SelectItem>
+                          <SelectItem value="Volvo">Volvo</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="vehicleModel">Model</Label>
+                      <Input
+                        type="text"
+                        id="vehicleModel"
+                        value={vehicleModel}
+                        onChange={(e) => setVehicleModel(e.target.value)}
+                        placeholder="e.g., Camry, F-150"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vehicleColor">Color</Label>
+                      <Select value={vehicleColor} onValueChange={setVehicleColor}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select color" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Black">Black</SelectItem>
+                          <SelectItem value="White">White</SelectItem>
+                          <SelectItem value="Silver">Silver</SelectItem>
+                          <SelectItem value="Gray">Gray</SelectItem>
+                          <SelectItem value="Red">Red</SelectItem>
+                          <SelectItem value="Blue">Blue</SelectItem>
+                          <SelectItem value="Green">Green</SelectItem>
+                          <SelectItem value="Yellow">Yellow</SelectItem>
+                          <SelectItem value="Orange">Orange</SelectItem>
+                          <SelectItem value="Brown">Brown</SelectItem>
+                          <SelectItem value="Purple">Purple</SelectItem>
+                          <SelectItem value="Gold">Gold</SelectItem>
+                          <SelectItem value="Maroon">Maroon</SelectItem>
+                          <SelectItem value="Tan">Tan</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="vehiclePlate">License Plate</Label>
+                      <Input
+                        type="text"
+                        id="vehiclePlate"
+                        value={vehiclePlate}
+                        onChange={(e) => setVehiclePlate(e.target.value)}
+                        placeholder="e.g., ABC-1234"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="lastKnownVehicle">Legacy Vehicle Field (Optional)</Label>
+                  <Input
+                    type="text"
+                    id="lastKnownVehicle"
+                    value={lastKnownVehicle}
+                    onChange={(e) => setLastKnownVehicle(e.target.value)}
+                    placeholder="Legacy format: 2018 Black Ford F-150, License: ABC-1234"
+                  />
                 </div>
 
                 {/* Order of Protection Section */}
@@ -1280,6 +1400,43 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                     </>
                   )}
+                </div>
+
+                {/* Photo Upload Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Headshot Photos</h3>
+                  <div>
+                    <Label htmlFor="photoUpload">Upload Headshot Photos</Label>
+                    <Input
+                      id="photoUpload"
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'photo')}
+                      className="mt-1"
+                    />
+                    {photos.length > 0 && (
+                      <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {photos.map((photo, index) => (
+                          <div key={index} className="relative">
+                            <img 
+                              src={photo} 
+                              alt={`Photo ${index + 1}`}
+                              className="w-full h-24 object-cover rounded border"
+                            />
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1 h-6 w-6 p-0"
+                              onClick={() => removePhoto(index)}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <Button onClick={() => {
