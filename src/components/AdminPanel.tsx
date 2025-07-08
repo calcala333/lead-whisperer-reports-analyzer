@@ -1171,7 +1171,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                             <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
                             <SelectItem value="civil">Civil No-Contact Order</SelectItem>
                             <SelectItem value="order">Order of Protection</SelectItem>
-                            <SelectItem value="emergency">Emergency Order of Protection</SelectItem>
+              <SelectItem value="emergency">Emergency Order of Protection</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
