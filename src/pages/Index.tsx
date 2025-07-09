@@ -75,10 +75,14 @@ interface WantedPerson {
 
 const Index = () => {
   const [people, setPeople] = useState<WantedPerson[]>([]);
+  const [filteredPeople, setFilteredPeople] = useState<WantedPerson[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [systemName, setSystemName] = useState("Wanted Persons Database");
   const [disclaimerText, setDisclaimerText] = useState("This system contains sensitive law enforcement information. Access is restricted to authorized personnel only. All activities are logged and monitored. Unauthorized access is prohibited and subject to prosecution.");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showActiveOrdersOnly, setShowActiveOrdersOnly] = useState(false);
 
   useEffect(() => {
     const savedPeople = localStorage.getItem('wantedPeople');
@@ -291,6 +295,31 @@ const Index = () => {
     }
   }, []);
 
+  // Filter and search logic
+  useEffect(() => {
+    let filtered = people;
+    
+    if (showActiveOrdersOnly) {
+      filtered = filtered.filter(person => person.orderOfProtection);
+    }
+    
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(person => 
+        (person.firstName?.toLowerCase().includes(term)) ||
+        (person.lastName?.toLowerCase().includes(term)) ||
+        (person.name?.toLowerCase().includes(term)) ||
+        (person.alias?.toLowerCase().includes(term))
+      );
+    }
+    
+    setFilteredPeople(filtered);
+  }, [people, showActiveOrdersOnly, searchTerm]);
+
+  const handleSearch = () => {
+    // Search is handled by useEffect
+  };
+
   const savePeople = (newPeople: WantedPerson[]) => {
     setPeople(newPeople);
     localStorage.setItem('wantedPeople', JSON.stringify(newPeople));
@@ -393,20 +422,37 @@ const Index = () => {
             </svg>
             <span className="font-bold">Search Database</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-3">
             <input 
               type="text" 
               placeholder="Enter Name or Alias" 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="flex-1 px-3 py-2 text-black rounded"
             />
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+            <Button 
+              onClick={handleSearch}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
               <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
               </svg>
               SEARCH
             </Button>
           </div>
-          <div className="mt-2 text-sm text-blue-100">
+          <div className="flex items-center gap-3 mb-2">
+            <label className="flex items-center gap-2 text-sm text-blue-100">
+              <input
+                type="checkbox"
+                checked={showActiveOrdersOnly}
+                onChange={(e) => setShowActiveOrdersOnly(e.target.checked)}
+                className="rounded"
+              />
+              <Shield className="h-4 w-4" />
+              Show Active Orders of Protection Only
+            </label>
+          </div>
+          <div className="text-sm text-blue-100">
             Try searching: WILLIAM, MARIA, JAMES
           </div>
         </div>
@@ -414,7 +460,7 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="container mx-auto p-6">
-        {people.length === 0 ? (
+        {filteredPeople.length === 0 && people.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-gray-600 mb-4">No Wanted Persons Listed</h2>
             <p className="text-gray-500 mb-6">Use the Admin Panel to add wanted persons to the database.</p>
@@ -422,15 +468,24 @@ const Index = () => {
               Add First Person
             </Button>
           </div>
+        ) : filteredPeople.length === 0 ? (
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">No Results Found</h2>
+            <p className="text-gray-500 mb-6">No wanted persons match your current search criteria.</p>
+          </div>
         ) : (
           <div className="space-y-6">
             {/* Wanted Individuals Header */}
             <div className="bg-blue-500 text-white p-4 rounded-lg text-center">
               <h2 className="text-2xl font-bold">Wanted Individuals</h2>
+              <p className="text-sm opacity-90">
+                Showing {filteredPeople.length} of {people.length} records
+                {showActiveOrdersOnly && " (Active Orders of Protection Only)"}
+              </p>
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {people.map((person) => (
+              {filteredPeople.map((person) => (
                 <Card 
                   key={person.id} 
                   className="cursor-pointer hover:shadow-lg transition-shadow relative bg-gray-200"
@@ -459,10 +514,14 @@ const Index = () => {
                         <img 
                           src={person.photos[0]} 
                           alt={person.name || `${person.firstName} ${person.lastName}`}
-                          className="w-20 h-20 object-cover rounded-full border-2 border-gray-400"
+                          className="w-20 h-20 object-cover border-2 border-gray-400 cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedPhoto(person.photos![0]);
+                          }}
                         />
                       ) : (
-                        <div className="w-20 h-20 bg-gray-400 rounded-full flex items-center justify-center border-2 border-gray-500">
+                        <div className="w-20 h-20 bg-gray-400 flex items-center justify-center border-2 border-gray-500">
                           <svg className="w-10 h-10 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                           </svg>
@@ -534,6 +593,24 @@ const Index = () => {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Photo Dialog */}
+        {selectedPhoto && (
+          <Dialog open={true} onOpenChange={() => setSelectedPhoto(null)}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Photo View</DialogTitle>
+              </DialogHeader>
+              <div className="flex justify-center">
+                <img 
+                  src={selectedPhoto} 
+                  alt="Enlarged photo"
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         )}
 
         {/* Person Detail Dialog */}
@@ -644,7 +721,8 @@ const Index = () => {
                             key={index}
                             src={photo} 
                             alt={`Photo ${index + 1}`}
-                            className="w-full h-40 object-cover rounded border"
+                            className="w-full h-40 object-cover border cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setSelectedPhoto(photo)}
                           />
                         ))}
                       </div>
