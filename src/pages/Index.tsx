@@ -488,17 +488,17 @@ const Index = () => {
               {filteredPeople.map((person) => (
                 <Card 
                   key={person.id} 
-                  className="cursor-pointer hover:shadow-lg transition-shadow relative bg-gray-200"
+                  className="cursor-pointer hover:shadow-lg transition-shadow relative bg-white border border-gray-300"
                   onClick={() => setSelectedPerson(person)}
                 >
-                  {/* Risk Level Badge */}
+                  {/* Risk Level Badge - Top Left */}
                   <div className="absolute top-3 left-3 z-10">
                     <Badge className={`${getDangerLevelColor(person.dangerLevel)} text-xs font-bold px-2 py-1 rounded`}>
                       {person.dangerLevel} RISK
                     </Badge>
                   </div>
                   
-                  {/* Order Type Badge */}
+                  {/* Order Type Badge - Top Right */}
                   {person.orderOfProtection && (
                     <div className="absolute top-3 right-3 z-10">
                       <div className="bg-purple-500 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center">
@@ -507,84 +507,88 @@ const Index = () => {
                     </div>
                   )}
 
-                  <CardContent className="p-6">
-                    {/* Photo Section */}
-                    <div className="flex justify-center mb-4">
+                  <CardContent className="p-4">
+                    {/* Photo Section - Centered */}
+                    <div className="flex justify-center mb-6 mt-6">
                       {person.photos && person.photos.length > 0 ? (
                         <img 
                           src={person.photos[0]} 
                           alt={person.name || `${person.firstName} ${person.lastName}`}
-                          className="w-20 h-20 object-cover border-2 border-gray-400 cursor-pointer hover:opacity-80 transition-opacity"
+                          className="w-24 h-24 object-cover cursor-pointer hover:opacity-80 transition-opacity border border-gray-300"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPhoto(person.photos![0]);
                           }}
                         />
                       ) : (
-                        <div className="w-20 h-20 bg-gray-400 flex items-center justify-center border-2 border-gray-500">
-                          <svg className="w-10 h-10 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-24 h-24 bg-gray-300 flex items-center justify-center border border-gray-400">
+                          <svg className="w-12 h-12 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                           </svg>
                         </div>
                       )}
                     </div>
 
-                    {/* Name and Alias */}
-                    <div className="mb-4">
-                      <h3 className="text-sm font-bold text-gray-900 text-center mb-1">
+                    {/* Name */}
+                    <div className="mb-3 text-center">
+                      <h3 className="text-lg font-bold text-black">
                         {(person.lastName && person.firstName) 
                           ? `${person.lastName.toUpperCase()} ${person.firstName.toUpperCase()} ${person.middleName?.charAt(0) || ''}`.trim()
                           : (person.name || 'Unknown Name').toUpperCase()
                         }
                       </h3>
-                      {person.alias && (
-                        <p className="text-xs text-gray-600 text-center">AKA: {person.alias.toUpperCase()}</p>
-                      )}
                     </div>
+
+                    {/* AKA */}
+                    {person.alias && (
+                      <div className="mb-4 text-center">
+                        <p className="text-sm text-red-600 font-medium">AKA: {person.alias.toUpperCase()}</p>
+                      </div>
+                    )}
 
                     {/* Active Order of Protection */}
                     {person.orderOfProtection && (
-                      <div className="mb-3 p-2 border border-purple-300 rounded">
-                        <div className="flex items-center gap-1 mb-1">
-                          <Shield className="h-3 w-3 text-purple-600" />
-                          <span className="text-xs font-bold text-purple-600">ACTIVE ORDER OF PROTECTION</span>
+                      <div className="mb-4 bg-purple-100 border border-purple-300 rounded p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Shield className="h-4 w-4 text-purple-600" />
+                          <span className="text-sm font-bold text-purple-800">ACTIVE ORDER OF PROTECTION</span>
                         </div>
                         {person.protectionExpirationDate && (
-                          <p className="text-xs text-gray-600">
-                            Expires: {new Date(person.protectionExpirationDate).toLocaleDateString()}
+                          <p className="text-sm text-purple-700">
+                            Expires {new Date(person.protectionExpirationDate).toLocaleDateString()}
                           </p>
                         )}
                       </div>
                     )}
 
                     {/* Charges Section */}
-                    <div className="mb-3">
-                      <div className="flex items-center gap-1 mb-1">
-                        <AlertTriangle className="h-3 w-3 text-orange-500" />
-                        <span className="text-xs font-bold text-gray-700">CHARGES</span>
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-red-500" />
+                        <span className="text-sm font-bold text-black">CHARGES</span>
                       </div>
-                      <p className="text-xs text-gray-700 uppercase">
+                      <p className="text-sm text-black">
                         {person.charges || 'No charges listed'}
                       </p>
                     </div>
 
                     {/* Last Seen Section */}
-                    <div className="mb-3">
-                      <div className="flex items-center gap-1 mb-1">
-                        <svg className="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="h-4 w-4 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-xs font-bold text-gray-700">LAST SEEN</span>
+                        <span className="text-sm font-bold text-black">LAST SEEN</span>
                       </div>
-                      <p className="text-xs text-gray-700 uppercase">
+                      <p className="text-sm text-black">
                         {person.lastSeen || 'Unknown'}
                       </p>
                     </div>
 
                     {/* Description */}
                     <div>
-                      <h4 className="text-xs font-bold text-gray-700 mb-1">DESCRIPTION</h4>
-                      <p className="text-xs text-gray-600">
+                      <h4 className="text-sm font-bold text-black mb-2">DESCRIPTION</h4>
+                      <p className="text-sm text-gray-700">
                         {person.sex}, {person.age} years old, {person.height}, {person.weight}, {person.hair} hair, {person.eyes} eyes
                       </p>
                     </div>
