@@ -372,11 +372,42 @@ const Index = () => {
       </header>
 
       {/* Disclaimer */}
-      <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4">
+      <div className="bg-yellow-500 text-white p-4">
         <div className="container mx-auto">
           <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2" />
-            <p className="text-sm text-yellow-700">{disclaimerText}</p>
+            <AlertTriangle className="h-5 w-5 text-white mr-2" />
+            <div>
+              <div className="font-bold text-sm mb-1">DISCLAIMER</div>
+              <p className="text-sm">{disclaimerText}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Database Section */}
+      <div className="bg-blue-500 text-white p-4">
+        <div className="container mx-auto">
+          <div className="flex items-center gap-2 mb-3">
+            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
+            </svg>
+            <span className="font-bold">Search Database</span>
+          </div>
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              placeholder="Enter Name or Alias" 
+              className="flex-1 px-3 py-2 text-black rounded"
+            />
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+              <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
+              </svg>
+              SEARCH
+            </Button>
+          </div>
+          <div className="mt-2 text-sm text-blue-100">
+            Try searching: WILLIAM, MARIA, JAMES
           </div>
         </div>
       </div>
@@ -393,21 +424,21 @@ const Index = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Orders of Protection Header */}
-            <div className="bg-blue-600 text-white p-4 rounded-lg text-center">
-              <h2 className="text-2xl font-bold">Active Orders of Protection</h2>
+            {/* Wanted Individuals Header */}
+            <div className="bg-blue-500 text-white p-4 rounded-lg text-center">
+              <h2 className="text-2xl font-bold">Wanted Individuals</h2>
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {people.map((person) => (
                 <Card 
                   key={person.id} 
-                  className="cursor-pointer hover:shadow-lg transition-shadow relative bg-gray-100"
+                  className="cursor-pointer hover:shadow-lg transition-shadow relative bg-gray-200"
                   onClick={() => setSelectedPerson(person)}
                 >
                   {/* Risk Level Badge */}
                   <div className="absolute top-3 left-3 z-10">
-                    <Badge className={`${getDangerLevelColor(person.dangerLevel)} text-xs font-bold`}>
+                    <Badge className={`${getDangerLevelColor(person.dangerLevel)} text-xs font-bold px-2 py-1 rounded`}>
                       {person.dangerLevel} RISK
                     </Badge>
                   </div>
@@ -415,7 +446,7 @@ const Index = () => {
                   {/* Order Type Badge */}
                   {person.orderOfProtection && (
                     <div className="absolute top-3 right-3 z-10">
-                      <div className="bg-purple-500 text-white p-2 rounded-full">
+                      <div className="bg-purple-500 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center">
                         <Shield className="h-4 w-4" />
                       </div>
                     </div>
@@ -428,11 +459,11 @@ const Index = () => {
                         <img 
                           src={person.photos[0]} 
                           alt={person.name || `${person.firstName} ${person.lastName}`}
-                          className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-lg"
+                          className="w-20 h-20 object-cover rounded-full border-2 border-gray-400"
                         />
                       ) : (
-                        <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                          <svg className="w-12 h-12 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                        <div className="w-20 h-20 bg-gray-400 rounded-full flex items-center justify-center border-2 border-gray-500">
+                          <svg className="w-10 h-10 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                           </svg>
                         </div>
@@ -440,63 +471,62 @@ const Index = () => {
                     </div>
 
                     {/* Name and Alias */}
-                    <div className="text-center mb-4">
-                      <h3 className="text-lg font-bold text-gray-900">
+                    <div className="mb-4">
+                      <h3 className="text-sm font-bold text-gray-900 text-center mb-1">
                         {(person.lastName && person.firstName) 
-                          ? `${person.lastName} ${person.firstName}`.toUpperCase()
+                          ? `${person.lastName.toUpperCase()} ${person.firstName.toUpperCase()} ${person.middleName?.charAt(0) || ''}`.trim()
                           : (person.name || 'Unknown Name').toUpperCase()
                         }
                       </h3>
                       {person.alias && (
-                        <p className="text-sm text-purple-600 font-medium">AKA: {person.alias}</p>
+                        <p className="text-xs text-gray-600 text-center">AKA: {person.alias.toUpperCase()}</p>
                       )}
                     </div>
 
-                    {/* Order of Protection Info */}
+                    {/* Active Order of Protection */}
                     {person.orderOfProtection && (
-                      <div className="mb-4 p-3 bg-purple-100 rounded-lg">
-                        <div className="text-center">
-                          <Badge className="bg-purple-600 text-white mb-2">
-                            {getOrderOfProtectionTypeLabel(person.orderOfProtectionType || '')}
-                          </Badge>
-                          {person.protectionExpirationDate && (
-                            <p className="text-xs text-gray-600">
-                              Expires: {new Date(person.protectionExpirationDate).toLocaleDateString()}
-                            </p>
-                          )}
+                      <div className="mb-3 p-2 border border-purple-300 rounded">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Shield className="h-3 w-3 text-purple-600" />
+                          <span className="text-xs font-bold text-purple-600">ACTIVE ORDER OF PROTECTION</span>
                         </div>
+                        {person.protectionExpirationDate && (
+                          <p className="text-xs text-gray-600">
+                            Expires: {new Date(person.protectionExpirationDate).toLocaleDateString()}
+                          </p>
+                        )}
                       </div>
                     )}
 
                     {/* Charges Section */}
-                    <div className="mb-4">
-                      <div className="flex items-center gap-1 text-red-600 mb-2">
-                        <AlertTriangle className="h-4 w-4" />
-                        <span className="text-sm font-bold">CHARGES</span>
+                    <div className="mb-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <AlertTriangle className="h-3 w-3 text-orange-500" />
+                        <span className="text-xs font-bold text-gray-700">CHARGES</span>
                       </div>
-                      <p className="text-xs text-gray-700 uppercase font-medium">
+                      <p className="text-xs text-gray-700 uppercase">
                         {person.charges || 'No charges listed'}
                       </p>
                     </div>
 
                     {/* Last Seen Section */}
-                    <div className="mb-4">
-                      <div className="flex items-center gap-1 text-orange-600 mb-2">
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="mb-3">
+                      <div className="flex items-center gap-1 mb-1">
+                        <svg className="h-3 w-3 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <span className="text-sm font-bold">LAST SEEN</span>
+                        <span className="text-xs font-bold text-gray-700">LAST SEEN</span>
                       </div>
                       <p className="text-xs text-gray-700 uppercase">
                         {person.lastSeen || 'Unknown'}
                       </p>
                     </div>
 
-                    {/* Physical Description */}
+                    {/* Description */}
                     <div>
-                      <h4 className="text-sm font-bold text-gray-900 mb-2">DESCRIPTION</h4>
-                      <p className="text-xs text-gray-700">
-                        {person.sex}, {person.age} years old. {person.height}, {person.weight}. {person.hair} hair, {person.eyes} eyes
+                      <h4 className="text-xs font-bold text-gray-700 mb-1">DESCRIPTION</h4>
+                      <p className="text-xs text-gray-600">
+                        {person.sex}, {person.age} years old, {person.height}, {person.weight}, {person.hair} hair, {person.eyes} eyes
                       </p>
                     </div>
                   </CardContent>
@@ -509,100 +539,413 @@ const Index = () => {
         {/* Person Detail Dialog */}
         {selectedPerson && (
           <Dialog open={true} onOpenChange={() => setSelectedPerson(null)}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle className="text-2xl">
-                  {selectedPerson.name || `${selectedPerson.firstName} ${selectedPerson.lastName}`}
-                  <Badge className={`ml-2 ${getDangerLevelColor(selectedPerson.dangerLevel)}`}>
-                    {selectedPerson.dangerLevel} DANGER
-                  </Badge>
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="grid gap-6">
-                {/* Photos Section */}
-                {selectedPerson.photos && selectedPerson.photos.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Photos</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {selectedPerson.photos.map((photo, index) => (
-                        <img 
-                          key={index}
-                          src={photo} 
-                          alt={`Photo ${index + 1}`}
-                          className="w-full h-32 object-cover rounded"
-                        />
-                      ))}
+                <div className="bg-red-500 text-white p-4 rounded-lg mb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold">SUSPECT INFORMATION</h3>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-center">
+                        <div className="text-sm">DANGER LEVEL</div>
+                        <Badge className={`${getDangerLevelColor(selectedPerson.dangerLevel)} font-bold`}>
+                          {selectedPerson.dangerLevel}
+                        </Badge>
+                      </div>
+                      {selectedPerson.orderOfProtection && (
+                        <div className="text-center">
+                          <div className="text-sm">ORDER OF PROTECTION</div>
+                          <div className="text-white font-bold">
+                            Active - Expires: {selectedPerson.protectionExpirationDate ? new Date(selectedPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-
-                {/* Basic Info */}
+                </div>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                {/* Subject Demographics */}
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Basic Information</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <p><strong>Name:</strong> {selectedPerson.name || `${selectedPerson.firstName} ${selectedPerson.lastName}`}</p>
-                    {selectedPerson.alias && <p><strong>Alias:</strong> {selectedPerson.alias}</p>}
-                    <p><strong>Age:</strong> {selectedPerson.age}</p>
-                    <p><strong>DOB:</strong> {selectedPerson.dob}</p>
-                    <p><strong>Sex:</strong> {selectedPerson.sex}</p>
-                    <p><strong>Race:</strong> {selectedPerson.race}</p>
-                    <p><strong>Height:</strong> {selectedPerson.height}</p>
-                    <p><strong>Weight:</strong> {selectedPerson.weight}</p>
-                    <p><strong>Hair:</strong> {selectedPerson.hair}</p>
-                    <p><strong>Eyes:</strong> {selectedPerson.eyes}</p>
+                  <div className="bg-blue-500 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                      SUBJECT DEMOGRAPHICS
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Last Name</div>
+                        <div className="font-bold">{selectedPerson.lastName}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">First Name</div>
+                        <div className="font-bold">{selectedPerson.firstName}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Middle Name</div>
+                        <div className="font-bold">{selectedPerson.middleName || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Sex</div>
+                        <div className="font-bold">{selectedPerson.sex}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Race</div>
+                        <div className="font-bold">{selectedPerson.race}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Age</div>
+                        <div className="font-bold">{selectedPerson.age}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">DOB</div>
+                        <div className="font-bold">{selectedPerson.dob || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Deceased</div>
+                        <div className="font-bold">{selectedPerson.deceased}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Height</div>
+                        <div className="font-bold">{selectedPerson.height}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Weight</div>
+                        <div className="font-bold">{selectedPerson.weight}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Hair</div>
+                        <div className="font-bold">{selectedPerson.hair}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Eyes</div>
+                        <div className="font-bold">{selectedPerson.eyes}</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Physical Descriptors */}
-                {(selectedPerson.tattoos || selectedPerson.piercings || selectedPerson.scars) && (
+                {/* Photos Section */}
+                {selectedPerson.photos && selectedPerson.photos.length > 0 && (
                   <div>
-                    <h3 className="text-lg font-bold mb-2">Physical Descriptors</h3>
-                    <div className="space-y-2 text-sm">
-                      {selectedPerson.tattoos && <p><strong>Tattoos:</strong> {selectedPerson.tattoos}</p>}
-                      {selectedPerson.piercings && <p><strong>Piercings:</strong> {selectedPerson.piercings}</p>}
-                      {selectedPerson.scars && <p><strong>Scars:</strong> {selectedPerson.scars}</p>}
+                    <div className="bg-gray-500 text-white p-3 rounded-t-lg">
+                      <h3 className="text-lg font-bold">PHOTOS</h3>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {selectedPerson.photos.map((photo, index) => (
+                          <img 
+                            key={index}
+                            src={photo} 
+                            alt={`Photo ${index + 1}`}
+                            className="w-full h-40 object-cover rounded border"
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
 
+                {/* Identification */}
+                <div>
+                  <div className="bg-green-500 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/>
+                        <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd"/>
+                      </svg>
+                      IDENTIFICATION
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Driver's License #</div>
+                        <div className="font-bold">{selectedPerson.driversLicenseNumber || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Driver's License State</div>
+                        <div className="font-bold">{selectedPerson.driversLicenseState || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Address of Residence */}
+                <div>
+                  <div className="bg-purple-500 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"/>
+                      </svg>
+                      ADDRESS OF RESIDENCE
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Address of Residence</div>
+                        <div className="font-bold">{selectedPerson.addressOfResidence || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">District</div>
+                        <div className="font-bold">{selectedPerson.district || 'No Data'}</div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-gray-600 text-xs">Majority District</div>
+                        <div className="font-bold">{selectedPerson.majorityDistrict || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* IDOC Information */}
+                <div>
+                  <div className="bg-blue-600 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd"/>
+                      </svg>
+                      IDOC INFORMATION
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">IDOC #</div>
+                        <div className="font-bold">{selectedPerson.idocNumber || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">District</div>
+                        <div className="font-bold">{selectedPerson.idocDistrict || 'No Data'}</div>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="text-gray-600 text-xs">IDOC Address of Residence</div>
+                        <div className="font-bold">{selectedPerson.idocAddressOfResidence || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Criminal Record Details */}
+                <div>
+                  <div className="bg-red-600 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      CRIMINAL RECORD DETAILS
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Arrest CB #</div>
+                        <div className="font-bold">{selectedPerson.latestArrestCB || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Felony Arrest CB #</div>
+                        <div className="font-bold">{selectedPerson.latestFelonyArrestCB || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">On Parole</div>
+                        <div className="font-bold">{selectedPerson.onParole || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Contact</div>
+                        <div className="font-bold">{selectedPerson.latestContact || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Contact District</div>
+                        <div className="font-bold">{selectedPerson.latestContactDistrict || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Warrant</div>
+                        <div className="font-bold">{selectedPerson.latestWarrant || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Domestic Violence Arrest Record */}
+                <div>
+                  <div className="bg-pink-500 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      DOMESTIC VIOLENCE ARREST RECORD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Arrest Count</div>
+                        <div className="font-bold">{selectedPerson.domesticViolenceArrestCount || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Arrest Date</div>
+                        <div className="font-bold">{selectedPerson.latestDomesticViolenceArrestDate || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Weapons Arrest Record */}
+                <div>
+                  <div className="bg-orange-500 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z"/>
+                      </svg>
+                      WEAPONS ARREST RECORD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Possession</div>
+                        <div className="font-bold">{selectedPerson.weaponsPossession || 'N'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Arrest Count</div>
+                        <div className="font-bold">{selectedPerson.weaponsArrestCount || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Arrest Date</div>
+                        <div className="font-bold">{selectedPerson.latestWeaponsArrestDate || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Narcotics Arrest Record */}
+                <div>
+                  <div className="bg-yellow-500 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd"/>
+                      </svg>
+                      NARCOTICS ARREST RECORD
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Possession</div>
+                        <div className="font-bold">{selectedPerson.narcoticsPossession || 'N'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Arrest Count</div>
+                        <div className="font-bold">{selectedPerson.narcoticsArrestCount || 'No Data'}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Latest Arrest Date</div>
+                        <div className="font-bold">{selectedPerson.latestNarcoticsArrestDate || 'No Data'}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional Information */}
+                <div>
+                  <div className="bg-gray-700 text-white p-3 rounded-t-lg">
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                      </svg>
+                      ADDITIONAL INFORMATION
+                    </h3>
+                  </div>
+                  <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                    <div className="space-y-4 text-sm">
+                      <div>
+                        <div className="text-gray-600 text-xs">Charges</div>
+                        <div className="font-bold text-red-600 uppercase">{selectedPerson.charges}</div>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Danger Level</div>
+                        <Badge className={`${getDangerLevelColor(selectedPerson.dangerLevel)} font-bold`}>
+                          {selectedPerson.dangerLevel}
+                        </Badge>
+                      </div>
+                      <div>
+                        <div className="text-gray-600 text-xs">Last Seen</div>
+                        <div className="font-bold">{selectedPerson.lastSeen}</div>
+                      </div>
+                      {selectedPerson.knownAssailants && (
+                        <div>
+                          <div className="text-gray-600 text-xs">Known Assailants</div>
+                          <div className="font-bold">{selectedPerson.knownAssailants}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* Order of Protection */}
                 {selectedPerson.orderOfProtection && (
-                  <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                    <h3 className="text-lg font-bold mb-2 text-red-700 flex items-center gap-2">
-                      <Shield className="h-5 w-5" />
-                      Order of Protection Active
-                    </h3>
-                    <div className="space-y-2 text-sm">
-                      {selectedPerson.orderOfProtectionType && (
-                        <p><strong>Type:</strong> {getOrderOfProtectionTypeLabel(selectedPerson.orderOfProtectionType)}</p>
-                      )}
-                      {selectedPerson.protectionPetitioner && (
-                        <p><strong>Petitioner:</strong> {selectedPerson.protectionPetitioner}</p>
-                      )}
-                      {selectedPerson.protectionRespondent && (
-                        <p><strong>Respondent:</strong> {selectedPerson.protectionRespondent}</p>
-                      )}
-                      {selectedPerson.protectionExpirationDate && (
-                        <p><strong>Expiration Date:</strong> {selectedPerson.protectionExpirationDate}</p>
-                      )}
-                      {selectedPerson.protectionDescription && (
-                        <p><strong>Description:</strong> {selectedPerson.protectionDescription}</p>
-                      )}
-                      {selectedPerson.protectionNotes && (
-                        <p><strong>Notes:</strong> {selectedPerson.protectionNotes}</p>
-                      )}
+                  <div>
+                    <div className="bg-purple-600 text-white p-3 rounded-t-lg">
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <Shield className="h-5 w-5" />
+                        ORDER OF PROTECTION
+                      </h3>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                        <div>
+                          <div className="text-gray-600 text-xs">Status</div>
+                          <div className="font-bold text-purple-600">ACTIVE</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600 text-xs">Protection Expiration Date</div>
+                          <div className="font-bold">{selectedPerson.protectionExpirationDate || 'N/A'}</div>
+                        </div>
+                        {selectedPerson.orderOfProtectionType && (
+                          <div className="col-span-2">
+                            <div className="text-gray-600 text-xs">Type</div>
+                            <div className="font-bold">{getOrderOfProtectionTypeLabel(selectedPerson.orderOfProtectionType)}</div>
+                          </div>
+                        )}
+                        {selectedPerson.protectionPetitioner && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Petitioner</div>
+                            <div className="font-bold">{selectedPerson.protectionPetitioner}</div>
+                          </div>
+                        )}
+                        {selectedPerson.protectionRespondent && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Respondent</div>
+                            <div className="font-bold">{selectedPerson.protectionRespondent}</div>
+                          </div>
+                        )}
+                        {selectedPerson.protectionDescription && (
+                          <div className="col-span-2">
+                            <div className="text-gray-600 text-xs">Description</div>
+                            <div className="font-bold">{selectedPerson.protectionDescription}</div>
+                          </div>
+                        )}
+                        {selectedPerson.protectionNotes && (
+                          <div className="col-span-2">
+                            <div className="text-gray-600 text-xs">Notes</div>
+                            <div className="font-bold">{selectedPerson.protectionNotes}</div>
+                          </div>
+                        )}
+                      </div>
                       
                       {/* Protection Documents */}
                       {selectedPerson.protectionDocuments && selectedPerson.protectionDocuments.length > 0 && (
-                        <div className="mt-3">
-                          <p className="font-semibold mb-2">Court Documents:</p>
-                          <div className="space-y-1">
+                        <div className="border-t pt-4">
+                          <div className="text-gray-600 text-xs mb-2">Court Documents:</div>
+                          <div className="space-y-2">
                             {selectedPerson.protectionDocuments.map((doc, index) => (
-                              <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded border">
                                 <div className="flex items-center gap-2">
-                                  <FileText className="h-4 w-4 text-red-600" />
-                                  <span className="text-sm">{doc.name}</span>
+                                  <FileText className="h-4 w-4 text-purple-600" />
+                                  <span className="text-sm font-medium">{doc.name}</span>
                                 </div>
                                 <Button
                                   variant="outline"
@@ -621,44 +964,53 @@ const Index = () => {
                   </div>
                 )}
 
-                {/* Charges */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Charges</h3>
-                  <p className="text-sm bg-gray-50 p-3 rounded">{selectedPerson.charges}</p>
-                </div>
-
-                {/* Known Assailants */}
-                {selectedPerson.knownAssailants && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Known Assailants</h3>
-                    <p className="text-sm bg-gray-50 p-3 rounded">{selectedPerson.knownAssailants}</p>
-                  </div>
-                )}
-
                 {/* Vehicle Information */}
                 {(selectedPerson.vehicleMake || selectedPerson.vehicleModel || selectedPerson.vehicleColor || selectedPerson.vehiclePlate || selectedPerson.lastKnownVehicle) && (
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">Vehicle Information</h3>
-                    <div className="space-y-2 text-sm">
-                      {selectedPerson.vehicleMake && <p><strong>Make:</strong> {selectedPerson.vehicleMake}</p>}
-                      {selectedPerson.vehicleModel && <p><strong>Model:</strong> {selectedPerson.vehicleModel}</p>}
-                      {selectedPerson.vehicleColor && <p><strong>Color:</strong> {selectedPerson.vehicleColor}</p>}
-                      {selectedPerson.vehiclePlate && <p><strong>License Plate:</strong> {selectedPerson.vehiclePlate}</p>}
-                      {selectedPerson.lastKnownVehicle && (
-                        <p><strong>Legacy Vehicle Info:</strong> {selectedPerson.lastKnownVehicle}</p>
-                      )}
+                    <div className="bg-indigo-500 text-white p-3 rounded-t-lg">
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2V8a2 2 0 012-2h8a2 2 0 00-2-2H4z" clipRule="evenodd"/>
+                        </svg>
+                        VEHICLE INFORMATION
+                      </h3>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        {selectedPerson.vehicleMake && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Make</div>
+                            <div className="font-bold">{selectedPerson.vehicleMake}</div>
+                          </div>
+                        )}
+                        {selectedPerson.vehicleModel && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Model</div>
+                            <div className="font-bold">{selectedPerson.vehicleModel}</div>
+                          </div>
+                        )}
+                        {selectedPerson.vehicleColor && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Color</div>
+                            <div className="font-bold">{selectedPerson.vehicleColor}</div>
+                          </div>
+                        )}
+                        {selectedPerson.vehiclePlate && (
+                          <div>
+                            <div className="text-gray-600 text-xs">License Plate</div>
+                            <div className="font-bold">{selectedPerson.vehiclePlate}</div>
+                          </div>
+                        )}
+                        {selectedPerson.lastKnownVehicle && (
+                          <div className="col-span-2">
+                            <div className="text-gray-600 text-xs">Legacy Vehicle Info</div>
+                            <div className="font-bold">{selectedPerson.lastKnownVehicle}</div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
-
-                {/* Contact Information */}
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Last Known Information</h3>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Address:</strong> {selectedPerson.address || selectedPerson.addressOfResidence}</p>
-                    <p><strong>Last Seen:</strong> {selectedPerson.lastSeen}</p>
-                  </div>
-                </div>
               </div>
             </DialogContent>
           </Dialog>
