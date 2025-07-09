@@ -514,7 +514,7 @@ const Index = () => {
                         <img 
                           src={person.photos[0]} 
                           alt={person.name || `${person.firstName} ${person.lastName}`}
-                          className="w-36 h-36 object-cover cursor-pointer hover:opacity-80 transition-opacity border border-gray-300"
+                          className="w-48 h-48 object-cover cursor-pointer hover:opacity-80 transition-all duration-300 border-2 border-gray-400 shadow-lg hover:shadow-xl hover:scale-105"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPhoto(person.photos![0]);
