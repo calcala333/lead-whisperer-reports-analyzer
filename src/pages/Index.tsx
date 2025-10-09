@@ -79,10 +79,9 @@ const Index = () => {
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [systemName, setSystemName] = useState("Wanted Persons Database");
+  const [systemName, setSystemName] = useState("Active Orders of Protection");
   const [disclaimerText, setDisclaimerText] = useState("This system contains sensitive law enforcement information. Access is restricted to authorized personnel only. All activities are logged and monitored. Unauthorized access is prohibited and subject to prosecution.");
   const [searchTerm, setSearchTerm] = useState("");
-  const [showActiveOrdersOnly, setShowActiveOrdersOnly] = useState(false);
 
   useEffect(() => {
     const savedPeople = localStorage.getItem('wantedPeople');
@@ -299,10 +298,6 @@ const Index = () => {
   useEffect(() => {
     let filtered = people;
     
-    if (showActiveOrdersOnly) {
-      filtered = filtered.filter(person => person.orderOfProtection);
-    }
-    
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(person => 
@@ -314,7 +309,7 @@ const Index = () => {
     }
     
     setFilteredPeople(filtered);
-  }, [people, showActiveOrdersOnly, searchTerm]);
+  }, [people, searchTerm]);
 
   const handleSearch = () => {
     // Search is handled by useEffect
@@ -440,18 +435,6 @@ const Index = () => {
               SEARCH
             </Button>
           </div>
-          <div className="flex items-center gap-3 mb-2">
-            <label className="flex items-center gap-2 text-sm text-blue-100">
-              <input
-                type="checkbox"
-                checked={showActiveOrdersOnly}
-                onChange={(e) => setShowActiveOrdersOnly(e.target.checked)}
-                className="rounded"
-              />
-              <Shield className="h-4 w-4" />
-              Show Active Orders of Protection Only
-            </label>
-          </div>
           <div className="text-sm text-blue-100">
             Try searching: WILLIAM, MARIA, JAMES
           </div>
@@ -462,8 +445,8 @@ const Index = () => {
       <main className="container mx-auto p-6">
         {filteredPeople.length === 0 && people.length === 0 ? (
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-600 mb-4">No Wanted Persons Listed</h2>
-            <p className="text-gray-500 mb-6">Use the Admin Panel to add wanted persons to the database.</p>
+            <h2 className="text-2xl font-bold text-gray-600 mb-4">No Records Listed</h2>
+            <p className="text-gray-500 mb-6">Use the Admin Panel to add records to the database.</p>
             <Button onClick={() => setIsAdminOpen(true)}>
               Add First Person
             </Button>
@@ -471,16 +454,15 @@ const Index = () => {
         ) : filteredPeople.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-gray-600 mb-4">No Results Found</h2>
-            <p className="text-gray-500 mb-6">No wanted persons match your current search criteria.</p>
+            <p className="text-gray-500 mb-6">No records match your current search criteria.</p>
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Wanted Individuals Header */}
+            {/* Active Orders Header */}
             <div className="bg-blue-500 text-white p-4 rounded-lg text-center">
-              <h2 className="text-2xl font-bold">Wanted Individuals</h2>
+              <h2 className="text-2xl font-bold">Active Orders of Protection</h2>
               <p className="text-sm opacity-90">
                 Showing {filteredPeople.length} of {people.length} records
-                {showActiveOrdersOnly && " (Active Orders of Protection Only)"}
               </p>
             </div>
             
@@ -602,11 +584,11 @@ const Index = () => {
         {/* Photo Dialog */}
         {selectedPhoto && (
           <Dialog open={true} onOpenChange={() => setSelectedPhoto(null)}>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-2xl" aria-describedby="photo-description">
               <DialogHeader>
                 <DialogTitle>Photo View</DialogTitle>
               </DialogHeader>
-              <div className="flex justify-center">
+              <div id="photo-description" className="flex justify-center">
                 <img 
                   src={selectedPhoto} 
                   alt="Enlarged photo"
@@ -620,12 +602,13 @@ const Index = () => {
         {/* Person Detail Dialog */}
         {selectedPerson && (
           <Dialog open={true} onOpenChange={() => setSelectedPerson(null)}>
-            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="person-details-description">
               <DialogHeader>
-                <div className="bg-red-500 text-white p-4 rounded-lg mb-4">
+                <DialogTitle className="sr-only">Person Details</DialogTitle>
+                <div id="person-details-description" className="bg-red-500 text-white p-4 rounded-lg mb-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold">SUSPECT INFORMATION</h3>
+                      <h3 className="text-xl font-bold">SUBJECT INFORMATION</h3>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-center">
