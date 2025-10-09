@@ -110,6 +110,8 @@ interface AdminPanelProps {
   onUpdateSystemName: (name: string) => void;
   disclaimerText: string;
   onUpdateDisclaimer: (disclaimer: string) => void;
+  logoUrl: string;
+  onUpdateLogo: (logo: string) => void;
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({
@@ -123,11 +125,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   onUpdateSystemName,
   disclaimerText,
   onUpdateDisclaimer,
+  logoUrl,
+  onUpdateLogo,
 }) => {
   const [activeTab, setActiveTab] = useState("add");
   const [editingPerson, setEditingPerson] = useState<WantedPerson | null>(null);
   const [tempSystemName, setTempSystemName] = useState(systemName);
   const [tempDisclaimerText, setTempDisclaimerText] = useState(disclaimerText);
+  const [tempLogoUrl, setTempLogoUrl] = useState(logoUrl);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -195,7 +200,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   useEffect(() => {
     setTempSystemName(systemName);
     setTempDisclaimerText(disclaimerText);
-  }, [systemName, disclaimerText]);
+    setTempLogoUrl(logoUrl);
+  }, [systemName, disclaimerText, logoUrl]);
 
   // Calculate age from DOB
   const calculateAge = (dobString: string) => {
@@ -515,9 +521,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setActiveTab("add");
   };
 
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setTempLogoUrl(e.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSystemSettingsSave = () => {
     onUpdateSystemName(tempSystemName);
     onUpdateDisclaimer(tempDisclaimerText);
+    onUpdateLogo(tempLogoUrl);
   };
 
   if (!isOpen) return null;
@@ -1522,6 +1542,27 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     rows={8}
                     className="resize-none"
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="logoUpload">System Logo</Label>
+                  <Input
+                    id="logoUpload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="mt-1"
+                  />
+                  {tempLogoUrl && (
+                    <div className="mt-2 p-4 border rounded-lg bg-gray-50">
+                      <p className="text-sm text-gray-600 mb-2">Logo Preview:</p>
+                      <img 
+                        src={tempLogoUrl} 
+                        alt="System Logo" 
+                        className="max-h-20 object-contain"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <Button 

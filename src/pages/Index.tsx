@@ -81,12 +81,14 @@ const Index = () => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [systemName, setSystemName] = useState("Active Orders of Protection");
   const [disclaimerText, setDisclaimerText] = useState("This system contains sensitive law enforcement information. Access is restricted to authorized personnel only. All activities are logged and monitored. Unauthorized access is prohibited and subject to prosecution.");
+  const [logoUrl, setLogoUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const savedPeople = localStorage.getItem('wantedPeople');
     const savedSystemName = localStorage.getItem('systemName');
     const savedDisclaimer = localStorage.getItem('disclaimerText');
+    const savedLogo = localStorage.getItem('logoUrl');
     
     if (savedPeople) {
       setPeople(JSON.parse(savedPeople));
@@ -292,6 +294,9 @@ const Index = () => {
     if (savedDisclaimer) {
       setDisclaimerText(savedDisclaimer);
     }
+    if (savedLogo) {
+      setLogoUrl(savedLogo);
+    }
   }, []);
 
   // Filter and search logic
@@ -348,6 +353,11 @@ const Index = () => {
     localStorage.setItem('disclaimerText', disclaimer);
   };
 
+  const handleUpdateLogo = (logo: string) => {
+    setLogoUrl(logo);
+    localStorage.setItem('logoUrl', logo);
+  };
+
   const getDangerLevelColor = (level: string) => {
     switch (level.toUpperCase()) {
       case 'EXTREME':
@@ -383,7 +393,16 @@ const Index = () => {
       {/* Header */}
       <header className="bg-blue-900 text-white p-4 shadow-lg">
         <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-bold">{systemName}</h1>
+          <div className="flex items-center gap-4">
+            {logoUrl && (
+              <img 
+                src={logoUrl} 
+                alt="System Logo" 
+                className="h-12 w-auto object-contain"
+              />
+            )}
+            <h1 className="text-3xl font-bold">{systemName}</h1>
+          </div>
           <Button
             variant="secondary"
             onClick={() => setIsAdminOpen(true)}
@@ -1094,6 +1113,8 @@ const Index = () => {
         onUpdateSystemName={handleUpdateSystemName}
         disclaimerText={disclaimerText}
         onUpdateDisclaimer={handleUpdateDisclaimer}
+        logoUrl={logoUrl}
+        onUpdateLogo={handleUpdateLogo}
       />
     </div>
   );

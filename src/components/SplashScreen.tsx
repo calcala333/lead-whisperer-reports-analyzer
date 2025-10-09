@@ -5,19 +5,33 @@ import { AlertTriangle, Shield } from "lucide-react";
 interface SplashScreenProps {
   onAccept: () => void;
   disclaimerText: string;
+  logoUrl?: string;
 }
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ onAccept, disclaimerText }) => {
+const SplashScreen: React.FC<SplashScreenProps> = ({ onAccept, disclaimerText, logoUrl }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-lg shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="bg-red-600 text-white p-6">
           <div className="flex items-center justify-center gap-3 mb-2">
-            <Shield className="h-8 w-8" />
-            <h1 className="text-3xl font-bold">RESTRICTED ACCESS</h1>
-            <Shield className="h-8 w-8" />
+            {logoUrl ? (
+              <img 
+                src={logoUrl} 
+                alt="System Logo" 
+                className="h-16 w-auto object-contain"
+              />
+            ) : (
+              <>
+                <Shield className="h-8 w-8" />
+                <h1 className="text-3xl font-bold">RESTRICTED ACCESS</h1>
+                <Shield className="h-8 w-8" />
+              </>
+            )}
           </div>
+          {logoUrl && (
+            <h1 className="text-2xl font-bold text-center">RESTRICTED ACCESS</h1>
+          )}
           <p className="text-center text-sm opacity-90">
             Law Enforcement Personnel Only
           </p>

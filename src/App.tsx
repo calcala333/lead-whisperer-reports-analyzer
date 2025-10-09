@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,7 +12,16 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
   const disclaimerText = "This system contains sensitive law enforcement information. Access is restricted to authorized personnel only. All activities are logged and monitored. Unauthorized access is prohibited and subject to prosecution.";
+
+  // Load logo from localStorage on mount
+  useEffect(() => {
+    const savedLogo = localStorage.getItem('logoUrl');
+    if (savedLogo) {
+      setLogoUrl(savedLogo);
+    }
+  }, []);
 
   const handleAcceptDisclaimer = () => {
     setDisclaimerAccepted(true);
@@ -25,6 +34,7 @@ const App = () => {
           <SplashScreen 
             onAccept={handleAcceptDisclaimer} 
             disclaimerText={disclaimerText}
+            logoUrl={logoUrl}
           />
         </TooltipProvider>
       </QueryClientProvider>
