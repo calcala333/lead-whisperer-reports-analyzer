@@ -27,10 +27,10 @@ if [ "$MODE" = "docker" ]; then
     info "docker compose plugin not found, falling back to docker build/run..."
     docker build -t active-orders-of-protection:latest .
     docker rm -f aop-web >/dev/null 2>&1 || true
-    docker run -d --name aop-web --restart unless-stopped -p 8080:80 active-orders-of-protection:latest
+    docker run -d --name aop-web --restart unless-stopped -p 6900:6900 active-orders-of-protection:latest
   fi
 
-  ok "App running at: http://localhost:8080"
+  ok "App running at: http://localhost:6900"
   exit 0
 fi
 
@@ -47,6 +47,6 @@ echo ""
 ok "Install complete."
 echo ""
 echo "Next steps:"
-echo "  Dev server:        npm run dev      # http://localhost:8080"
+echo "  Dev server:        npm run dev      # http://localhost:6900"
 echo "  Production build:  npm run build && npm run preview"
 echo "  Docker install:    ./install.sh docker"
