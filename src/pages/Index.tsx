@@ -389,24 +389,28 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/40">
       {/* Header */}
-      <header className="bg-blue-900 text-white p-4 shadow-lg">
-        <div className="container mx-auto flex justify-between items-center">
+      <header className="relative overflow-hidden text-primary-foreground shadow-lg" style={{ background: "var(--gradient-hero)" }}>
+        <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 20% 20%, hsl(var(--primary-glow)) 0%, transparent 50%)" }} />
+        <div className="container mx-auto flex flex-wrap justify-between items-center gap-4 p-5 relative">
           <div className="flex items-center gap-4">
-            {logoUrl && (
-              <img 
-                src={logoUrl} 
-                alt="System Logo" 
-                className="h-12 w-auto object-contain"
-              />
+            {logoUrl ? (
+              <img src={logoUrl} alt="System Logo" className="h-12 w-auto object-contain drop-shadow" />
+            ) : (
+              <div className="h-12 w-12 rounded-xl bg-primary-foreground/10 backdrop-blur flex items-center justify-center ring-1 ring-primary-foreground/20">
+                <Shield className="h-6 w-6" />
+              </div>
             )}
-            <h1 className="text-3xl font-bold">{systemName}</h1>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{systemName}</h1>
+              <p className="text-xs sm:text-sm opacity-75">Law Enforcement Information System</p>
+            </div>
           </div>
           <Button
             variant="secondary"
             onClick={() => setIsAdminOpen(true)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 shadow-md"
           >
             <Settings className="h-4 w-4" />
             Admin Panel
@@ -415,50 +419,41 @@ const Index = () => {
       </header>
 
       {/* Disclaimer */}
-      <div className="bg-yellow-500 text-white p-4">
-        <div className="container mx-auto">
-          <div className="flex items-center">
-            <AlertTriangle className="h-5 w-5 text-white mr-2" />
+      <div className="border-y border-warning/30 bg-warning/10">
+        <div className="container mx-auto p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
             <div>
-              <div className="font-bold text-sm mb-1">DISCLAIMER</div>
-              <p className="text-sm">{disclaimerText}</p>
+              <div className="font-semibold text-xs uppercase tracking-wider text-warning-foreground/80 mb-1">Disclaimer</div>
+              <p className="text-sm text-foreground/80 leading-relaxed">{disclaimerText}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search Database Section */}
-      <div className="bg-blue-500 text-white p-4">
-        <div className="container mx-auto">
-          <div className="flex items-center gap-2 mb-3">
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
-            </svg>
-            <span className="font-bold">Search Database</span>
-          </div>
-          <div className="flex gap-2 mb-3">
-            <input 
-              type="text" 
-              placeholder="Enter Name or Alias" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 px-3 py-2 text-black rounded"
-            />
-            <Button 
-              onClick={handleSearch}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              <svg className="h-4 w-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+      {/* Search */}
+      <div className="border-b bg-card">
+        <div className="container mx-auto p-5">
+          <label className="block text-sm font-semibold text-foreground mb-2">Search Database</label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
               </svg>
-              SEARCH
-            </Button>
+              <input
+                type="text"
+                placeholder="Enter name or alias..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
+              />
+            </div>
+            <Button onClick={handleSearch} className="px-6">Search</Button>
           </div>
-          <div className="text-sm text-blue-100">
-            Try searching: WILLIAM, MARIA, JAMES
-          </div>
+          <p className="text-xs text-muted-foreground mt-2">Try searching: WILLIAM, MARIA, JAMES</p>
         </div>
       </div>
+
 
       {/* Main Content */}
       <main className="container mx-auto p-6">
