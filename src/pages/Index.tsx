@@ -480,7 +480,8 @@ const Index = () => {
       : ""
   }
 
-  ${docs ? `<h2>Court Documents</h2><ul>${docs}</ul>` : ""}
+  ${docsList ? `<h2>Court Documents</h2><ul>${docsList}</ul>` : ""}
+  ${embeddedDocs ? `<h2 style="page-break-before:always;">Attached Documents</h2>${embeddedDocs}` : ""}
 
   <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 300); });</script>
 </body></html>`;
