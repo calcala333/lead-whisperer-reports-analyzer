@@ -253,13 +253,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
           }]);
         }
       } else if (type === 'photo' && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e.target?.result) {
-            setPhotos(prev => [...prev, e.target!.result as string]);
-          }
-        };
-        reader.readAsDataURL(file);
+        try {
+          const stored = await uploadToServer(file);
+          setPhotos(prev => [...prev, stored.url]);
+        } catch (err) {
+          console.warn("Server upload unavailable, falling back to data URL.", err);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target?.result) {
+              setPhotos(prev => [...prev, e.target!.result as string]);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
       }
     });
   };
