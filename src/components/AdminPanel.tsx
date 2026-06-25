@@ -222,18 +222,36 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setAge(calculatedAge);
   };
 
+  const uploadToServer = async (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: form });
+    if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
+    return (await res.json()) as { name: string; url: string; type: string };
+  };
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'document' | 'photo') => {
     const files = event.target.files;
     if (!files) return;
 
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach(async (file) => {
       if (type === 'document' && (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-        const url = URL.createObjectURL(file);
-        setProtectionDocuments(prev => [...prev, {
-          name: file.name,
-          url: url,
-          type: file.type
-        }]);
+        try {
+          const stored = await uploadToServer(file);
+          setProtectionDocuments(prev => [...prev, {
+            name: stored.name,
+            url: stored.url,
+            type: stored.type || file.type,
+          }]);
+        } catch (err) {
+          console.warn("Server upload unavailable, falling back to local blob URL.", err);
+          const url = URL.createObjectURL(file);
+          setProtectionDocuments(prev => [...prev, {
+            name: file.name,
+            url,
+            type: file.type,
+          }]);
+        }
       } else if (type === 'photo' && file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => {

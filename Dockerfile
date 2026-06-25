@@ -2,26 +2,35 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
-# Install deps first for better layer caching
 COPY package*.json ./
 RUN npm ci
 
-# Build the app
 COPY . .
 RUN npm run build
 
 # ---------- Runtime stage ----------
-FROM nginx:1.27-alpine AS runtime
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production \
+    PORT=6900 \
+    UPLOAD_DIR=/data/uploads \
+    DIST_DIR=/app/dist
 
-# SPA-friendly nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Install only production deps for the tiny server.
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Copy built assets
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copy server code and built SPA.
+COPY server ./server
+COPY --from=build /app/dist ./dist
+
+# Persistent uploads directory (mount a volume here).
+RUN mkdir -p /data/uploads
+VOLUME ["/data/uploads"]
 
 EXPOSE 6900
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:6900/ >/dev/null 2>&1 || exit 1
+  CMD wget -qO- http://localhost:6900/api/health >/dev/null 2>&1 || exit 1
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server/server.mjs"]
