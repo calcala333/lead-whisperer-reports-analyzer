@@ -729,8 +729,17 @@ const Index = () => {
                 <DialogTitle className="sr-only">Person Details</DialogTitle>
                 <div id="person-details-description" className="bg-red-500 text-white p-4 rounded-lg mb-4">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex items-center gap-3">
                       <h3 className="text-xl font-bold">SUBJECT INFORMATION</h3>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white text-red-600 hover:bg-gray-100"
+                        onClick={() => printPerson(selectedPerson)}
+                      >
+                        <Printer className="h-4 w-4 mr-1" />
+                        Print
+                      </Button>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-center">
