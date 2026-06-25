@@ -432,6 +432,8 @@ const Index = () => {
          background:#eee;color:#111;margin-left:6px;}
   .charges{background:#fff5f5;border:1px solid #f3c2c2;padding:8px;border-radius:4px;color:#7a1313;}
   ul{padding-left:20px;}
+  .doc-page{page-break-before:always;margin-top:12px;}
+  .doc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
   @media print { .noprint{display:none;} body{margin:12mm;} }
 </style></head>
 <body>
