@@ -389,13 +389,30 @@ const Index = () => {
       )
       .join("");
 
-    const docs = (person.protectionDocuments || [])
-      .map(
-        (d) =>
-          `<li><strong>${esc(d.name)}</strong> &mdash; <span style="color:#555">${esc(
-            window.location.origin + d.url
-          )}</span></li>`
-      )
+    const docsList = (person.protectionDocuments || [])
+      .map((d) => {
+        const absUrl = d.url.startsWith("http") ? d.url : window.location.origin + d.url;
+        return `<li><strong>${esc(d.name)}</strong> &mdash; <a href="${esc(absUrl)}" style="color:#1a4a8a">${esc(absUrl)}</a></li>`;
+      })
+      .join("");
+
+    const embeddedDocs = (person.protectionDocuments || [])
+      .map((d) => {
+        const absUrl = d.url.startsWith("http") ? d.url : window.location.origin + d.url;
+        const isImage = (d.type || "").startsWith("image/") || /\.(png|jpe?g|gif|webp|bmp)$/i.test(d.url);
+        const isPdf = (d.type || "").includes("pdf") || /\.pdf$/i.test(d.url);
+        if (isImage) {
+          return `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
+            <img src="${esc(absUrl)}" style="max-width:100%;max-height:9in;border:1px solid #999;" /></div>`;
+        }
+        if (isPdf) {
+          return `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
+            <embed src="${esc(absUrl)}" type="application/pdf" style="width:100%;height:9.5in;border:1px solid #999;" />
+            <div style="font-size:11px;color:#555;margin-top:4px;">${esc(absUrl)}</div></div>`;
+        }
+        return `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
+          <div style="font-size:12px;color:#555;">Attached file: <a href="${esc(absUrl)}">${esc(absUrl)}</a></div></div>`;
+      })
       .join("");
 
     const row = (label: string, value: unknown) =>
@@ -415,6 +432,8 @@ const Index = () => {
          background:#eee;color:#111;margin-left:6px;}
   .charges{background:#fff5f5;border:1px solid #f3c2c2;padding:8px;border-radius:4px;color:#7a1313;}
   ul{padding-left:20px;}
+  .doc-page{page-break-before:always;margin-top:12px;}
+  .doc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
   @media print { .noprint{display:none;} body{margin:12mm;} }
 </style></head>
 <body>
@@ -463,7 +482,8 @@ const Index = () => {
       : ""
   }
 
-  ${docs ? `<h2>Court Documents</h2><ul>${docs}</ul>` : ""}
+  ${docsList ? `<h2>Court Documents</h2><ul>${docsList}</ul>` : ""}
+  ${embeddedDocs ? `<h2 style="page-break-before:always;">Attached Documents</h2>${embeddedDocs}` : ""}
 
   <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 300); });</script>
 </body></html>`;
