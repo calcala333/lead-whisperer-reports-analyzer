@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Settings, Shield, AlertTriangle, FileText, Download } from "lucide-react";
+import { Settings, Shield, AlertTriangle, FileText, Download, Printer } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
 
 interface WantedPerson {
