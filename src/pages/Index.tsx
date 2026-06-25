@@ -371,6 +371,114 @@ const Index = () => {
     }
   };
 
+  const printPerson = (person: WantedPerson) => {
+    const esc = (s: unknown) =>
+      String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    const fullName =
+      person.lastName || person.firstName
+        ? `${person.lastName ?? ""} ${person.firstName ?? ""} ${person.middleName ?? ""}`.trim()
+        : person.name || "Unknown";
+
+    const photos = (person.photos || [])
+      .map(
+        (p) =>
+          `<img src="${esc(p)}" style="max-width:220px;max-height:260px;margin:4px;border:1px solid #999;object-fit:cover;" />`
+      )
+      .join("");
+
+    const docs = (person.protectionDocuments || [])
+      .map(
+        (d) =>
+          `<li><strong>${esc(d.name)}</strong> &mdash; <span style="color:#555">${esc(
+            window.location.origin + d.url
+          )}</span></li>`
+      )
+      .join("");
+
+    const row = (label: string, value: unknown) =>
+      `<tr><td style="padding:4px 10px 4px 0;color:#555;white-space:nowrap;">${esc(
+        label
+      )}</td><td style="padding:4px 0;font-weight:600;">${esc(value || "N/A")}</td></tr>`;
+
+    const html = `<!doctype html>
+<html><head><meta charset="utf-8"/><title>${esc(fullName)} – Order of Protection</title>
+<style>
+  body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111;margin:24px;}
+  h1{margin:0 0 4px 0;font-size:22px;}
+  h2{margin:18px 0 6px;font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;}
+  table{border-collapse:collapse;font-size:13px;width:100%;}
+  .meta{color:#555;font-size:12px;margin-bottom:10px;}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;
+         background:#eee;color:#111;margin-left:6px;}
+  .charges{background:#fff5f5;border:1px solid #f3c2c2;padding:8px;border-radius:4px;color:#7a1313;}
+  ul{padding-left:20px;}
+  @media print { .noprint{display:none;} body{margin:12mm;} }
+</style></head>
+<body>
+  <div class="noprint" style="text-align:right;margin-bottom:10px;">
+    <button onclick="window.print()">Print</button>
+  </div>
+  <h1>${esc(fullName)} <span class="badge">${esc(person.dangerLevel)} RISK</span></h1>
+  <div class="meta">Active Orders of Protection &mdash; printed ${new Date().toLocaleString()}</div>
+
+  ${photos ? `<h2>Photos</h2><div>${photos}</div>` : ""}
+
+  <h2>Subject Demographics</h2>
+  <table>
+    ${row("Last Name", person.lastName)}
+    ${row("First Name", person.firstName)}
+    ${row("Middle Name", person.middleName)}
+    ${row("AKA", person.alias)}
+    ${row("Sex", person.sex)}
+    ${row("Race", person.race)}
+    ${row("Age", person.age)}
+    ${row("DOB", person.dob)}
+    ${row("Height", person.height)}
+    ${row("Weight", person.weight)}
+    ${row("Hair", person.hair)}
+    ${row("Eyes", person.eyes)}
+  </table>
+
+  <h2>Charges</h2>
+  <div class="charges">${esc(person.charges || "No charges listed")}</div>
+
+  <h2>Last Seen</h2>
+  <div>${esc(person.lastSeen || "Unknown")}</div>
+
+  ${
+    person.orderOfProtection
+      ? `<h2>Order of Protection</h2>
+         <table>
+           ${row("Status", "ACTIVE")}
+           ${row("Expiration", person.protectionExpirationDate)}
+           ${row("Type", person.orderOfProtectionType)}
+           ${row("Petitioner", person.protectionPetitioner)}
+           ${row("Respondent", person.protectionRespondent)}
+           ${row("Description", person.protectionDescription)}
+           ${row("Notes", person.protectionNotes)}
+         </table>`
+      : ""
+  }
+
+  ${docs ? `<h2>Court Documents</h2><ul>${docs}</ul>` : ""}
+
+  <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 300); });</script>
+</body></html>`;
+
+    const w = window.open("", "_blank", "width=900,height=1000");
+    if (!w) {
+      alert("Please allow pop-ups to print this record.");
+      return;
+    }
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  };
+
+
   const getOrderOfProtectionTypeLabel = (type: string) => {
     switch (type) {
       case 'plenary':
