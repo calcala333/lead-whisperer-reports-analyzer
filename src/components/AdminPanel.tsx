@@ -1212,6 +1212,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   />
                 </div>
 
+                {/* Elopement Risk Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Elopement Risk</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="elopementRisk">Person Wanders / Elopement Risk</Label>
+                      <Select value={elopementRisk} onValueChange={setElopementRisk}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="N">No</SelectItem>
+                          <SelectItem value="Y">Yes</SelectItem>
+                          <SelectItem value="UNK">Unknown</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="frequentLocations">Places Frequently Visited</Label>
+                    <Textarea
+                      id="frequentLocations"
+                      value={frequentLocations}
+                      onChange={(e) => setFrequentLocations(e.target.value)}
+                      placeholder="List parks, stores, relatives' homes, transit stops, or any locations the subject is known to visit..."
+                      className="resize-none"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+
                 {/* Vehicle Information Section */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-gray-700">Last Known Registered Vehicle</h3>
