@@ -71,6 +71,8 @@ interface WantedPerson {
   vehicleModel?: string;
   vehicleColor?: string;
   vehiclePlate?: string;
+  elopementRisk?: string;
+  frequentLocations?: string;
 }
 
 const Index = () => {
@@ -320,6 +322,16 @@ const Index = () => {
            ${row("Description", person.protectionDescription)}
            ${row("Notes", person.protectionNotes)}
          </table>`
+      : ""
+  }
+
+  ${
+    person.elopementRisk === "Y" || person.frequentLocations
+      ? `<h2>Elopement Risk</h2>
+         <table>
+           ${row("Person Wanders", person.elopementRisk === "Y" ? "YES" : person.elopementRisk === "UNK" ? "Unknown" : "No")}
+         </table>
+         ${person.frequentLocations ? `<div style="margin-top:6px;"><strong>Places Frequently Visited:</strong><br/>${esc(person.frequentLocations).replace(/\n/g, "<br/>")}</div>` : ""}`
       : ""
   }
 
