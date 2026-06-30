@@ -71,6 +71,8 @@ interface WantedPerson {
   vehicleModel?: string;
   vehicleColor?: string;
   vehiclePlate?: string;
+  elopementRisk?: string;
+  frequentLocations?: string;
 }
 
 const Index = () => {
@@ -320,6 +322,16 @@ const Index = () => {
            ${row("Description", person.protectionDescription)}
            ${row("Notes", person.protectionNotes)}
          </table>`
+      : ""
+  }
+
+  ${
+    person.elopementRisk === "Y" || person.frequentLocations
+      ? `<h2>Elopement Risk</h2>
+         <table>
+           ${row("Person Wanders", person.elopementRisk === "Y" ? "YES" : person.elopementRisk === "UNK" ? "Unknown" : "No")}
+         </table>
+         ${person.frequentLocations ? `<div style="margin-top:6px;"><strong>Places Frequently Visited:</strong><br/>${esc(person.frequentLocations).replace(/\n/g, "<br/>")}</div>` : ""}`
       : ""
   }
 
@@ -941,6 +953,40 @@ const Index = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Elopement Risk */}
+                {(selectedPerson.elopementRisk === 'Y' || selectedPerson.elopementRisk === 'UNK' || selectedPerson.frequentLocations) && (
+                  <div>
+                    <div className="bg-amber-600 text-white p-3 rounded-t-lg">
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        ELOPEMENT RISK
+                      </h3>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                      <div className="grid grid-cols-1 gap-4 text-sm">
+                        <div>
+                          <div className="text-gray-600 text-xs">Person Wanders</div>
+                          <div className="font-bold">
+                            {selectedPerson.elopementRisk === 'Y'
+                              ? 'YES'
+                              : selectedPerson.elopementRisk === 'UNK'
+                              ? 'Unknown'
+                              : 'No'}
+                          </div>
+                        </div>
+                        {selectedPerson.frequentLocations && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Places Frequently Visited</div>
+                            <div className="font-bold whitespace-pre-wrap">{selectedPerson.frequentLocations}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
 
                 {/* Order of Protection */}
                 {selectedPerson.orderOfProtection && (

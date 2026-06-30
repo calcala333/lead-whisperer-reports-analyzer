@@ -81,6 +81,10 @@ interface WantedPerson {
   vehicleModel?: string;
   vehicleColor?: string;
   vehiclePlate?: string;
+
+  // Elopement risk
+  elopementRisk?: string;
+  frequentLocations?: string;
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
@@ -187,6 +191,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [vehicleModel, setVehicleModel] = useState("");
   const [vehicleColor, setVehicleColor] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
+  const [elopementRisk, setElopementRisk] = useState("N");
+  const [frequentLocations, setFrequentLocations] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
   const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
@@ -329,6 +335,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setVehicleModel("");
     setVehicleColor("");
     setVehiclePlate("");
+    setElopementRisk("N");
+    setFrequentLocations("");
     setOrderOfProtection(false);
     setOrderOfProtectionType('');
     setProtectionExpirationDate("");
@@ -392,6 +400,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       vehicleModel,
       vehicleColor,
       vehiclePlate,
+      elopementRisk,
+      frequentLocations,
       orderOfProtection,
       orderOfProtectionType,
       protectionExpirationDate,
@@ -460,6 +470,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         vehicleModel,
         vehicleColor,
         vehiclePlate,
+        elopementRisk,
+        frequentLocations,
         orderOfProtection,
         orderOfProtectionType,
         protectionExpirationDate,
@@ -533,6 +545,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setVehicleModel(person.vehicleModel || "");
     setVehicleColor(person.vehicleColor || "");
     setVehiclePlate(person.vehiclePlate || "");
+    setElopementRisk(person.elopementRisk || "N");
+    setFrequentLocations(person.frequentLocations || "");
     setOrderOfProtection(person.orderOfProtection || false);
     setOrderOfProtectionType(person.orderOfProtectionType || '');
     setProtectionExpirationDate(person.protectionExpirationDate || "");
@@ -1197,6 +1211,38 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     className="resize-none"
                   />
                 </div>
+
+                {/* Elopement Risk Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-gray-700">Elopement Risk</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="elopementRisk">Person Wanders / Elopement Risk</Label>
+                      <Select value={elopementRisk} onValueChange={setElopementRisk}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="N">No</SelectItem>
+                          <SelectItem value="Y">Yes</SelectItem>
+                          <SelectItem value="UNK">Unknown</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="frequentLocations">Places Frequently Visited</Label>
+                    <Textarea
+                      id="frequentLocations"
+                      value={frequentLocations}
+                      onChange={(e) => setFrequentLocations(e.target.value)}
+                      placeholder="List parks, stores, relatives' homes, transit stops, or any locations the subject is known to visit..."
+                      className="resize-none"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
 
                 {/* Vehicle Information Section */}
                 <div className="space-y-4">
