@@ -84,220 +84,63 @@ const Index = () => {
   const [logoUrl, setLogoUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Load people + settings: try server first, fall back to localStorage.
   useEffect(() => {
-    const savedPeople = localStorage.getItem('wantedPeople');
-    const savedSystemName = localStorage.getItem('systemName');
-    const savedDisclaimer = localStorage.getItem('disclaimerText');
-    const savedLogo = localStorage.getItem('logoUrl');
-    
-    if (savedPeople) {
-      setPeople(JSON.parse(savedPeople));
-    } else {
-      // Add mock data if no saved data exists
-      const mockData: WantedPerson[] = [
-        {
-          id: "1",
-          lastName: "Johnson",
-          firstName: "Michael",
-          middleName: "David",
-          name: "Michael David Johnson",
-          alias: "Mike, MDJ",
-          sex: "Male",
-          race: "White",
-          age: "34",
-          dob: "1989-03-15",
-          deceased: "No",
-          height: "6'2\"",
-          weight: "185 lbs",
-          hair: "Brown",
-          eyes: "Blue",
-          tattoos: "Eagle on right shoulder, 'MOM' on left forearm",
-          piercings: "None",
-          scars: "2-inch scar above left eyebrow",
-          driversLicenseNumber: "D123456789",
-          driversLicenseState: "IL",
-          address: "1234 Oak Street, Chicago, IL 60601",
-          addressOfResidence: "1234 Oak Street, Chicago, IL 60601",
-          district: "Central",
-          majorityDistrict: "District 1",
-          idocNumber: "R12345",
-          idocAddressOfResidence: "Last known: 1234 Oak Street",
-          idocDistrict: "Central",
-          latestArrestCB: "2023-08-15",
-          latestFelonyArrestCB: "2022-12-10",
-          onParole: "Yes",
-          latestContact: "2023-09-01",
-          latestContactDistrict: "Central",
-          latestWarrant: "2023-08-20",
-          latestInvestigativeAlert: "2023-09-05",
-          domesticViolenceArrestCount: "2",
-          latestDomesticViolenceArrestDate: "2023-06-12",
-          weaponsPossession: "Yes",
-          weaponsArrestCount: "1",
-          latestWeaponsArrestDate: "2022-12-10",
-          narcoticsPossession: "No",
-          narcoticsArrestCount: "0",
-          latestNarcoticsArrestDate: "",
-          charges: "Aggravated Battery, Violation of Order of Protection, Resisting Arrest",
-          dangerLevel: "HIGH",
-          lastSeen: "September 1, 2023 - Near downtown Chicago",
-          lastKnownVehicle: "2018 Black Ford F-150, License: ABC-1234",
-          orderOfProtection: true,
-          orderOfProtectionType: "plenary",
-          protectionExpirationDate: "2024-12-31",
-          protectionNotes: "Subject has violated order multiple times",
-          protectionDescription: "No contact with Jane Johnson, stay 500 feet away from residence and workplace",
-          protectionPetitioner: "Jane Johnson",
-          protectionRespondent: "Michael Johnson",
-          protectionDocuments: [
-            {
-              name: "Order of Protection - Case #2023-CV-12345",
-              url: "#",
-              type: "pdf"
-            },
-            {
-              name: "Violation Report - 08/20/2023",
-              url: "#",
-              type: "pdf"
-            }
-          ],
-          photos: [
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&crop=face",
-            "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&crop=face&angle=45"
-          ]
-        },
-        {
-          id: "2",
-          lastName: "Rodriguez",
-          firstName: "Maria",
-          middleName: "Elena",
-          name: "Maria Elena Rodriguez",
-          alias: "Mari, Elena",
-          sex: "Female",
-          race: "Hispanic",
-          age: "28",
-          dob: "1995-07-22",
-          deceased: "No",
-          height: "5'4\"",
-          weight: "130 lbs",
-          hair: "Black",
-          eyes: "Brown",
-          tattoos: "Rose on left wrist, butterfly on right ankle",
-          piercings: "Ears pierced",
-          scars: "Small scar on chin",
-          driversLicenseNumber: "D987654321",
-          driversLicenseState: "IL",
-          address: "567 Maple Ave, Apartment 3B, Chicago, IL 60610",
-          addressOfResidence: "567 Maple Ave, Apartment 3B, Chicago, IL 60610",
-          district: "North",
-          majorityDistrict: "District 2",
-          idocNumber: "R67890",
-          idocAddressOfResidence: "567 Maple Ave, Apartment 3B",
-          idocDistrict: "North",
-          latestArrestCB: "2023-07-28",
-          latestFelonyArrestCB: "2023-07-28",
-          onParole: "No",
-          latestContact: "2023-08-15",
-          latestContactDistrict: "North",
-          latestWarrant: "2023-08-01",
-          latestInvestigativeAlert: "2023-08-20",
-          domesticViolenceArrestCount: "0",
-          latestDomesticViolenceArrestDate: "",
-          weaponsPossession: "No",
-          weaponsArrestCount: "0",
-          latestWeaponsArrestDate: "",
-          narcoticsPossession: "Yes",
-          narcoticsArrestCount: "3",
-          latestNarcoticsArrestDate: "2023-07-28",
-          charges: "Possession of Controlled Substance, Intent to Distribute, Failure to Appear",
-          dangerLevel: "LOW",
-          lastSeen: "August 15, 2023 - North Side neighborhood",
-          lastKnownVehicle: "2020 White Honda Civic, License: XYZ-9876",
-          orderOfProtection: false,
-          photos: [
-            "https://images.unsplash.com/photo-1494790108755-2616b612b789?w=300&h=400&fit=crop&crop=face"
-          ]
-        },
-        {
-          id: "3",
-          lastName: "Thompson",
-          firstName: "Robert",
-          middleName: "James",
-          name: "Robert James Thompson",
-          alias: "Bobby, RJ, Tank",
-          sex: "Male",
-          race: "Black",
-          age: "42",
-          dob: "1981-11-08",
-          deceased: "No",
-          height: "6'0\"",
-          weight: "220 lbs",
-          hair: "Black",
-          eyes: "Brown",
-          tattoos: "Skull on neck, 'RESPECT' across knuckles, tribal sleeve on right arm",
-          piercings: "Left ear pierced",
-          scars: "Bullet wound scar on left shoulder, knife scar on right hand",
-          driversLicenseNumber: "D555666777",
-          driversLicenseState: "IL",
-          address: "890 Pine Street, Chicago, IL 60615",
-          addressOfResidence: "890 Pine Street, Chicago, IL 60615",
-          district: "South",
-          majorityDistrict: "District 3",
-          idocNumber: "R11111",
-          idocAddressOfResidence: "890 Pine Street",
-          idocDistrict: "South",
-          latestArrestCB: "2023-09-10",
-          latestFelonyArrestCB: "2023-09-10",
-          onParole: "Yes",
-          latestContact: "2023-09-15",
-          latestContactDistrict: "South",
-          latestWarrant: "2023-09-12",
-          latestInvestigativeAlert: "2023-09-18",
-          domesticViolenceArrestCount: "1",
-          latestDomesticViolenceArrestDate: "2022-05-15",
-          weaponsPossession: "Yes",
-          weaponsArrestCount: "4",
-          latestWeaponsArrestDate: "2023-09-10",
-          narcoticsPossession: "Yes",
-          narcoticsArrestCount: "2",
-          latestNarcoticsArrestDate: "2023-01-20",
-          charges: "Armed Robbery, Unlawful Use of Weapon, Aggravated Assault, Parole Violation",
-          dangerLevel: "EXTREME",
-          lastSeen: "September 15, 2023 - South Side, armed and dangerous",
-          lastKnownVehicle: "2015 Blue Chevrolet Impala, License: DEF-4567",
-          orderOfProtection: true,
-          orderOfProtectionType: "emergency",
-          protectionExpirationDate: "2024-06-30",
-          protectionNotes: "Subject is considered armed and extremely dangerous. Do not approach alone.",
-          protectionDescription: "Emergency protective order - stay away from Lisa Thompson and children",
-          protectionPetitioner: "Lisa Thompson",
-          protectionRespondent: "Robert Thompson",
-          protectionDocuments: [
-            {
-              name: "Emergency Order of Protection - Case #2023-OP-5678",
-              url: "#",
-              type: "pdf"
-            }
-          ],
-          photos: [
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop&crop=face",
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=400&fit=crop&crop=face&sat=-50"
-          ]
+    let cancelled = false;
+
+    const applyLocal = () => {
+      const savedPeople = localStorage.getItem('wantedPeople');
+      const savedSystemName = localStorage.getItem('systemName');
+      const savedDisclaimer = localStorage.getItem('disclaimerText');
+      const savedLogo = localStorage.getItem('logoUrl');
+      if (savedPeople) setPeople(JSON.parse(savedPeople));
+      if (savedSystemName) setSystemName(savedSystemName);
+      if (savedDisclaimer) setDisclaimerText(savedDisclaimer);
+      if (savedLogo) setLogoUrl(savedLogo);
+    };
+
+    (async () => {
+      try {
+        const res = await fetch('/api/data');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (cancelled) return;
+        if (Array.isArray(data.people)) setPeople(data.people);
+        if (data.settings) {
+          if (data.settings.systemName) setSystemName(data.settings.systemName);
+          if (data.settings.disclaimerText) setDisclaimerText(data.settings.disclaimerText);
+          if (typeof data.settings.logoUrl === 'string') setLogoUrl(data.settings.logoUrl);
         }
-      ];
-      setPeople(mockData);
-      localStorage.setItem('wantedPeople', JSON.stringify(mockData));
-    }
-    if (savedSystemName) {
-      setSystemName(savedSystemName);
-    }
-    if (savedDisclaimer) {
-      setDisclaimerText(savedDisclaimer);
-    }
-    if (savedLogo) {
-      setLogoUrl(savedLogo);
-    }
+      } catch (err) {
+        console.warn('Server data unavailable, using localStorage fallback.', err);
+        applyLocal();
+      } finally {
+        if (!cancelled) setDataLoaded(true);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, []);
+
+  // Helper: persist to server (best-effort), always mirror to localStorage.
+  const persistPeople = (newPeople: WantedPerson[]) => {
+    localStorage.setItem('wantedPeople', JSON.stringify(newPeople));
+    fetch('/api/people', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newPeople),
+    }).catch((err) => console.warn('Failed to persist people to server.', err));
+  };
+
+  const persistSettings = (patch: Record<string, string>) => {
+    fetch('/api/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(patch),
+    }).catch((err) => console.warn('Failed to persist settings to server.', err));
+  };
 
   // Filter and search logic
   useEffect(() => {
@@ -322,40 +165,38 @@ const Index = () => {
 
   const savePeople = (newPeople: WantedPerson[]) => {
     setPeople(newPeople);
-    localStorage.setItem('wantedPeople', JSON.stringify(newPeople));
+    persistPeople(newPeople);
   };
 
   const handleAddPerson = (person: Omit<WantedPerson, 'id'>) => {
     const newPerson = { ...person, id: Date.now().toString() };
-    const newPeople = [...people, newPerson];
-    savePeople(newPeople);
+    savePeople([...people, newPerson]);
   };
 
   const handleEditPerson = (id: string, updatedPerson: Omit<WantedPerson, 'id'>) => {
-    const newPeople = people.map(person => 
-      person.id === id ? { ...updatedPerson, id } : person
-    );
-    savePeople(newPeople);
+    savePeople(people.map(p => (p.id === id ? { ...updatedPerson, id } : p)));
   };
 
   const handleDeletePerson = (id: string) => {
-    const newPeople = people.filter(person => person.id !== id);
-    savePeople(newPeople);
+    savePeople(people.filter(person => person.id !== id));
   };
 
   const handleUpdateSystemName = (name: string) => {
     setSystemName(name);
     localStorage.setItem('systemName', name);
+    persistSettings({ systemName: name });
   };
 
   const handleUpdateDisclaimer = (disclaimer: string) => {
     setDisclaimerText(disclaimer);
     localStorage.setItem('disclaimerText', disclaimer);
+    persistSettings({ disclaimerText: disclaimer });
   };
 
   const handleUpdateLogo = (logo: string) => {
     setLogoUrl(logo);
     localStorage.setItem('logoUrl', logo);
+    persistSettings({ logoUrl: logo });
   };
 
   const getDangerLevelColor = (level: string) => {
