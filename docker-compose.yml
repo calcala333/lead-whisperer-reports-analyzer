@@ -8,10 +8,12 @@ services:
       - "6900:6900"
     environment:
       - PORT=6900
+      - DATA_DIR=/data
       - UPLOAD_DIR=/data/uploads
+      - DB_FILE=/data/db.json
     volumes:
-      # Persist uploaded documents on the host.
-      - ./uploads:/data/uploads
+      # Persist uploaded documents AND the JSON data store on the host.
+      - ./data:/data
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:6900/api/health"]
       interval: 30s

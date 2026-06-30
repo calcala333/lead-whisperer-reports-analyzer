@@ -13,7 +13,9 @@ FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production \
     PORT=6900 \
+    DATA_DIR=/data \
     UPLOAD_DIR=/data/uploads \
+    DB_FILE=/data/db.json \
     DIST_DIR=/app/dist
 
 # Install only production deps for the tiny server.
@@ -24,9 +26,9 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY server ./server
 COPY --from=build /app/dist ./dist
 
-# Persistent uploads directory (mount a volume here).
+# Persistent data directory (mount a volume here for uploads + db.json).
 RUN mkdir -p /data/uploads
-VOLUME ["/data/uploads"]
+VOLUME ["/data"]
 
 EXPOSE 6900
 
