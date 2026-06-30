@@ -81,6 +81,10 @@ interface WantedPerson {
   vehicleModel?: string;
   vehicleColor?: string;
   vehiclePlate?: string;
+
+  // Elopement risk
+  elopementRisk?: string;
+  frequentLocations?: string;
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
@@ -187,6 +191,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [vehicleModel, setVehicleModel] = useState("");
   const [vehicleColor, setVehicleColor] = useState("");
   const [vehiclePlate, setVehiclePlate] = useState("");
+  const [elopementRisk, setElopementRisk] = useState("N");
+  const [frequentLocations, setFrequentLocations] = useState("");
   const [orderOfProtection, setOrderOfProtection] = useState(false);
   const [orderOfProtectionType, setOrderOfProtectionType] = useState<'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | ''>('');
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
@@ -329,6 +335,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setVehicleModel("");
     setVehicleColor("");
     setVehiclePlate("");
+    setElopementRisk("N");
+    setFrequentLocations("");
     setOrderOfProtection(false);
     setOrderOfProtectionType('');
     setProtectionExpirationDate("");
@@ -392,6 +400,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       vehicleModel,
       vehicleColor,
       vehiclePlate,
+      elopementRisk,
+      frequentLocations,
       orderOfProtection,
       orderOfProtectionType,
       protectionExpirationDate,
@@ -460,6 +470,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         vehicleModel,
         vehicleColor,
         vehiclePlate,
+        elopementRisk,
+        frequentLocations,
         orderOfProtection,
         orderOfProtectionType,
         protectionExpirationDate,
@@ -533,6 +545,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setVehicleModel(person.vehicleModel || "");
     setVehicleColor(person.vehicleColor || "");
     setVehiclePlate(person.vehiclePlate || "");
+    setElopementRisk(person.elopementRisk || "N");
+    setFrequentLocations(person.frequentLocations || "");
     setOrderOfProtection(person.orderOfProtection || false);
     setOrderOfProtectionType(person.orderOfProtectionType || '');
     setProtectionExpirationDate(person.protectionExpirationDate || "");
