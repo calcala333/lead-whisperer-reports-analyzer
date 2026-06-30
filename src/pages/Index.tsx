@@ -954,6 +954,40 @@ const Index = () => {
                   </div>
                 </div>
 
+                {/* Elopement Risk */}
+                {(selectedPerson.elopementRisk === 'Y' || selectedPerson.elopementRisk === 'UNK' || selectedPerson.frequentLocations) && (
+                  <div>
+                    <div className="bg-amber-600 text-white p-3 rounded-t-lg">
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5" />
+                        ELOPEMENT RISK
+                      </h3>
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4">
+                      <div className="grid grid-cols-1 gap-4 text-sm">
+                        <div>
+                          <div className="text-gray-600 text-xs">Person Wanders</div>
+                          <div className="font-bold">
+                            {selectedPerson.elopementRisk === 'Y'
+                              ? 'YES'
+                              : selectedPerson.elopementRisk === 'UNK'
+                              ? 'Unknown'
+                              : 'No'}
+                          </div>
+                        </div>
+                        {selectedPerson.frequentLocations && (
+                          <div>
+                            <div className="text-gray-600 text-xs">Places Frequently Visited</div>
+                            <div className="font-bold whitespace-pre-wrap">{selectedPerson.frequentLocations}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+
+
                 {/* Order of Protection */}
                 {selectedPerson.orderOfProtection && (
                   <div>
