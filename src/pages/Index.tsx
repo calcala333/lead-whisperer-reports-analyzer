@@ -73,6 +73,25 @@ interface WantedPerson {
   vehiclePlate?: string;
   elopementRisk?: string;
   frequentLocations?: string;
+  remedies?: {
+    r01?: { enabled?: boolean; abuseTypes?: string[] };
+    r02?: { enabled?: boolean; text?: string };
+    r03?: {
+      enabled?: boolean;
+      stayAwayGeneral?: boolean;
+      employmentAddresses?: string;
+      addressConfidential?: boolean;
+      otherAddresses?: string;
+    };
+    r05?: { enabled?: boolean; text?: string };
+    r08?: { enabled?: boolean; text?: string };
+    r10?: { enabled?: boolean; text?: string };
+    r11?: { enabled?: boolean; text?: string };
+    r11_5?: { enabled?: boolean; text?: string };
+    r14?: { enabled?: boolean; text?: string };
+    r14_5?: { enabled?: boolean };
+    r17?: { enabled?: boolean; text?: string };
+  };
 }
 
 const Index = () => {
