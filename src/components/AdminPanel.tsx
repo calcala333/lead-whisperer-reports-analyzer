@@ -134,6 +134,9 @@ interface WantedPerson {
   }>;
   
   photos?: string[];
+
+  // Order of Protection remedies (R01, R02, R03, R05, R08, R10, R11, R11.5, R14, R14.5, R17)
+  remedies?: RemediesState;
 }
 
 interface AdminPanelProps {
