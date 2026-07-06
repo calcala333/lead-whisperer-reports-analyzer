@@ -400,6 +400,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionRespondent("");
     setProtectionDocuments([]);
     setPhotos([]);
+    setRemedies({});
   };
 
   const handleAdd = () => {
@@ -464,7 +465,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       protectionPetitioner,
       protectionRespondent,
       protectionDocuments,
-      photos
+      photos,
+      remedies
     };
     onAddPerson(newPerson);
     resetForm();
@@ -534,7 +536,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         protectionPetitioner,
         protectionRespondent,
         protectionDocuments,
-        photos
+        photos,
+        remedies
       };
       onEditPerson(id, updatedPerson);
       setEditingPerson(null);
@@ -610,6 +613,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionRespondent(person.protectionRespondent || "");
     setProtectionDocuments(person.protectionDocuments || []);
     setPhotos(person.photos || []);
+    setRemedies(person.remedies || {});
     setActiveTab("add");
   };
 
