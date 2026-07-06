@@ -369,9 +369,11 @@ const Index = () => {
            ${row("Respondent", person.protectionRespondent)}
            ${row("Description", person.protectionDescription)}
            ${row("Notes", person.protectionNotes)}
-         </table>`
+          </table>`
       : ""
   }
+
+  ${remediesHtml}
 
   ${
     person.elopementRisk === "Y" || person.frequentLocations
