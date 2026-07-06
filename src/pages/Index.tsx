@@ -282,6 +282,35 @@ const Index = () => {
         label
       )}</td><td style="padding:4px 0;font-weight:600;">${esc(value || "N/A")}</td></tr>`;
 
+
+    const rem = person.remedies || {};
+    const nl2br = (s: string) => esc(s).replace(/\n/g, "<br/>");
+    const remedyItem = (title: string, body: string) =>
+      `<li style="margin-bottom:8px;"><div style="font-weight:700;color:#5a1a8a;">${esc(title)}</div>${body}</li>`;
+    const remedyParts: string[] = [];
+    if (rem.r01?.enabled) {
+      const items = (rem.r01.abuseTypes || []).map((t) => `<li>${esc(t)}</li>`).join("");
+      remedyParts.push(remedyItem("1. No Abuse (R01) — Police Enforced", items ? `<ul>${items}</ul>` : ""));
+    }
+    if (rem.r02?.enabled) remedyParts.push(remedyItem("2. Possession of Residence (R02) — Police Enforced", rem.r02.text ? `<div>${nl2br(rem.r02.text)}</div>` : ""));
+    if (rem.r03?.enabled) {
+      const parts: string[] = [];
+      if (rem.r03.stayAwayGeneral) parts.push("<div>Respondent shall stay away from Petitioner and protected people at all times, including through third parties.</div>");
+      if (rem.r03.employmentAddresses) parts.push(`<div><strong>Employment:</strong><br/>${nl2br(rem.r03.employmentAddresses)}</div>`);
+      if (rem.r03.addressConfidential) parts.push("<div><em>Address is confidential and omitted.</em></div>");
+      if (rem.r03.otherAddresses) parts.push(`<div><strong>Other places:</strong><br/>${nl2br(rem.r03.otherAddresses)}</div>`);
+      remedyParts.push(remedyItem("3. Stay Away from Petitioner and Certain Places (R03) — Police Enforced", parts.join("")));
+    }
+    if (rem.r05?.enabled) remedyParts.push(remedyItem("5. Care and Possession of Children (R05) — Police/Court Enforced", rem.r05.text ? `<div>${nl2br(rem.r05.text)}</div>` : ""));
+    if (rem.r08?.enabled) remedyParts.push(remedyItem("8. No Concealment or Removal of Children (R08) — Police Enforced", rem.r08.text ? `<div>${nl2br(rem.r08.text)}</div>` : ""));
+    if (rem.r10?.enabled) remedyParts.push(remedyItem("10. Possession of Personal Property (R10) — Court Enforced", rem.r10.text ? `<div>${nl2br(rem.r10.text)}</div>` : ""));
+    if (rem.r11?.enabled) remedyParts.push(remedyItem("11. Restrictions on Property (R11) — Court Enforced", rem.r11.text ? `<div>${nl2br(rem.r11.text)}</div>` : ""));
+    if (rem.r11_5?.enabled) remedyParts.push(remedyItem("11.5 Possession of Animals (R11.5) — Court Enforced", rem.r11_5.text ? `<div>${nl2br(rem.r11_5.text)}</div>` : ""));
+    if (rem.r14?.enabled) remedyParts.push(remedyItem("14. No Entry or Presence Under Influence (R14) — Police Enforced", rem.r14.text ? `<div>${nl2br(rem.r14.text)}</div>` : ""));
+    if (rem.r14_5?.enabled) remedyParts.push(remedyItem("14.5 Firearms (R14.5) — Police Enforced", "<div>Respondent prohibited from possessing firearms; must surrender firearms, firearm parts, FOID card, and/or CCL to law enforcement.</div>"));
+    if (rem.r17?.enabled) remedyParts.push(remedyItem("17. Miscellaneous Remedies (R17) — Court Enforced", rem.r17.text ? `<div>${nl2br(rem.r17.text)}</div>` : ""));
+    const remediesHtml = remedyParts.length ? `<h2>Remedies Granted</h2><ul style="list-style:none;padding-left:0;font-size:13px;">${remedyParts.join("")}</ul>` : "";
+
     const html = `<!doctype html>
 <html><head><meta charset="utf-8"/><title>${esc(fullName)} – Order of Protection</title>
 <style>
