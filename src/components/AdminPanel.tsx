@@ -238,6 +238,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [protectionRespondent, setProtectionRespondent] = useState("");
   const [protectionDocuments, setProtectionDocuments] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [remedies, setRemedies] = useState<RemediesState>({});
+
+  // Helpers to update nested remedy state cleanly.
+  const updateRemedy = <K extends keyof RemediesState>(key: K, patch: Partial<NonNullable<RemediesState[K]>>) => {
+    setRemedies((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] as object || {}), ...patch },
+    }));
+  };
+  const toggleAbuseType = (type: string) => {
+    setRemedies((prev) => {
+      const current = prev.r01?.abuseTypes || [];
+      const next = current.includes(type)
+        ? current.filter((t) => t !== type)
+        : [...current, type];
+      return { ...prev, r01: { ...(prev.r01 || {}), abuseTypes: next } };
+    });
+  };
 
   useEffect(() => {
     setTempSystemName(systemName);
