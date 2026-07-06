@@ -8,7 +8,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Edit, Plus, X, Settings, Upload, FileText, Download } from "lucide-react";
+
+// ---------- Order of Protection Remedies ----------
+export const ABUSE_TYPES = [
+  "Harassment",
+  "Intimidation of a Dependent",
+  "Physical Abuse",
+  "Exploitation of a High-Risk Adult with Disabilities",
+  "Stalking",
+  "Neglect of a High-Risk Adult with Disabilities",
+  "Willful Deprivation",
+  "Interference with Personal Liberty",
+] as const;
+
+export interface RemediesState {
+  r01?: { enabled?: boolean; abuseTypes?: string[] };
+  r02?: { enabled?: boolean; text?: string };
+  r03?: {
+    enabled?: boolean;
+    stayAwayGeneral?: boolean;
+    employmentAddresses?: string;
+    addressConfidential?: boolean;
+    otherAddresses?: string;
+  };
+  r05?: { enabled?: boolean; text?: string };
+  r08?: { enabled?: boolean; text?: string };
+  r10?: { enabled?: boolean; text?: string };
+  r11?: { enabled?: boolean; text?: string };
+  r11_5?: { enabled?: boolean; text?: string };
+  r14?: { enabled?: boolean; text?: string };
+  r14_5?: { enabled?: boolean };
+  r17?: { enabled?: boolean; text?: string };
+}
 
 interface WantedPerson {
   id: string;
@@ -101,6 +134,9 @@ interface WantedPerson {
   }>;
   
   photos?: string[];
+
+  // Order of Protection remedies (R01, R02, R03, R05, R08, R10, R11, R11.5, R14, R14.5, R17)
+  remedies?: RemediesState;
 }
 
 interface AdminPanelProps {
@@ -202,6 +238,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [protectionRespondent, setProtectionRespondent] = useState("");
   const [protectionDocuments, setProtectionDocuments] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [remedies, setRemedies] = useState<RemediesState>({});
+
+  // Helpers to update nested remedy state cleanly.
+  const updateRemedy = <K extends keyof RemediesState>(key: K, patch: Partial<NonNullable<RemediesState[K]>>) => {
+    setRemedies((prev) => ({
+      ...prev,
+      [key]: { ...(prev[key] as object || {}), ...patch },
+    }));
+  };
+  const toggleAbuseType = (type: string) => {
+    setRemedies((prev) => {
+      const current = prev.r01?.abuseTypes || [];
+      const next = current.includes(type)
+        ? current.filter((t) => t !== type)
+        : [...current, type];
+      return { ...prev, r01: { ...(prev.r01 || {}), abuseTypes: next } };
+    });
+  };
 
   useEffect(() => {
     setTempSystemName(systemName);
@@ -346,6 +400,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionRespondent("");
     setProtectionDocuments([]);
     setPhotos([]);
+    setRemedies({});
   };
 
   const handleAdd = () => {
@@ -410,7 +465,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       protectionPetitioner,
       protectionRespondent,
       protectionDocuments,
-      photos
+      photos,
+      remedies
     };
     onAddPerson(newPerson);
     resetForm();
@@ -480,7 +536,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         protectionPetitioner,
         protectionRespondent,
         protectionDocuments,
-        photos
+        photos,
+        remedies
       };
       onEditPerson(id, updatedPerson);
       setEditingPerson(null);
@@ -556,6 +613,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setProtectionRespondent(person.protectionRespondent || "");
     setProtectionDocuments(person.protectionDocuments || []);
     setPhotos(person.photos || []);
+    setRemedies(person.remedies || {});
     setActiveTab("add");
   };
 
@@ -1448,6 +1506,298 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           className="resize-none"
                           rows={2}
                         />
+                      </div>
+
+                      {/* ---------- Remedies ---------- */}
+                      <div className="rounded-lg border border-purple-200 bg-purple-50/40 p-4 space-y-5">
+                        <div>
+                          <h4 className="text-base font-bold text-purple-900">Remedies</h4>
+                          <p className="text-xs text-purple-900/70">
+                            Select the remedies granted by the court and fill in the required details.
+                          </p>
+                        </div>
+
+                        {/* R01 - No Abuse */}
+                        <div className="rounded border bg-white p-3 space-y-3">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r01?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r01", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              1. No Abuse (R01){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r01?.enabled && (
+                            <div className="pl-6 space-y-2">
+                              <p className="text-xs text-muted-foreground">
+                                Respondent shall not threaten or commit the following acts of abuse (check all that apply):
+                              </p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {ABUSE_TYPES.map((type) => (
+                                  <label key={type} className="flex items-start gap-2 text-sm cursor-pointer">
+                                    <Checkbox
+                                      checked={remedies.r01?.abuseTypes?.includes(type) || false}
+                                      onCheckedChange={() => toggleAbuseType(type)}
+                                    />
+                                    <span>{type}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* R02 - Possession of Residence */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r02?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r02", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              2. Possession of Residence (R02){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r02?.enabled && (
+                            <Textarea
+                              value={remedies.r02?.text || ""}
+                              onChange={(e) => updateRemedy("r02", { text: e.target.value })}
+                              placeholder="Petitioner is granted exclusive possession of the residence located at…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
+
+                        {/* R03 - Stay Away */}
+                        <div className="rounded border bg-white p-3 space-y-3">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r03?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r03", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              3. Stay Away from Petitioner, Protected People, and Certain Places (R03){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r03?.enabled && (
+                            <div className="pl-6 space-y-3">
+                              <label className="flex items-start gap-2 text-sm cursor-pointer">
+                                <Checkbox
+                                  checked={!!remedies.r03?.stayAwayGeneral}
+                                  onCheckedChange={(v) => updateRemedy("r03", { stayAwayGeneral: !!v })}
+                                />
+                                <span>
+                                  Respondent shall stay away from Petitioner and protected people at all times, and shall
+                                  not have any contact, including through third parties.
+                                </span>
+                              </label>
+                              <div>
+                                <Label className="text-xs">Petitioner's places of employment (name, street, city, state, ZIP)</Label>
+                                <Textarea
+                                  value={remedies.r03?.employmentAddresses || ""}
+                                  onChange={(e) => updateRemedy("r03", { employmentAddresses: e.target.value })}
+                                  placeholder="Name&#10;Street Address, City, State ZIP"
+                                  rows={3}
+                                />
+                                <label className="mt-2 flex items-center gap-2 text-xs cursor-pointer">
+                                  <Checkbox
+                                    checked={!!remedies.r03?.addressConfidential}
+                                    onCheckedChange={(v) => updateRemedy("r03", { addressConfidential: !!v })}
+                                  />
+                                  <span>Address is confidential and is omitted from these forms.</span>
+                                </label>
+                              </div>
+                              <div>
+                                <Label className="text-xs">Other places Respondent must stay away from</Label>
+                                <Textarea
+                                  value={remedies.r03?.otherAddresses || ""}
+                                  onChange={(e) => updateRemedy("r03", { otherAddresses: e.target.value })}
+                                  placeholder="Name&#10;Street Address, City, State ZIP"
+                                  rows={3}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* R05 - Care and Possession of Children */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r05?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r05", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              5. Care and Possession of Children (R05){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police/Court Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r05?.enabled && (
+                            <Textarea
+                              value={remedies.r05?.text || ""}
+                              onChange={(e) => updateRemedy("r05", { text: e.target.value })}
+                              placeholder="Details of care and possession of children…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
+
+                        {/* R08 - No Concealment or Removal of Children */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r08?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r08", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              8. No Concealment or Removal of Children (R08){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r08?.enabled && (
+                            <Textarea
+                              value={remedies.r08?.text || ""}
+                              onChange={(e) => updateRemedy("r08", { text: e.target.value })}
+                              placeholder="Respondent shall not hide the minor children within the State or remove the children from Illinois. Details…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
+
+                        {/* R10 - Possession of Personal Property */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r10?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r10", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              10. Possession of Personal Property (R10){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Court Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r10?.enabled && (
+                            <Textarea
+                              value={remedies.r10?.text || ""}
+                              onChange={(e) => updateRemedy("r10", { text: e.target.value })}
+                              placeholder="Petitioner is awarded possession of the following property…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
+
+                        {/* R11 - Restrictions on Property */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r11?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r11", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              11. Restrictions on Property (R11){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Court Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r11?.enabled && (
+                            <Textarea
+                              value={remedies.r11?.text || ""}
+                              onChange={(e) => updateRemedy("r11", { text: e.target.value })}
+                              placeholder="The following property is protected…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
+
+                        {/* R11.5 - Possession of Animals */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r11_5?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r11_5", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              11.5 Possession of Animals (R11.5){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Court Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r11_5?.enabled && (
+                            <Textarea
+                              value={remedies.r11_5?.text || ""}
+                              onChange={(e) => updateRemedy("r11_5", { text: e.target.value })}
+                              placeholder="Animals (name, type, breed)…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
+
+                        {/* R14 - No Entry Under Influence */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r14?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r14", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              14. No Entry or Presence Under Influence (R14){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r14?.enabled && (
+                            <Textarea
+                              value={remedies.r14?.text || ""}
+                              onChange={(e) => updateRemedy("r14", { text: e.target.value })}
+                              placeholder="Details / conditions…"
+                              rows={2}
+                            />
+                          )}
+                        </div>
+
+                        {/* R14.5 - Firearms */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r14_5?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r14_5", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              14.5 Firearms (R14.5){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Police Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r14_5?.enabled && (
+                            <p className="pl-6 text-xs text-muted-foreground">
+                              Respondent is prohibited from possessing firearms for the duration of this order and must
+                              surrender firearms, firearm parts, FOID card, and/or Concealed Carry License to law
+                              enforcement.
+                            </p>
+                          )}
+                        </div>
+
+                        {/* R17 - Miscellaneous */}
+                        <div className="rounded border bg-white p-3 space-y-2">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={!!remedies.r17?.enabled}
+                              onCheckedChange={(v) => updateRemedy("r17", { enabled: !!v })}
+                            />
+                            <span className="text-sm font-semibold">
+                              17. Miscellaneous Remedies (R17){" "}
+                              <span className="text-xs font-normal text-muted-foreground">(Court Enforced)</span>
+                            </span>
+                          </label>
+                          {remedies.r17?.enabled && (
+                            <Textarea
+                              value={remedies.r17?.text || ""}
+                              onChange={(e) => updateRemedy("r17", { text: e.target.value })}
+                              placeholder="The court further orders as follows…"
+                              rows={3}
+                            />
+                          )}
+                        </div>
                       </div>
 
                       {/* Document Upload Section */}
