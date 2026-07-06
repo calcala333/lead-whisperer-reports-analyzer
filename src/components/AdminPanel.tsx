@@ -8,7 +8,40 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Trash2, Edit, Plus, X, Settings, Upload, FileText, Download } from "lucide-react";
+
+// ---------- Order of Protection Remedies ----------
+export const ABUSE_TYPES = [
+  "Harassment",
+  "Intimidation of a Dependent",
+  "Physical Abuse",
+  "Exploitation of a High-Risk Adult with Disabilities",
+  "Stalking",
+  "Neglect of a High-Risk Adult with Disabilities",
+  "Willful Deprivation",
+  "Interference with Personal Liberty",
+] as const;
+
+export interface RemediesState {
+  r01?: { enabled?: boolean; abuseTypes?: string[] };
+  r02?: { enabled?: boolean; text?: string };
+  r03?: {
+    enabled?: boolean;
+    stayAwayGeneral?: boolean;
+    employmentAddresses?: string;
+    addressConfidential?: boolean;
+    otherAddresses?: string;
+  };
+  r05?: { enabled?: boolean; text?: string };
+  r08?: { enabled?: boolean; text?: string };
+  r10?: { enabled?: boolean; text?: string };
+  r11?: { enabled?: boolean; text?: string };
+  r11_5?: { enabled?: boolean; text?: string };
+  r14?: { enabled?: boolean; text?: string };
+  r14_5?: { enabled?: boolean };
+  r17?: { enabled?: boolean; text?: string };
+}
 
 interface WantedPerson {
   id: string;
