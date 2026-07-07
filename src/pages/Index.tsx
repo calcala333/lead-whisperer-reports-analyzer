@@ -365,7 +365,8 @@ const Index = () => {
          <table>
            ${row("Status", "ACTIVE")}
            ${row("Expiration", person.protectionExpirationDate)}
-           ${row("Type", person.orderOfProtectionType)}
+           ${row("Type", person.orderOfProtectionType ? getOrderOfProtectionTypeLabel(person.orderOfProtectionType) : "")}
+           ${row("Status Flags", (person.orderStatusFlags || []).map(orderStatusFlagLabel).join(", "))}
            ${row("Petitioner", person.protectionPetitioner)}
            ${row("Respondent", person.protectionRespondent)}
            ${row("Description", person.protectionDescription)}
