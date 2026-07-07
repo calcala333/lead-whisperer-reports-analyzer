@@ -611,6 +611,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setFrequentLocations(person.frequentLocations || "");
     setOrderOfProtection(person.orderOfProtection || false);
     setOrderOfProtectionType(person.orderOfProtectionType || '');
+    setOrderStatusFlags(person.orderStatusFlags || []);
     setProtectionExpirationDate(person.protectionExpirationDate || "");
     setProtectionNotes(person.protectionNotes || "");
     setProtectionDescription(person.protectionDescription || "");
