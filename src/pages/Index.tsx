@@ -405,18 +405,27 @@ const Index = () => {
 
   const getOrderOfProtectionTypeLabel = (type: string) => {
     switch (type) {
-      case 'plenary':
-        return 'Plenary Order of Protection';
+      case 'order':
+        return 'Order of Protection';
       case 'stalking':
         return 'Stalking No Contact Order';
       case 'civil':
-        return 'Civil No-Contact Order';
-      case 'order':
-        return 'Order of Protection';
-      case 'emergency':
-        return 'Emergency Order of Protection';
+        return 'Civil No Contact Order';
+      case 'firearms':
+        return 'Firearms Restraining Order';
       default:
         return 'Order of Protection';
+    }
+  };
+
+  const orderStatusFlagLabel = (flag: string) => {
+    switch (flag) {
+      case 'no-unlawful-contact': return 'No Unlawful Contact';
+      case 'no-contact': return 'No Contact';
+      case 'emergency': return 'Emergency';
+      case 'durational': return 'Durational';
+      case 'plenary': return 'Plenary';
+      default: return flag;
     }
   };
 
