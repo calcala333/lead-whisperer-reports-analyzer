@@ -54,7 +54,8 @@ interface WantedPerson {
   lastSeen: string;
   lastKnownVehicle?: string;
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | '';
+  orderOfProtectionType?: 'order' | 'stalking' | 'civil' | 'firearms' | '';
+  orderStatusFlags?: string[];
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
@@ -364,7 +365,8 @@ const Index = () => {
          <table>
            ${row("Status", "ACTIVE")}
            ${row("Expiration", person.protectionExpirationDate)}
-           ${row("Type", person.orderOfProtectionType)}
+           ${row("Type", person.orderOfProtectionType ? getOrderOfProtectionTypeLabel(person.orderOfProtectionType) : "")}
+           ${row("Status Flags", (person.orderStatusFlags || []).map(orderStatusFlagLabel).join(", "))}
            ${row("Petitioner", person.protectionPetitioner)}
            ${row("Respondent", person.protectionRespondent)}
            ${row("Description", person.protectionDescription)}
@@ -404,18 +406,27 @@ const Index = () => {
 
   const getOrderOfProtectionTypeLabel = (type: string) => {
     switch (type) {
-      case 'plenary':
-        return 'Plenary Order of Protection';
+      case 'order':
+        return 'Order of Protection';
       case 'stalking':
         return 'Stalking No Contact Order';
       case 'civil':
-        return 'Civil No-Contact Order';
-      case 'order':
-        return 'Order of Protection';
-      case 'emergency':
-        return 'Emergency Order of Protection';
+        return 'Civil No Contact Order';
+      case 'firearms':
+        return 'Firearms Restraining Order';
       default:
         return 'Order of Protection';
+    }
+  };
+
+  const orderStatusFlagLabel = (flag: string) => {
+    switch (flag) {
+      case 'no-unlawful-contact': return 'No Unlawful Contact';
+      case 'no-contact': return 'No Contact';
+      case 'emergency': return 'Emergency';
+      case 'durational': return 'Durational';
+      case 'plenary': return 'Plenary';
+      default: return flag;
     }
   };
 
@@ -1061,6 +1072,18 @@ const Index = () => {
                           <div className="col-span-2">
                             <div className="text-gray-600 text-xs">Type</div>
                             <div className="font-bold">{getOrderOfProtectionTypeLabel(selectedPerson.orderOfProtectionType)}</div>
+                          </div>
+                        )}
+                        {selectedPerson.orderStatusFlags && selectedPerson.orderStatusFlags.length > 0 && (
+                          <div className="col-span-2">
+                            <div className="text-gray-600 text-xs">Status</div>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {selectedPerson.orderStatusFlags.map((f) => (
+                                <span key={f} className="px-2 py-1 rounded bg-purple-100 text-purple-800 text-xs font-semibold">
+                                  {orderStatusFlagLabel(f)}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                         {selectedPerson.protectionPetitioner && (
