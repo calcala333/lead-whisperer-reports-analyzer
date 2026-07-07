@@ -1073,6 +1073,18 @@ const Index = () => {
                             <div className="font-bold">{getOrderOfProtectionTypeLabel(selectedPerson.orderOfProtectionType)}</div>
                           </div>
                         )}
+                        {selectedPerson.orderStatusFlags && selectedPerson.orderStatusFlags.length > 0 && (
+                          <div className="col-span-2">
+                            <div className="text-gray-600 text-xs">Status</div>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {selectedPerson.orderStatusFlags.map((f) => (
+                                <span key={f} className="px-2 py-1 rounded bg-purple-100 text-purple-800 text-xs font-semibold">
+                                  {orderStatusFlagLabel(f)}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         {selectedPerson.protectionPetitioner && (
                           <div>
                             <div className="text-gray-600 text-xs">Petitioner</div>
