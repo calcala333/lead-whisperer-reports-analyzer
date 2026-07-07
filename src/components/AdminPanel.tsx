@@ -533,6 +533,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         frequentLocations,
         orderOfProtection,
         orderOfProtectionType,
+        orderStatusFlags,
         protectionExpirationDate,
         protectionNotes,
         protectionDescription,
