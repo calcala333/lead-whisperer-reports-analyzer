@@ -121,7 +121,8 @@ interface WantedPerson {
   
   // Enhanced Order of Protection
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | '';
+  orderOfProtectionType?: 'order' | 'stalking' | 'civil' | 'firearms' | '';
+  orderStatusFlags?: string[];
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
