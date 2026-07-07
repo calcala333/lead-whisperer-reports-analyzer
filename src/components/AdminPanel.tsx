@@ -1430,26 +1430,50 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         <Label htmlFor="orderOfProtectionType">Type of Order</Label>
                         <Select 
                           value={orderOfProtectionType} 
-                          onValueChange={(value) => setOrderOfProtectionType(value as 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | 'no-contact' | 'no-unlawful-contact' | 'stalking-emergency' | 'sexual-assault' | '')}
+                          onValueChange={(value) => setOrderOfProtectionType(value as 'order' | 'stalking' | 'civil' | 'firearms' | '')}
                         >
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="no-contact">Order of Protection-No Contact</SelectItem>
-                            <SelectItem value="no-unlawful-contact">Order of Protection-No Unlawful Contact</SelectItem>
-                            <SelectItem value="stalking-emergency">Stalking No Contact Order--Emergency</SelectItem>
-                            <SelectItem value="sexual-assault">Sexual Assault No Contact Order</SelectItem>
-                            <SelectItem value="plenary">Plenary Order of Protection</SelectItem>
-                            <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
-                            <SelectItem value="civil">Civil No-Contact Order</SelectItem>
                             <SelectItem value="order">Order of Protection</SelectItem>
-              <SelectItem value="emergency">Emergency Order of Protection</SelectItem>
+                            <SelectItem value="stalking">Stalking No Contact Order</SelectItem>
+                            <SelectItem value="civil">Civil No Contact Order</SelectItem>
+                            <SelectItem value="firearms">Firearms Restraining Order</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     )}
                   </div>
+
+                  {orderOfProtection && (
+                    <div>
+                      <Label>Order Status (check all that apply)</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2 p-3 border rounded-md">
+                        {[
+                          { value: 'no-unlawful-contact', label: 'No Unlawful Contact' },
+                          { value: 'no-contact', label: 'No Contact' },
+                          { value: 'emergency', label: 'Emergency' },
+                          { value: 'durational', label: 'Durational' },
+                          { value: 'plenary', label: 'Plenary' },
+                        ].map((opt) => (
+                          <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={orderStatusFlags.includes(opt.value)}
+                              onCheckedChange={(checked) => {
+                                setOrderStatusFlags((prev) =>
+                                  checked
+                                    ? [...prev, opt.value]
+                                    : prev.filter((v) => v !== opt.value)
+                                );
+                              }}
+                            />
+                            <span className="text-sm">{opt.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   {orderOfProtection && (
                     <>
