@@ -37,16 +37,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onAccept, disclaimerText, l
           {/* Header */}
           <div className="px-8 pt-8 pb-6 text-center border-b border-border">
             <div className="flex justify-center mb-4">
-              {logoUrl ? (
-                <img src={logoUrl} alt="System Logo" className="h-20 w-auto object-contain" />
-              ) : (
-                <div
-                  className="h-16 w-16 rounded-2xl flex items-center justify-center text-primary-foreground shadow-lg"
-                  style={{ background: "var(--gradient-primary)" }}
-                >
-                  <Shield className="h-8 w-8" />
-                </div>
-              )}
+              <img
+                src={logoUrl || defaultLogo}
+                alt="System Logo"
+                className="h-24 w-auto object-contain"
+              />
             </div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-semibold uppercase tracking-wider mb-3">
               <Lock className="h-3 w-3" />
