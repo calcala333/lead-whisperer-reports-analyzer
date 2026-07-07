@@ -54,7 +54,8 @@ interface WantedPerson {
   lastSeen: string;
   lastKnownVehicle?: string;
   orderOfProtection?: boolean;
-  orderOfProtectionType?: 'plenary' | 'stalking' | 'civil' | 'order' | 'emergency' | '';
+  orderOfProtectionType?: 'order' | 'stalking' | 'civil' | 'firearms' | '';
+  orderStatusFlags?: string[];
   protectionExpirationDate?: string;
   protectionNotes?: string;
   protectionDescription?: string;
