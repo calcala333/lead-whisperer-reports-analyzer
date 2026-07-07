@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Shield, Lock, CheckCircle2 } from "lucide-react";
+import { AlertTriangle, Lock, CheckCircle2 } from "lucide-react";
+import defaultLogo from "@/assets/default-logo.png";
 
 interface SplashScreenProps {
   onAccept: () => void;
