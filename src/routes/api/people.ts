@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { updateDb } from "./_storage";
+import { updateDb } from "./-_storage";
 
 export const Route = createFileRoute("/api/people")({
   server: {

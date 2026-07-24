@@ -5,16 +5,16 @@ services:
     container_name: aop-app
     restart: unless-stopped
     ports:
-      - "6900:6900"
+      - "6909:6909"
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
-      PORT: "6900"
+      PORT: "6909"
       DATA_DIR: /data
     volumes:
       - aop-data:/data
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:6900/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:6909/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 10s
       retries: 3

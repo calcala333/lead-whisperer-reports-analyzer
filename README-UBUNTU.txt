@@ -17,7 +17,7 @@ IMPORTANT:
    docker compose logs -f
 
 Open the site at:
-  http://YOUR-SERVER-IP:6900
+  http://YOUR-SERVER-IP:6909
 
 Do not run "docker compose down -v" unless you intentionally want to delete the persistent database and uploaded files.
 
@@ -26,3 +26,10 @@ The project uses Node.js 22 in Docker. For local development, install Node.js 22
   rm -rf node_modules package-lock.json
   npm install
   npm run dev
+
+PORT CONFIGURATION
+The application listens on port 6909 inside the container and is published on port 6909 on the Ubuntu host:
+  6909:6909
+
+Health check:
+  curl http://localhost:6909/api/health

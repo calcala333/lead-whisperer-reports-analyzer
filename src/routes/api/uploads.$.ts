@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { readUpload, guessMime } from "./_storage";
+import { readUpload, guessMime } from "./-_storage";
 
 export const Route = createFileRoute("/api/uploads/$")({
   server: {

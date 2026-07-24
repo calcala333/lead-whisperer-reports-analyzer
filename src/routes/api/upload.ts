@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { saveUpload, guessMime } from "./_storage";
+import { saveUpload, guessMime } from "./-_storage";
 
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 const ALLOWED_TYPES = new Set([

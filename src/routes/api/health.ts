@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { readDb } from "./_storage";
+import { readDb } from "./-_storage";
 
 export const Route = createFileRoute("/api/health")({
   server: {

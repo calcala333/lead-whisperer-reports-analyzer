@@ -15,7 +15,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production \
     HOST=0.0.0.0 \
-    PORT=6900 \
+    PORT=6909 \
     DATA_DIR=/data
 
 COPY --from=build /app/.output ./.output
@@ -24,6 +24,6 @@ RUN mkdir -p /data && chown -R node:node /data
 USER node
 
 VOLUME ["/data"]
-EXPOSE 6900
+EXPOSE 6909
 
 CMD ["node", ".output/server/index.mjs"]
