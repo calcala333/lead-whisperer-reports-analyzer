@@ -6,6 +6,7 @@ COPY package.json ./
 RUN npm install --no-audit --no-fund
 
 COPY . .
+RUN rm -f postcss.config.js postcss.config.cjs postcss.config.mjs
 RUN npm run build
 
 # ---- Runtime stage ----
