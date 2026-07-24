@@ -23,6 +23,200 @@ export const ABUSE_TYPES = [
   "Interference with Personal Liberty",
 ] as const;
 
+const US_STATES = [
+  ["AL", "Alabama"], ["AK", "Alaska"], ["AZ", "Arizona"], ["AR", "Arkansas"],
+  ["CA", "California"], ["CO", "Colorado"], ["CT", "Connecticut"], ["DE", "Delaware"],
+  ["FL", "Florida"], ["GA", "Georgia"], ["HI", "Hawaii"], ["ID", "Idaho"],
+  ["IL", "Illinois"], ["IN", "Indiana"], ["IA", "Iowa"], ["KS", "Kansas"],
+  ["KY", "Kentucky"], ["LA", "Louisiana"], ["ME", "Maine"], ["MD", "Maryland"],
+  ["MA", "Massachusetts"], ["MI", "Michigan"], ["MN", "Minnesota"], ["MS", "Mississippi"],
+  ["MO", "Missouri"], ["MT", "Montana"], ["NE", "Nebraska"], ["NV", "Nevada"],
+  ["NH", "New Hampshire"], ["NJ", "New Jersey"], ["NM", "New Mexico"], ["NY", "New York"],
+  ["NC", "North Carolina"], ["ND", "North Dakota"], ["OH", "Ohio"], ["OK", "Oklahoma"],
+  ["OR", "Oregon"], ["PA", "Pennsylvania"], ["RI", "Rhode Island"], ["SC", "South Carolina"],
+  ["SD", "South Dakota"], ["TN", "Tennessee"], ["TX", "Texas"], ["UT", "Utah"],
+  ["VT", "Vermont"], ["VA", "Virginia"], ["WA", "Washington"], ["WV", "West Virginia"],
+  ["WI", "Wisconsin"], ["WY", "Wyoming"], ["DC", "District of Columbia"]
+] as const;
+
+const VEHICLE_MODELS: Record<string, string[]> = {
+  Acura: ["ILX", "Integra", "MDX", "RDX", "TLX", "Other"],
+  Audi: ["A3", "A4", "A5", "A6", "A7", "A8", "Q3", "Q5", "Q7", "Q8", "Other"],
+  BMW: ["2 Series", "3 Series", "4 Series", "5 Series", "7 Series", "X1", "X3", "X5", "X7", "Other"],
+  Buick: ["Enclave", "Encore", "Envision", "LaCrosse", "Regal", "Other"],
+  Cadillac: ["CT4", "CT5", "Escalade", "XT4", "XT5", "XT6", "Other"],
+  Chevrolet: ["Blazer", "Camaro", "Colorado", "Corvette", "Equinox", "Impala", "Malibu", "Silverado", "Suburban", "Tahoe", "Trailblazer", "Traverse", "Other"],
+  Chrysler: ["200", "300", "Pacifica", "Town & Country", "Voyager", "Other"],
+  Dodge: ["Challenger", "Charger", "Dart", "Durango", "Grand Caravan", "Journey", "Other"],
+  Ford: ["Bronco", "Edge", "Escape", "Expedition", "Explorer", "F-150", "Focus", "Fusion", "Maverick", "Mustang", "Ranger", "Taurus", "Transit", "Other"],
+  GMC: ["Acadia", "Canyon", "Savana", "Sierra", "Terrain", "Yukon", "Other"],
+  Honda: ["Accord", "Civic", "CR-V", "HR-V", "Odyssey", "Passport", "Pilot", "Ridgeline", "Other"],
+  Hyundai: ["Accent", "Elantra", "Kona", "Palisade", "Santa Fe", "Sonata", "Tucson", "Venue", "Other"],
+  Infiniti: ["Q50", "Q60", "QX50", "QX55", "QX60", "QX80", "Other"],
+  Jeep: ["Cherokee", "Compass", "Gladiator", "Grand Cherokee", "Renegade", "Wrangler", "Other"],
+  Kia: ["Carnival", "Forte", "K5", "Niro", "Optima", "Rio", "Seltos", "Sorento", "Soul", "Sportage", "Telluride", "Other"],
+  Lexus: ["ES", "GX", "IS", "LS", "NX", "RX", "UX", "Other"],
+  Lincoln: ["Aviator", "Corsair", "MKC", "MKZ", "Nautilus", "Navigator", "Other"],
+  Mazda: ["Mazda3", "Mazda6", "CX-3", "CX-30", "CX-5", "CX-50", "CX-9", "CX-90", "Other"],
+  "Mercedes-Benz": ["A-Class", "C-Class", "E-Class", "S-Class", "CLA", "GLA", "GLB", "GLC", "GLE", "GLS", "Other"],
+  Mitsubishi: ["Eclipse Cross", "Lancer", "Mirage", "Outlander", "Outlander Sport", "Other"],
+  Nissan: ["Altima", "Armada", "Frontier", "Kicks", "Maxima", "Murano", "Pathfinder", "Rogue", "Sentra", "Titan", "Versa", "Other"],
+  Pontiac: ["G5", "G6", "Grand Am", "Grand Prix", "GTO", "Torrent", "Vibe", "Other"],
+  Ram: ["1500", "2500", "3500", "ProMaster", "Other"],
+  Subaru: ["Ascent", "Crosstrek", "Forester", "Impreza", "Legacy", "Outback", "WRX", "Other"],
+  Tesla: ["Model 3", "Model S", "Model X", "Model Y", "Cybertruck", "Other"],
+  Toyota: ["4Runner", "Avalon", "Camry", "Corolla", "Highlander", "Prius", "RAV4", "Sequoia", "Sienna", "Tacoma", "Tundra", "Venza", "Other"],
+  Volkswagen: ["Atlas", "Golf", "ID.4", "Jetta", "Passat", "Taos", "Tiguan", "Other"],
+  Volvo: ["S60", "S90", "V60", "XC40", "XC60", "XC90", "Other"],
+  Other: ["Other"]
+};
+
+const formatGroupedNumber = (value: string, groups: number[]) => {
+  const digits = value.replace(/\D/g, "").slice(0, groups.reduce((a, b) => a + b, 0));
+  const parts: string[] = [];
+  let offset = 0;
+  for (const size of groups) {
+    const part = digits.slice(offset, offset + size);
+    if (part) parts.push(part);
+    offset += size;
+  }
+  return parts.join("-");
+};
+
+const normalizeAddress = (value: string) =>
+  value.trim().replace(/\s+/g, " ").toUpperCase();
+
+const addressLooksComplete = (value: string) => {
+  const normalized = normalizeAddress(value);
+  if (!normalized) return true;
+  // A gentle validation check: street number, street name, state abbreviation, and ZIP.
+  // It does not block unusual or confidential addresses.
+  return /^\d+[A-Z-]?\s+.+,?\s+[A-Z .'-]+,?\s+[A-Z]{2}\s+\d{5}(?:-\d{4})?$/.test(normalized);
+};
+
+
+interface AddressMatch {
+  address: string;
+  coordinates?: { latitude: number; longitude: number };
+}
+
+interface ValidatedAddressInputProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+}
+
+const ValidatedAddressInput = ({ id, label, value, onChange, placeholder }: ValidatedAddressInputProps) => {
+  const [matches, setMatches] = useState<AddressMatch[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [validated, setValidated] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    const query = value.trim();
+    setValidated(false);
+    setMessage("");
+    if (query.length < 6) {
+      setMatches([]);
+      setOpen(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/address-search?q=${encodeURIComponent(query)}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("Address service unavailable");
+        const data = await response.json() as { matches?: AddressMatch[] };
+        const nextMatches = Array.isArray(data.matches) ? data.matches : [];
+        setMatches(nextMatches);
+        setOpen(true);
+        if (nextMatches.length === 0) setMessage("No validated address found. Add the city, state, and ZIP, then try again.");
+      } catch (error) {
+        if ((error as Error).name !== "AbortError") {
+          setMatches([]);
+          setMessage("Address validation is temporarily unavailable. You may still enter the address manually.");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }, 450);
+
+    return () => {
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [value]);
+
+  const chooseAddress = (match: AddressMatch) => {
+    onChange(normalizeAddress(match.address));
+    setValidated(true);
+    setMessage("Address validated using the U.S. Census Geocoder.");
+    setMatches([]);
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        type="text"
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => matches.length > 0 && setOpen(true)}
+        onBlur={() => window.setTimeout(() => setOpen(false), 180)}
+        autoComplete="off"
+        placeholder={placeholder}
+        aria-autocomplete="list"
+        aria-expanded={open}
+      />
+      {loading && <p className="mt-1 text-xs text-gray-500">Checking address…</p>}
+      {!loading && message && (
+        <p className={`mt-1 text-xs ${validated ? "text-green-700" : "text-amber-700"}`}>{message}</p>
+      )}
+      {!loading && !message && value && !addressLooksComplete(value) && (
+        <p className="mt-1 text-xs text-amber-700">Enter street, city, state, and ZIP to validate the address.</p>
+      )}
+      {open && matches.length > 0 && (
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border bg-white shadow-lg" role="listbox">
+          {matches.map((match, index) => (
+            <button
+              key={`${match.address}-${index}`}
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => chooseAddress(match)}
+              className="block w-full border-b px-3 py-2 text-left text-sm hover:bg-blue-50 last:border-b-0"
+              role="option"
+            >
+              <span className="font-medium">{normalizeAddress(match.address)}</span>
+              <span className="mt-0.5 block text-xs text-green-700">Validated address</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const toDateInputValue = (value?: string) => {
+  if (!value) return "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const year = parsed.getFullYear();
+  const month = String(parsed.getMonth() + 1).padStart(2, "0");
+  const day = String(parsed.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 export interface RemediesState {
   r01?: { enabled?: boolean; abuseTypes?: string[] };
   r02?: { enabled?: boolean; text?: string };
@@ -43,8 +237,36 @@ export interface RemediesState {
   r17?: { enabled?: boolean; text?: string };
 }
 
+interface VictimInfo {
+  name: string;
+  relationship: string;
+  dob: string;
+  address: string;
+  phone: string;
+}
+
+interface ChildInfo {
+  name: string;
+  dob: string;
+  relationship: string;
+  schoolName: string;
+  schoolAddress: string;
+}
+
+interface DescriptorPhoto {
+  url: string;
+  category: "scar" | "tattoo";
+  description: string;
+}
+
 interface WantedPerson {
   id: string;
+  createdDate?: string;
+  lastModifiedDate?: string;
+  createdByName?: string;
+  createdByStarNumber?: string;
+  lastModifiedByName?: string;
+  lastModifiedByStarNumber?: string;
   // Subject Demographics
   lastName: string;
   firstName: string;
@@ -106,7 +328,10 @@ interface WantedPerson {
   hair?: string;
   eyes?: string;
   charges: string;
-  dangerLevel: string;
+  activeCases?: string;
+  activeCaseNumber?: string;
+  activeCaseNumbers?: string[];
+  dangerLevel?: string;
   lastSeen: string;
   lastKnownVehicle?: string;
   knownAssailants?: string;
@@ -124,6 +349,7 @@ interface WantedPerson {
   orderOfProtectionType?: 'order' | 'stalking' | 'civil' | 'firearms' | '';
   orderStatusFlags?: string[];
   protectionExpirationDate?: string;
+  protectionForDurationOfCourtDate?: boolean;
   protectionNotes?: string;
   protectionDescription?: string;
   protectionPetitioner?: string;
@@ -135,6 +361,9 @@ interface WantedPerson {
   }>;
   
   photos?: string[];
+  victims?: VictimInfo[];
+  children?: ChildInfo[];
+  descriptorPhotos?: DescriptorPhoto[];
 
   // Order of Protection remedies (R01, R02, R03, R05, R08, R10, R11, R11.5, R14, R14.5, R17)
   remedies?: RemediesState;
@@ -220,7 +449,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [hair, setHair] = useState("");
   const [eyes, setEyes] = useState("");
   const [charges, setCharges] = useState("");
-  const [dangerLevel, setDangerLevel] = useState("HIGH");
+  const [activeCases, setActiveCases] = useState("");
+  const [activeCaseNumbers, setActiveCaseNumbers] = useState<string[]>([""]);
   const [lastSeen, setLastSeen] = useState("");
   const [lastKnownVehicle, setLastKnownVehicle] = useState("");
   const [knownAssailants, setKnownAssailants] = useState("");
@@ -234,13 +464,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
   const [orderOfProtectionType, setOrderOfProtectionType] = useState<'order' | 'stalking' | 'civil' | 'firearms' | ''>('');
   const [orderStatusFlags, setOrderStatusFlags] = useState<string[]>([]);
   const [protectionExpirationDate, setProtectionExpirationDate] = useState("");
+  const [protectionForDurationOfCourtDate, setProtectionForDurationOfCourtDate] = useState(false);
   const [protectionNotes, setProtectionNotes] = useState("");
   const [protectionDescription, setProtectionDescription] = useState("");
   const [protectionPetitioner, setProtectionPetitioner] = useState("");
   const [protectionRespondent, setProtectionRespondent] = useState("");
   const [protectionDocuments, setProtectionDocuments] = useState<Array<{ name: string; url: string; type: string }>>([]);
   const [photos, setPhotos] = useState<string[]>([]);
+  const [victims, setVictims] = useState<VictimInfo[]>([]);
+  const [children, setChildren] = useState<ChildInfo[]>([]);
+  const [descriptorPhotos, setDescriptorPhotos] = useState<DescriptorPhoto[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [remedies, setRemedies] = useState<RemediesState>({});
+
+  const today = new Date().toISOString().slice(0, 10);
 
   // Helpers to update nested remedy state cleanly.
   const updateRemedy = <K extends keyof RemediesState>(key: K, patch: Partial<NonNullable<RemediesState[K]>>) => {
@@ -286,50 +524,64 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
   const uploadToServer = async (file: File) => {
     const form = new FormData();
-    form.append("file", file);
+    form.append("file", file, file.name);
     const res = await fetch("/api/upload", { method: "POST", body: form });
-    if (!res.ok) throw new Error(`Upload failed: ${res.status}`);
-    return (await res.json()) as { name: string; url: string; type: string };
+    const payload = await res.json().catch(() => null) as { name?: string; url?: string; type?: string; error?: string } | null;
+    if (!res.ok || !payload?.url) {
+      throw new Error(payload?.error || `Upload failed with status ${res.status}`);
+    }
+    return payload as { name: string; url: string; type: string };
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'document' | 'photo') => {
-    const files = event.target.files;
-    if (!files) return;
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+    type: "document" | "photo" | "scar" | "tattoo",
+  ) => {
+    const input = event.currentTarget;
+    const files = Array.from(input.files || []);
+    input.value = "";
+    if (files.length === 0) return;
 
-    Array.from(files).forEach(async (file) => {
-      if (type === 'document' && (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-        try {
-          const stored = await uploadToServer(file);
-          setProtectionDocuments(prev => [...prev, {
-            name: stored.name,
-            url: stored.url,
-            type: stored.type || file.type,
-          }]);
-        } catch (err) {
-          console.warn("Server upload unavailable, falling back to local blob URL.", err);
-          const url = URL.createObjectURL(file);
-          setProtectionDocuments(prev => [...prev, {
-            name: file.name,
-            url,
-            type: file.type,
-          }]);
+    const allowedImages = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+    const maxBytes = 15 * 1024 * 1024;
+    setUploadError("");
+    setUploadingPhotos(true);
+
+    try {
+      for (const file of files) {
+        if (file.size > maxBytes) {
+          throw new Error(`${file.name} is larger than 15 MB.`);
         }
-      } else if (type === 'photo' && file.type.startsWith('image/')) {
-        try {
+
+        if (type === "document") {
+          const allowedDocument = file.type === "application/pdf" || file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+          if (!allowedDocument) throw new Error(`${file.name} must be a PDF or DOCX file.`);
           const stored = await uploadToServer(file);
+          setProtectionDocuments(prev => [...prev, { name: stored.name, url: stored.url, type: stored.type || file.type }]);
+          continue;
+        }
+
+        if (!allowedImages.has(file.type)) {
+          const message = file.type.includes("heic") || file.name.toLowerCase().endsWith(".heic")
+            ? `${file.name} is an HEIC photo. Please export or convert it to JPG, PNG, or WebP before uploading.`
+            : `${file.name} must be a JPG, PNG, WebP, or GIF image.`;
+          throw new Error(message);
+        }
+
+        const stored = await uploadToServer(file);
+        if (type === "photo") {
           setPhotos(prev => [...prev, stored.url]);
-        } catch (err) {
-          console.warn("Server upload unavailable, falling back to data URL.", err);
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            if (e.target?.result) {
-              setPhotos(prev => [...prev, e.target!.result as string]);
-            }
-          };
-          reader.readAsDataURL(file);
+        } else {
+          setDescriptorPhotos(prev => [...prev, { url: stored.url, category: type, description: "" }]);
         }
       }
-    });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "The file could not be uploaded.";
+      setUploadError(message);
+      window.alert(`Photo upload failed: ${message}`);
+    } finally {
+      setUploadingPhotos(false);
+    }
   };
 
   const removeDocument = (index: number) => {
@@ -383,7 +635,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setHair("");
     setEyes("");
     setCharges("");
-    setDangerLevel("HIGH");
+    setActiveCases("");
+    setActiveCaseNumbers([""]);
     setLastSeen("");
     setLastKnownVehicle("");
     setKnownAssailants("");
@@ -397,12 +650,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setOrderOfProtectionType('');
     setOrderStatusFlags([]);
     setProtectionExpirationDate("");
+    setProtectionForDurationOfCourtDate(false);
     setProtectionNotes("");
     setProtectionDescription("");
     setProtectionPetitioner("");
     setProtectionRespondent("");
     setProtectionDocuments([]);
     setPhotos([]);
+    setVictims([]);
+    setChildren([]);
+    setDescriptorPhotos([]);
     setRemedies({});
   };
 
@@ -450,7 +707,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       hair,
       eyes,
       charges,
-      dangerLevel,
+      activeCases,
+      activeCaseNumbers: activeCaseNumbers.filter(Boolean),
+      activeCaseNumber: activeCaseNumbers.filter(Boolean)[0] || "",
       lastSeen,
       lastKnownVehicle,
       knownAssailants,
@@ -464,12 +723,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
       orderOfProtectionType,
       orderStatusFlags,
       protectionExpirationDate,
+      protectionForDurationOfCourtDate,
       protectionNotes,
       protectionDescription,
       protectionPetitioner,
       protectionRespondent,
       protectionDocuments,
       photos,
+      victims,
+      children,
+      descriptorPhotos,
       remedies
     };
     onAddPerson(newPerson);
@@ -522,7 +785,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         hair,
         eyes,
         charges,
-        dangerLevel,
+        activeCases,
+        activeCaseNumbers: activeCaseNumbers.filter(Boolean),
+        activeCaseNumber: activeCaseNumbers.filter(Boolean)[0] || "",
         lastSeen,
         lastKnownVehicle,
         knownAssailants,
@@ -536,12 +801,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
         orderOfProtectionType,
         orderStatusFlags,
         protectionExpirationDate,
+        protectionForDurationOfCourtDate,
         protectionNotes,
         protectionDescription,
         protectionPetitioner,
         protectionRespondent,
         protectionDocuments,
         photos,
+        victims,
+        children,
+        descriptorPhotos,
         remedies
       };
       onEditPerson(id, updatedPerson);
@@ -585,13 +854,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setLatestWarrant(person.latestWarrant);
     setLatestInvestigativeAlert(person.latestInvestigativeAlert);
     setDomesticViolenceArrestCount(person.domesticViolenceArrestCount);
-    setLatestDomesticViolenceArrestDate(person.latestDomesticViolenceArrestDate);
+    setLatestDomesticViolenceArrestDate(toDateInputValue(person.latestDomesticViolenceArrestDate));
     setWeaponsPossession(person.weaponsPossession);
     setWeaponsArrestCount(person.weaponsArrestCount);
-    setLatestWeaponsArrestDate(person.latestWeaponsArrestDate);
+    setLatestWeaponsArrestDate(toDateInputValue(person.latestWeaponsArrestDate));
     setNarcoticsPossession(person.narcoticsPossession);
     setNarcoticsArrestCount(person.narcoticsArrestCount);
-    setLatestNarcoticsArrestDate(person.latestNarcoticsArrestDate);
+    setLatestNarcoticsArrestDate(toDateInputValue(person.latestNarcoticsArrestDate));
     setName(person.name || "");
     setAlias(person.alias || "");
     setAddress(person.address || "");
@@ -599,7 +868,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setHair(person.hair || "");
     setEyes(person.eyes || "");
     setCharges(person.charges);
-    setDangerLevel(person.dangerLevel);
+    setActiveCases(person.activeCases || "");
+    setActiveCaseNumbers(person.activeCaseNumbers?.length ? person.activeCaseNumbers : [person.activeCaseNumber || ""]);
     setLastSeen(person.lastSeen);
     setLastKnownVehicle(person.lastKnownVehicle || "");
     setKnownAssailants(person.knownAssailants || "");
@@ -613,12 +883,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
     setOrderOfProtectionType(person.orderOfProtectionType || '');
     setOrderStatusFlags(person.orderStatusFlags || []);
     setProtectionExpirationDate(person.protectionExpirationDate || "");
+    setProtectionForDurationOfCourtDate(person.protectionForDurationOfCourtDate || false);
     setProtectionNotes(person.protectionNotes || "");
     setProtectionDescription(person.protectionDescription || "");
     setProtectionPetitioner(person.protectionPetitioner || "");
     setProtectionRespondent(person.protectionRespondent || "");
     setProtectionDocuments(person.protectionDocuments || []);
     setPhotos(person.photos || []);
+    setVictims(person.victims || []);
+    setChildren(person.children || []);
+    setDescriptorPhotos(person.descriptorPhotos || []);
     setRemedies(person.remedies || {});
     setActiveTab("add");
   };
@@ -679,7 +953,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       type="file"
                       multiple
                       accept="image/*"
-                      onChange={(e) => handleFileUpload(e, 'photo')}
+                      onChange={(e) => void handleFileUpload(e, 'photo')}
                       className="mt-1"
                     />
                     {photos.length > 0 && (
@@ -700,6 +974,67 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
+
+
+                {/* Victims and Protected Children */}
+                <div className="space-y-4 rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-gray-700">Victim Information</h3>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setVictims(prev => [...prev, { name: "", relationship: "", dob: "", address: "", phone: "" }])}>
+                      <Plus className="h-4 w-4 mr-1" /> Add Victim
+                    </Button>
+                  </div>
+                  {victims.length === 0 && <p className="text-sm text-gray-500">No victims entered.</p>}
+                  {victims.map((victim, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded border p-3">
+                      <Input placeholder="Full name" value={victim.name} onChange={e => setVictims(prev => prev.map((v,i) => i===index ? {...v,name:e.target.value} : v))} />
+                      <Input placeholder="Relationship" value={victim.relationship} onChange={e => setVictims(prev => prev.map((v,i) => i===index ? {...v,relationship:e.target.value} : v))} />
+                      <div><Label>Date of Birth</Label><Input type="date" value={victim.dob} onChange={e => setVictims(prev => prev.map((v,i) => i===index ? {...v,dob:e.target.value} : v))} /></div>
+                      <Input placeholder="Phone number" value={victim.phone} onChange={e => setVictims(prev => prev.map((v,i) => i===index ? {...v,phone:e.target.value} : v))} />
+                      <div className="md:col-span-2"><ValidatedAddressInput id={`victim-address-${index}`} label="Protected Person's Residence" placeholder="Start typing a complete address" value={victim.address} onChange={value => setVictims(prev => prev.map((v,i) => i===index ? {...v,address:value} : v))} /></div>
+                      <Button type="button" variant="destructive" size="sm" className="md:col-span-2 justify-self-end" onClick={() => setVictims(prev => prev.filter((_,i) => i!==index))}><Trash2 className="h-4 w-4 mr-1" />Delete Victim</Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4 rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-gray-700">Protected Children</h3>
+                    <Button type="button" variant="outline" size="sm" onClick={() => setChildren(prev => [...prev, { name: "", dob: "", relationship: "", schoolName: "", schoolAddress: "" }])}>
+                      <Plus className="h-4 w-4 mr-1" /> Add Child
+                    </Button>
+                  </div>
+                  {children.length === 0 && <p className="text-sm text-gray-500">No protected children entered.</p>}
+                  {children.map((child, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3 rounded border p-3">
+                      <Input placeholder="Child's full name" value={child.name} onChange={e => setChildren(prev => prev.map((v,i) => i===index ? {...v,name:e.target.value} : v))} />
+                      <Input placeholder="Relationship" value={child.relationship} onChange={e => setChildren(prev => prev.map((v,i) => i===index ? {...v,relationship:e.target.value} : v))} />
+                      <div><Label>Date of Birth</Label><Input type="date" value={child.dob} onChange={e => setChildren(prev => prev.map((v,i) => i===index ? {...v,dob:e.target.value} : v))} /></div>
+                      <Input placeholder="School name" value={child.schoolName} onChange={e => setChildren(prev => prev.map((v,i) => i===index ? {...v,schoolName:e.target.value} : v))} />
+                      <div className="md:col-span-2"><ValidatedAddressInput id={`school-address-${index}`} label="School Address" placeholder="Start typing a complete school address" value={child.schoolAddress} onChange={value => setChildren(prev => prev.map((v,i) => i===index ? {...v,schoolAddress:value} : v))} /></div>
+                      <Button type="button" variant="destructive" size="sm" className="md:col-span-2 justify-self-end" onClick={() => setChildren(prev => prev.filter((_,i) => i!==index))}><Trash2 className="h-4 w-4 mr-1" />Delete Child</Button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-4 rounded-lg border p-4">
+                  <h3 className="text-lg font-bold text-gray-700">Scar and Tattoo Photos</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><Label>Upload Scar Photos</Label><Input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" disabled={uploadingPhotos} onChange={e => void handleFileUpload(e, 'scar')} /></div>
+                    <div><Label>Upload Tattoo Photos</Label><Input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" disabled={uploadingPhotos} onChange={e => void handleFileUpload(e, 'tattoo')} /></div>
+                  </div>
+                  {uploadingPhotos && <p className="text-sm font-medium text-blue-700">Uploading photo to the server… Please wait before saving the record.</p>}
+                  {uploadError && <p className="text-sm font-medium text-red-700" role="alert">{uploadError}</p>}
+                  <p className="text-xs text-gray-500">Supported formats: JPG, PNG, WebP, and GIF. Maximum size: 15 MB per photo.</p>
+                  {descriptorPhotos.length > 0 && <div className="grid grid-cols-1 md:grid-cols-3 gap-3">{descriptorPhotos.map((photo,index) => (
+                    <div key={index} className="rounded border p-2 space-y-2">
+                      <img src={photo.url} alt={`${photo.category} ${index+1}`} className="w-full h-32 object-cover rounded" />
+                      <Badge variant="outline" className="uppercase">{photo.category}</Badge>
+                      <Input placeholder="Location or description" value={photo.description} onChange={e => setDescriptorPhotos(prev => prev.map((v,i) => i===index ? {...v,description:e.target.value} : v))} />
+                      <Button type="button" variant="destructive" size="sm" onClick={() => setDescriptorPhotos(prev => prev.filter((_,i) => i!==index))}><Trash2 className="h-4 w-4 mr-1" />Delete</Button>
+                    </div>
+                  ))}</div>}
                 </div>
 
                 {/* Basic Information */}
@@ -749,15 +1084,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       onChange={(e) => setAlias(e.target.value)}
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="address">Address</Label>
-                    <Input
-                      type="text"
-                      id="address"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
-                    />
-                  </div>
+                  <ValidatedAddressInput
+                    id="address"
+                    label="Address"
+                    value={address}
+                    onChange={setAddress}
+                    placeholder="Start typing a full U.S. address"
+                  />
                   <div>
                     <Label htmlFor="dob">Date of Birth</Label>
                     <Input
@@ -824,19 +1157,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         type="text"
                         id="driversLicenseNumber"
                         value={driversLicenseNumber}
-                        onChange={(e) => setDriversLicenseNumber(e.target.value)}
-                        placeholder="No Data"
+                        onChange={(e) => setDriversLicenseNumber(formatGroupedNumber(e.target.value, [4, 4, 4]))}
+                        placeholder="0000-0000-0000"
+                        inputMode="numeric"
+                        maxLength={14}
                       />
                     </div>
                     <div>
                       <Label htmlFor="driversLicenseState">Driver&apos;s License State</Label>
-                      <Input
-                        type="text"
-                        id="driversLicenseState"
-                        value={driversLicenseState}
-                        onChange={(e) => setDriversLicenseState(e.target.value)}
-                        placeholder="No Data"
-                      />
+                      <Select value={driversLicenseState} onValueChange={setDriversLicenseState}>
+                        <SelectTrigger className="w-full" id="driversLicenseState">
+                          <SelectValue placeholder="Select state" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {US_STATES.map(([code, state]) => (
+                            <SelectItem key={code} value={code}>{code} — {state}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
@@ -845,16 +1183,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-gray-700">Address of Residence</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="addressOfResidence">Address of Residence</Label>
-                      <Input
-                        type="text"
-                        id="addressOfResidence"
-                        value={addressOfResidence}
-                        onChange={(e) => setAddressOfResidence(e.target.value)}
-                        placeholder="e.g., 6400 N CICERO AVE"
-                      />
-                    </div>
+                    <ValidatedAddressInput
+                      id="addressOfResidence"
+                      label="Address of Residence"
+                      value={addressOfResidence}
+                      onChange={setAddressOfResidence}
+                      placeholder="Start typing a full U.S. address"
+                    />
                     <div>
                       <Label htmlFor="district">District</Label>
                       <Input
@@ -880,7 +1215,23 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
 
                 {/* IDOC Information Section */}
                 <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-gray-700">IDOC Information</h3>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <h3 className="text-lg font-bold text-gray-700">IDOC Information</h3>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const name = `${firstName ?? ''} ${lastName ?? ''}`.trim();
+                        if (name) {
+                          try { navigator.clipboard.writeText(name); } catch {}
+                        }
+                        window.open('https://idoc.illinois.gov/offender/inmatesearch.html', '_blank', 'noopener,noreferrer');
+                      }}
+                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-1.5 rounded shadow-sm"
+                      title="Opens IDOC Inmate Search in a new tab. Name is copied to clipboard so you can paste and search, then copy fields back."
+                    >
+                      Search IDOC ↗
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="idocNumber">IDOC #</Label>
@@ -892,16 +1243,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                         placeholder="No Data"
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="idocAddressOfResidence">IDOC Address of Residence</Label>
-                      <Input
-                        type="text"
-                        id="idocAddressOfResidence"
-                        value={idocAddressOfResidence}
-                        onChange={(e) => setIdocAddressOfResidence(e.target.value)}
-                        placeholder="No Data"
-                      />
-                    </div>
+                    <ValidatedAddressInput
+                      id="idocAddressOfResidence"
+                      label="IDOC Address of Residence"
+                      value={idocAddressOfResidence}
+                      onChange={setIdocAddressOfResidence}
+                      placeholder="Start typing a full U.S. address"
+                    />
                     <div>
                       <Label htmlFor="idocDistrict">District</Label>
                       <Input
@@ -1009,11 +1357,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div>
                       <Label htmlFor="latestDomesticViolenceArrestDate">Latest Arrest Date</Label>
                       <Input
-                        type="text"
+                        type="date"
                         id="latestDomesticViolenceArrestDate"
                         value={latestDomesticViolenceArrestDate}
                         onChange={(e) => setLatestDomesticViolenceArrestDate(e.target.value)}
-                        placeholder="No Data"
+                        max={today}
                       />
                     </div>
                   </div>
@@ -1048,11 +1396,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div>
                       <Label htmlFor="latestWeaponsArrestDate">Latest Arrest Date</Label>
                       <Input
-                        type="text"
+                        type="date"
                         id="latestWeaponsArrestDate"
                         value={latestWeaponsArrestDate}
                         onChange={(e) => setLatestWeaponsArrestDate(e.target.value)}
-                        placeholder="No Data"
+                        max={today}
                       />
                     </div>
                   </div>
@@ -1087,11 +1435,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     <div>
                       <Label htmlFor="latestNarcoticsArrestDate">Latest Arrest Date</Label>
                       <Input
-                        type="text"
+                        type="date"
                         id="latestNarcoticsArrestDate"
                         value={latestNarcoticsArrestDate}
                         onChange={(e) => setLatestNarcoticsArrestDate(e.target.value)}
-                        placeholder="No Data"
+                        max={today}
                       />
                     </div>
                   </div>
@@ -1230,20 +1578,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="dangerLevel">Danger Level</Label>
-                  <Select value={dangerLevel} onValueChange={setDangerLevel}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="LOW">Low</SelectItem>
-                      <SelectItem value="HIGH">High</SelectItem>
-                      <SelectItem value="EXTREME">Extreme</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="charges">Charges</Label>
@@ -1254,15 +1588,72 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       className="resize-none"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="lastSeen">Last Seen</Label>
-                    <Input
-                      type="text"
-                      id="lastSeen"
-                      value={lastSeen}
-                      onChange={(e) => setLastSeen(e.target.value)}
-                    />
+                  <div className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label>Active Case Numbers</Label>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActiveCaseNumbers((numbers) => [...numbers, ""])}
+                        >
+                          <Plus className="h-4 w-4 mr-1" /> Add Case
+                        </Button>
+                      </div>
+                      {activeCaseNumbers.map((caseNumber, index) => (
+                        <div key={index} className="flex gap-2">
+                          <Input
+                            aria-label={`Active Case Number ${index + 1}`}
+                            value={caseNumber}
+                            onChange={(e) => {
+                              const formatted = formatGroupedNumber(e.target.value, [4, 8]);
+                              setActiveCaseNumbers((numbers) =>
+                                numbers.map((number, numberIndex) => numberIndex === index ? formatted : number)
+                              );
+                            }}
+                            placeholder="0000-00000000"
+                            inputMode="numeric"
+                            maxLength={13}
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            aria-label={`Delete Active Case Number ${index + 1}`}
+                            onClick={() =>
+                              setActiveCaseNumbers((numbers) => {
+                                const remaining = numbers.filter((_, numberIndex) => numberIndex !== index);
+                                return remaining.length ? remaining : [""];
+                              })
+                            }
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div>
+                      <Label htmlFor="activeCases">Active Case Details</Label>
+                      <Textarea
+                        id="activeCases"
+                        value={activeCases}
+                        onChange={(e) => setActiveCases(e.target.value)}
+                        placeholder="Enter active case details..."
+                        className="resize-none"
+                      />
+                    </div>
                   </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="lastSeen">Last Seen</Label>
+                  <Input
+                    type="text"
+                    id="lastSeen"
+                    value={lastSeen}
+                    onChange={(e) => setLastSeen(e.target.value)}
+                  />
                 </div>
 
                 <div>
@@ -1314,7 +1705,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                       <Label htmlFor="vehicleMake">Make</Label>
-                      <Select value={vehicleMake} onValueChange={setVehicleMake}>
+                      <Select value={vehicleMake} onValueChange={(make) => { setVehicleMake(make); setVehicleModel(""); }}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select make" />
                         </SelectTrigger>
@@ -1353,13 +1744,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                     </div>
                     <div>
                       <Label htmlFor="vehicleModel">Model</Label>
-                      <Input
-                        type="text"
-                        id="vehicleModel"
-                        value={vehicleModel}
-                        onChange={(e) => setVehicleModel(e.target.value)}
-                        placeholder="e.g., Camry, F-150"
-                      />
+                      <Select value={vehicleModel} onValueChange={setVehicleModel} disabled={!vehicleMake}>
+                        <SelectTrigger className="w-full" id="vehicleModel">
+                          <SelectValue placeholder={vehicleMake ? "Select model" : "Select make first"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(VEHICLE_MODELS[vehicleMake] || []).map((model) => (
+                            <SelectItem key={model} value={model}>{model}</SelectItem>
+                          ))}
+                          {vehicleModel && !(VEHICLE_MODELS[vehicleMake] || []).includes(vehicleModel) && (
+                            <SelectItem value={vehicleModel}>{vehicleModel}</SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div>
                       <Label htmlFor="vehicleColor">Color</Label>
@@ -1511,8 +1908,24 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           id="protectionExpirationDate"
                           value={protectionExpirationDate}
                           onChange={(e) => setProtectionExpirationDate(e.target.value)}
+                          disabled={protectionForDurationOfCourtDate}
                         />
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Checkbox
+                            id="protectionForDurationOfCourtDate"
+                            checked={protectionForDurationOfCourtDate}
+                            onCheckedChange={(checked) => {
+                              const val = checked === true;
+                              setProtectionForDurationOfCourtDate(val);
+                              if (val) setProtectionExpirationDate("");
+                            }}
+                          />
+                          <Label htmlFor="protectionForDurationOfCourtDate" className="cursor-pointer font-normal">
+                            For duration of the court date
+                          </Label>
+                        </div>
                       </div>
+                      
                       
                       <div>
                         <Label htmlFor="protectionDescription">Protection Description</Label>
@@ -1838,7 +2251,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                           type="file"
                           multiple
                           accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                          onChange={(e) => handleFileUpload(e, 'document')}
+                          onChange={(e) => void handleFileUpload(e, 'document')}
                           className="mt-1"
                         />
                         {protectionDocuments.length > 0 && (
@@ -1885,7 +2298,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       type="file"
                       multiple
                       accept="image/*"
-                      onChange={(e) => handleFileUpload(e, 'photo')}
+                      onChange={(e) => void handleFileUpload(e, 'photo')}
                       className="mt-1"
                     />
                     {photos.length > 0 && (
@@ -1912,7 +2325,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                   </div>
                 </div>
 
-                <Button onClick={() => {
+                <Button disabled={uploadingPhotos} onClick={() => {
                   if (editingPerson) {
                     handleEdit(editingPerson.id);
                   } else {
@@ -1941,6 +2354,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({
                       <div>
                         <h3 className="text-lg font-semibold">{person.name || `${person.firstName} ${person.lastName}`}</h3>
                         <p className="text-sm text-gray-500">ID: {person.id}</p>
+                        <p className="text-xs text-gray-500">Created: {person.createdDate ? new Date(person.createdDate).toLocaleString() : "Legacy record"}{person.createdByName ? ` by ${person.createdByName} (Star ${person.createdByStarNumber || "N/A"})` : ""}</p>
+                        <p className="text-xs text-gray-500">Last modified: {person.lastModifiedDate ? new Date(person.lastModifiedDate).toLocaleString() : "Not recorded"}{person.lastModifiedByName ? ` by ${person.lastModifiedByName} (Star ${person.lastModifiedByStarNumber || "N/A"})` : ""}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button

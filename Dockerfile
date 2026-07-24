@@ -1,38 +1,28 @@
-# ---------- Build stage ----------
-FROM node:20-alpine AS build
+# ---- Build stage ----
+FROM node:22-alpine AS build
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json ./
 RUN npm install --no-audit --no-fund
 
 COPY . .
 RUN npm run build
 
-# ---------- Runtime stage ----------
-FROM node:20-alpine AS runtime
+# ---- Runtime stage ----
+FROM node:22-alpine AS runtime
 WORKDIR /app
+
 ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
     PORT=6900 \
-    DATA_DIR=/data \
-    UPLOAD_DIR=/data/uploads \
-    DB_FILE=/data/db.json \
-    DIST_DIR=/app/dist
+    DATA_DIR=/data
 
-# Install only production deps for the tiny server.
-COPY package*.json ./
-RUN npm install --omit=dev --no-audit --no-fund && npm cache clean --force
+COPY --from=build /app/.output ./.output
 
-# Copy server code and built SPA.
-COPY server ./server
-COPY --from=build /app/dist ./dist
+RUN mkdir -p /data && chown -R node:node /data
+USER node
 
-# Persistent data directory (mount a volume here for uploads + db.json).
-RUN mkdir -p /data/uploads
 VOLUME ["/data"]
-
 EXPOSE 6900
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:6900/api/health >/dev/null 2>&1 || exit 1
-
-CMD ["node", "server/server.mjs"]
+CMD ["node", ".output/server/index.mjs"]

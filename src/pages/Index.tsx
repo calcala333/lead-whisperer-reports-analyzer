@@ -3,11 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Settings, Shield, AlertTriangle, FileText, Download, Printer } from "lucide-react";
+import { Settings, Shield, AlertTriangle, FileText, Download, Printer, SlidersHorizontal, MapPin } from "lucide-react";
 import AdminPanel from "@/components/AdminPanel";
+import PhotoSlideshow from "@/components/PhotoSlideshow";
+import CardPhotoSlider from "@/components/CardPhotoSlider";
+import { toast } from "sonner";
+
+interface VictimInfo { name: string; relationship: string; dob: string; address: string; phone: string; }
+interface ChildInfo { name: string; dob: string; relationship: string; schoolName: string; schoolAddress: string; }
+interface DescriptorPhoto { url: string; category: "scar" | "tattoo"; description: string; }
+interface GeofenceResult { label: string; address: string; distanceFeet?: number; within: boolean; error?: string; }
 
 interface WantedPerson {
   id: string;
+  createdDate?: string;
+  lastModifiedDate?: string;
+  createdByName?: string;
+  createdByStarNumber?: string;
+  lastModifiedByName?: string;
+  lastModifiedByStarNumber?: string;
   lastName: string;
   firstName: string;
   middleName: string;
@@ -50,13 +64,17 @@ interface WantedPerson {
   hair?: string;
   eyes?: string;
   charges: string;
-  dangerLevel: string;
+  activeCases?: string;
+  activeCaseNumber?: string;
+  activeCaseNumbers?: string[];
+  dangerLevel?: string;
   lastSeen: string;
   lastKnownVehicle?: string;
   orderOfProtection?: boolean;
   orderOfProtectionType?: 'order' | 'stalking' | 'civil' | 'firearms' | '';
   orderStatusFlags?: string[];
   protectionExpirationDate?: string;
+  protectionForDurationOfCourtDate?: boolean;
   protectionNotes?: string;
   protectionDescription?: string;
   protectionPetitioner?: string;
@@ -67,6 +85,9 @@ interface WantedPerson {
     type: string;
   }>;
   photos?: string[];
+  victims?: VictimInfo[];
+  children?: ChildInfo[];
+  descriptorPhotos?: DescriptorPhoto[];
   knownAssailants?: string;
   vehicleMake?: string;
   vehicleModel?: string;
@@ -99,45 +120,77 @@ const Index = () => {
   const [people, setPeople] = useState<WantedPerson[]>([]);
   const [filteredPeople, setFilteredPeople] = useState<WantedPerson[]>([]);
   const [selectedPerson, setSelectedPerson] = useState<WantedPerson | null>(null);
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ photos: string[]; index: number } | null>(null);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [systemName, setSystemName] = useState("Active Orders of Protection");
   const [disclaimerText, setDisclaimerText] = useState("This system contains sensitive law enforcement information. Access is restricted to authorized personnel only. All activities are logged and monitored. Unauthorized access is prohibited and subject to prosecution.");
   const [logoUrl, setLogoUrl] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [districtFilter, setDistrictFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
+  const [orderFilter, setOrderFilter] = useState("all");
+  const [sexFilter, setSexFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name-asc");
+  const [healthStatus, setHealthStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [healthLastChecked, setHealthLastChecked] = useState<Date | null>(null);
+  const [geofenceLoading, setGeofenceLoading] = useState(false);
+  const [geofenceResults, setGeofenceResults] = useState<GeofenceResult[]>([]);
+  const appVersion = "1.4.0";
 
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Load people + settings: try server first, fall back to localStorage.
+  const [loadError, setLoadError] = useState("");
+
+  // Poll the server health endpoint so users can see live system status.
   useEffect(() => {
     let cancelled = false;
 
-    const applyLocal = () => {
-      const savedPeople = localStorage.getItem('wantedPeople');
-      const savedSystemName = localStorage.getItem('systemName');
-      const savedDisclaimer = localStorage.getItem('disclaimerText');
-      const savedLogo = localStorage.getItem('logoUrl');
-      if (savedPeople) setPeople(JSON.parse(savedPeople));
-      if (savedSystemName) setSystemName(savedSystemName);
-      if (savedDisclaimer) setDisclaimerText(savedDisclaimer);
-      if (savedLogo) setLogoUrl(savedLogo);
+    const checkHealth = async () => {
+      try {
+        const res = await fetch('/api/health', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const health = await res.json();
+        if (!cancelled) setHealthStatus(health.status === 'ok' ? 'online' : 'offline');
+      } catch (error) {
+        console.error('Health check failed.', error);
+        if (!cancelled) setHealthStatus('offline');
+      } finally {
+        if (!cancelled) setHealthLastChecked(new Date());
+      }
     };
+
+    checkHealth();
+    const interval = window.setInterval(checkHealth, 30_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, []);
+
+  // The server is the single source of truth for records and settings.
+  useEffect(() => {
+    let cancelled = false;
 
     (async () => {
       try {
-        const res = await fetch('/api/data');
+        const res = await fetch('/api/data', { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (cancelled) return;
-        if (Array.isArray(data.people)) setPeople(data.people);
+
+        setPeople(Array.isArray(data.people) ? data.people : []);
         if (data.settings) {
           if (data.settings.systemName) setSystemName(data.settings.systemName);
           if (data.settings.disclaimerText) setDisclaimerText(data.settings.disclaimerText);
           if (typeof data.settings.logoUrl === 'string') setLogoUrl(data.settings.logoUrl);
         }
+        setLoadError("");
       } catch (err) {
-        console.warn('Server data unavailable, using localStorage fallback.', err);
-        applyLocal();
+        console.error('Unable to load server data.', err);
+        if (!cancelled) {
+          setLoadError('Unable to connect to the server database. No browser-stored fallback was loaded.');
+        }
       } finally {
         if (!cancelled) setDataLoaded(true);
       }
@@ -146,79 +199,262 @@ const Index = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Helper: persist to server (best-effort), always mirror to localStorage.
-  const persistPeople = (newPeople: WantedPerson[]) => {
-    localStorage.setItem('wantedPeople', JSON.stringify(newPeople));
-    fetch('/api/people', {
+  const geocodeAddress = async (address: string) => {
+    const res = await fetch(`/api/address-search?q=${encodeURIComponent(address)}`, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Address lookup unavailable');
+    const data = await res.json();
+    const first = data.matches?.[0];
+    if (!first?.coordinates) throw new Error('Address could not be validated');
+    return first.coordinates as { latitude: number; longitude: number };
+  };
+
+  const distanceFeet = (a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) => {
+    const toRad = (value: number) => value * Math.PI / 180;
+    const earthFeet = 20902231;
+    const dLat = toRad(b.latitude - a.latitude);
+    const dLon = toRad(b.longitude - a.longitude);
+    const lat1 = toRad(a.latitude);
+    const lat2 = toRad(b.latitude);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+    return earthFeet * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+  };
+
+  const runGeofenceCheck = async (person: WantedPerson) => {
+    const originAddress = person.addressOfResidence || person.address || '';
+    if (!originAddress) {
+      toast.error('Enter the subject address before running a geofence check.');
+      return;
+    }
+    const targets = [
+      ...(person.victims || []).filter(v => v.address).map(v => ({ label: `Protected residence: ${v.name || 'Victim'}`, address: v.address })),
+      ...(person.children || []).filter(c => c.schoolAddress).map(c => ({ label: `School: ${c.schoolName || c.name || 'Protected child'}`, address: c.schoolAddress })),
+    ];
+    if (!targets.length) {
+      toast.error('Add a protected person residence or school address first.');
+      return;
+    }
+    setGeofenceLoading(true);
+    setGeofenceResults([]);
+    try {
+      const origin = await geocodeAddress(originAddress);
+      const results = await Promise.all(targets.map(async target => {
+        try {
+          const point = await geocodeAddress(target.address);
+          const feet = Math.round(distanceFeet(origin, point));
+          return { ...target, distanceFeet: feet, within: feet <= 1000 };
+        } catch (error) {
+          return { ...target, within: false, error: error instanceof Error ? error.message : 'Unable to check address' };
+        }
+      }));
+      setGeofenceResults(results);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Geofence check failed.');
+    } finally {
+      setGeofenceLoading(false);
+    }
+  };
+
+  const downloadBackup = async () => {
+    try {
+      const res = await fetch('/api/data', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const snapshot = { timestamp: new Date().toISOString(), ...(await res.json()) };
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `aop-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast.success('Server backup downloaded.');
+    } catch (err) {
+      console.error('Backup failed.', err);
+      toast.error('Backup failed because the server database could not be read.');
+    }
+  };
+
+  const persistPeople = async (newPeople: WantedPerson[]) => {
+    const res = await fetch('/api/people', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newPeople),
-    }).catch((err) => console.warn('Failed to persist people to server.', err));
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
   };
 
-  const persistSettings = (patch: Record<string, string>) => {
-    fetch('/api/settings', {
+  const persistSettings = async (patch: Record<string, string>) => {
+    const res = await fetch('/api/settings', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(patch),
-    }).catch((err) => console.warn('Failed to persist settings to server.', err));
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
   };
 
-  // Filter and search logic
+  // Search, advanced filtering, and sorting.
   useEffect(() => {
-    let filtered = people;
-    
+    let filtered = [...people];
+
     if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(person => 
-        (person.firstName?.toLowerCase().includes(term)) ||
-        (person.lastName?.toLowerCase().includes(term)) ||
-        (person.name?.toLowerCase().includes(term)) ||
-        (person.alias?.toLowerCase().includes(term))
-      );
+      const term = searchTerm.trim().toLowerCase();
+      filtered = filtered.filter((person) => {
+        const caseNumbers = [person.activeCaseNumber, ...(person.activeCaseNumbers || [])].filter(Boolean);
+        const values = [
+          person.firstName, person.lastName, person.middleName, person.name, person.alias,
+          person.driversLicenseNumber, person.vehiclePlate, person.addressOfResidence, person.address,
+          person.dob, person.district, person.driversLicenseState, ...caseNumbers,
+        ];
+        return values.some((value) => String(value || "").toLowerCase().includes(term));
+      });
     }
-    
+
+    if (districtFilter !== "all") filtered = filtered.filter((p) => p.district === districtFilter);
+    if (stateFilter !== "all") filtered = filtered.filter((p) => p.driversLicenseState === stateFilter);
+    if (sexFilter !== "all") filtered = filtered.filter((p) => p.sex === sexFilter);
+    if (orderFilter !== "all") {
+      filtered = filtered.filter((p) => {
+        if (orderFilter === "active") {
+          if (!p.orderOfProtection) return false;
+          if (p.protectionForDurationOfCourtDate || !p.protectionExpirationDate) return true;
+          return new Date(p.protectionExpirationDate).getTime() >= Date.now();
+        }
+        if (orderFilter === "expired") {
+          return Boolean(p.orderOfProtection && p.protectionExpirationDate && new Date(p.protectionExpirationDate).getTime() < Date.now());
+        }
+        return p.orderOfProtectionType === orderFilter;
+      });
+    }
+
+    const nameValue = (p: WantedPerson) => `${p.lastName || ""} ${p.firstName || ""} ${p.middleName || ""}`.trim().toLowerCase();
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name-desc": return nameValue(b).localeCompare(nameValue(a));
+        case "created-new": return Date.parse(b.createdDate || "") - Date.parse(a.createdDate || "");
+        case "created-old": return Date.parse(a.createdDate || "") - Date.parse(b.createdDate || "");
+        case "modified-new": return Date.parse(b.lastModifiedDate || "") - Date.parse(a.lastModifiedDate || "");
+        case "dob-new": return Date.parse(b.dob || "") - Date.parse(a.dob || "");
+        case "expiration": return Date.parse(a.protectionExpirationDate || "9999-12-31") - Date.parse(b.protectionExpirationDate || "9999-12-31");
+        default: return nameValue(a).localeCompare(nameValue(b));
+      }
+    });
+
     setFilteredPeople(filtered);
-  }, [people, searchTerm]);
+  }, [people, searchTerm, districtFilter, stateFilter, orderFilter, sexFilter, sortBy]);
+
+  const requestStaffIdentity = (action: "add" | "modify") => {
+    const name = window.prompt(`Enter your full name to ${action} this record:`)?.trim();
+    if (!name) {
+      toast.error("The change was cancelled. A staff name is required.");
+      return null;
+    }
+    const starNumber = window.prompt("Enter your star number:")?.trim();
+    if (!starNumber) {
+      toast.error("The change was cancelled. A star number is required.");
+      return null;
+    }
+    return { name, starNumber };
+  };
+
+  const normalize = (value?: string) => (value || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  const findDuplicate = (candidate: Omit<WantedPerson, "id">, excludedId?: string) => people.find((person) => {
+    if (person.id === excludedId) return false;
+    const sameLicense = normalize(candidate.driversLicenseNumber) && normalize(candidate.driversLicenseNumber) === normalize(person.driversLicenseNumber);
+    const sameIdentity = normalize(candidate.firstName) && normalize(candidate.lastName) && normalize(candidate.dob) &&
+      normalize(candidate.firstName) === normalize(person.firstName) &&
+      normalize(candidate.lastName) === normalize(person.lastName) &&
+      normalize(candidate.dob) === normalize(person.dob);
+    return Boolean(sameLicense || sameIdentity);
+  });
 
   const handleSearch = () => {
     // Search is handled by useEffect
   };
 
-  const savePeople = (newPeople: WantedPerson[]) => {
+  const savePeople = async (newPeople: WantedPerson[]) => {
+    const previousPeople = people;
     setPeople(newPeople);
-    persistPeople(newPeople);
+    try {
+      await persistPeople(newPeople);
+      toast.success('Records saved to the server.');
+    } catch (err) {
+      console.error('Failed to save records to the server.', err);
+      setPeople(previousPeople);
+      toast.error('Server save failed. Your change was not kept.');
+    }
   };
 
   const handleAddPerson = (person: Omit<WantedPerson, 'id'>) => {
-    const newPerson = { ...person, id: Date.now().toString() };
-    savePeople([...people, newPerson]);
+    const duplicate = findDuplicate(person);
+    if (duplicate && !window.confirm(`Possible duplicate found: ${duplicate.firstName} ${duplicate.lastName}${duplicate.dob ? ` (DOB ${duplicate.dob})` : ""}. Add this record anyway?`)) return;
+    const staff = requestStaffIdentity("add");
+    if (!staff) return;
+    const now = new Date().toISOString();
+    const newPerson: WantedPerson = {
+      ...person,
+      id: crypto.randomUUID(),
+      createdDate: now,
+      lastModifiedDate: now,
+      createdByName: staff.name,
+      createdByStarNumber: staff.starNumber,
+      lastModifiedByName: staff.name,
+      lastModifiedByStarNumber: staff.starNumber,
+    };
+    void savePeople([...people, newPerson]);
   };
 
   const handleEditPerson = (id: string, updatedPerson: Omit<WantedPerson, 'id'>) => {
-    savePeople(people.map(p => (p.id === id ? { ...updatedPerson, id } : p)));
+    const duplicate = findDuplicate(updatedPerson, id);
+    if (duplicate && !window.confirm(`Possible duplicate found: ${duplicate.firstName} ${duplicate.lastName}${duplicate.dob ? ` (DOB ${duplicate.dob})` : ""}. Save this record anyway?`)) return;
+    const staff = requestStaffIdentity("modify");
+    if (!staff) return;
+    void savePeople(people.map((p) => p.id === id ? {
+      ...updatedPerson,
+      id,
+      createdDate: p.createdDate || new Date().toISOString(),
+      createdByName: p.createdByName || "Legacy record",
+      createdByStarNumber: p.createdByStarNumber || "N/A",
+      lastModifiedDate: new Date().toISOString(),
+      lastModifiedByName: staff.name,
+      lastModifiedByStarNumber: staff.starNumber,
+    } : p));
   };
 
   const handleDeletePerson = (id: string) => {
-    savePeople(people.filter(person => person.id !== id));
+    const person = people.find((p) => p.id === id);
+    const label = person ? `${person.firstName} ${person.lastName}`.trim() : "this record";
+    if (!window.confirm(`Delete ${label}? This action cannot be undone.`)) return;
+    void savePeople(people.filter((person) => person.id !== id));
+  };
+
+  const saveSetting = async (patch: Record<string, string>, rollback: () => void) => {
+    try {
+      await persistSettings(patch);
+      toast.success('Settings saved to the server.');
+    } catch (err) {
+      console.error('Failed to save settings to the server.', err);
+      rollback();
+      toast.error('Server save failed. Your setting was not kept.');
+    }
   };
 
   const handleUpdateSystemName = (name: string) => {
+    const previous = systemName;
     setSystemName(name);
-    localStorage.setItem('systemName', name);
-    persistSettings({ systemName: name });
+    void saveSetting({ systemName: name }, () => setSystemName(previous));
   };
 
   const handleUpdateDisclaimer = (disclaimer: string) => {
+    const previous = disclaimerText;
     setDisclaimerText(disclaimer);
-    localStorage.setItem('disclaimerText', disclaimer);
-    persistSettings({ disclaimerText: disclaimer });
+    void saveSetting({ disclaimerText: disclaimer }, () => setDisclaimerText(previous));
   };
 
   const handleUpdateLogo = (logo: string) => {
+    const previous = logoUrl;
     setLogoUrl(logo);
-    localStorage.setItem('logoUrl', logo);
-    persistSettings({ logoUrl: logo });
+    void saveSetting({ logoUrl: logo }, () => setLogoUrl(previous));
   };
 
   const getDangerLevelColor = (level: string) => {
@@ -234,7 +470,30 @@ const Index = () => {
     }
   };
 
-  const printPerson = (person: WantedPerson) => {
+  const renderPdfToImages = async (url: string): Promise<string[]> => {
+    const pdfjs: any = await import("pdfjs-dist");
+    // Use bundled worker via URL
+    // @ts-ignore
+    const workerSrc = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+    pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+    const resp = await fetch(url);
+    const buf = await resp.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: buf }).promise;
+    const images: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2 });
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext("2d")!;
+      await page.render({ canvasContext: ctx, viewport, canvas }).promise;
+      images.push(canvas.toDataURL("image/jpeg", 0.85));
+    }
+    return images;
+  };
+
+  const printPerson = async (person: WantedPerson) => {
     const esc = (s: unknown) =>
       String(s ?? "")
         .replace(/&/g, "&amp;")
@@ -259,24 +518,45 @@ const Index = () => {
       })
       .join("");
 
-    const embeddedDocs = (person.protectionDocuments || [])
-      .map((d) => {
-        const absUrl = d.url.startsWith("http") ? d.url : window.location.origin + d.url;
-        const isImage = (d.type || "").startsWith("image/") || /\.(png|jpe?g|gif|webp|bmp)$/i.test(d.url);
-        const isPdf = (d.type || "").includes("pdf") || /\.pdf$/i.test(d.url);
-        if (isImage) {
-          return `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
-            <img src="${esc(absUrl)}" style="max-width:100%;max-height:9in;border:1px solid #999;" /></div>`;
+    const embeddedParts: string[] = [];
+    for (const d of person.protectionDocuments || []) {
+      const absUrl = d.url.startsWith("http") ? d.url : window.location.origin + d.url;
+      const isImage =
+        (d.type || "").startsWith("image/") || /\.(png|jpe?g|gif|webp|bmp)$/i.test(d.url);
+      const isPdf = (d.type || "").includes("pdf") || /\.pdf$/i.test(d.url);
+      if (isImage) {
+        embeddedParts.push(
+          `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
+            <img src="${esc(absUrl)}" style="max-width:100%;max-height:9.5in;border:1px solid #999;" /></div>`
+        );
+      } else if (isPdf) {
+        try {
+          const pages = await renderPdfToImages(d.url);
+          const pagesHtml = pages
+            .map(
+              (src, i) =>
+                `<div class="${i === 0 ? "doc-page" : "doc-subpage"}">
+                   ${i === 0 ? `<div class="doc-title">${esc(d.name)}</div>` : ""}
+                   <img src="${src}" style="max-width:100%;height:auto;border:1px solid #999;" />
+                 </div>`
+            )
+            .join("");
+          embeddedParts.push(pagesHtml);
+        } catch (err) {
+          console.error("Failed to render PDF for print", d.name, err);
+          embeddedParts.push(
+            `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
+              <div style="font-size:12px;color:#555;">Unable to embed PDF. <a href="${esc(absUrl)}">${esc(absUrl)}</a></div></div>`
+          );
         }
-        if (isPdf) {
-          return `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
-            <embed src="${esc(absUrl)}" type="application/pdf" style="width:100%;height:9.5in;border:1px solid #999;" />
-            <div style="font-size:11px;color:#555;margin-top:4px;">${esc(absUrl)}</div></div>`;
-        }
-        return `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
-          <div style="font-size:12px;color:#555;">Attached file: <a href="${esc(absUrl)}">${esc(absUrl)}</a></div></div>`;
-      })
-      .join("");
+      } else {
+        embeddedParts.push(
+          `<div class="doc-page"><div class="doc-title">${esc(d.name)}</div>
+            <div style="font-size:12px;color:#555;">Attached file: <a href="${esc(absUrl)}">${esc(absUrl)}</a></div></div>`
+        );
+      }
+    }
+    const embeddedDocs = embeddedParts.join("");
 
     const row = (label: string, value: unknown) =>
       `<tr><td style="padding:4px 10px 4px 0;color:#555;white-space:nowrap;">${esc(
@@ -315,30 +595,42 @@ const Index = () => {
     const html = `<!doctype html>
 <html><head><meta charset="utf-8"/><title>${esc(fullName)} – Order of Protection</title>
 <style>
+  html,body{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }
+  *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
   body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#111;margin:24px;}
   h1{margin:0 0 4px 0;font-size:22px;}
-  h2{margin:18px 0 6px;font-size:15px;border-bottom:1px solid #ccc;padding-bottom:4px;}
+  .hdr{display:flex;align-items:center;justify-content:space-between;color:#fff;font-weight:800;
+       padding:10px 14px;border-radius:6px;margin:14px 0 8px;font-size:14px;letter-spacing:.5px;text-transform:uppercase;}
+  .hdr-red{background:#dc2626;}
+  .hdr-blue{background:#2563eb;}
+  .hdr-green{background:#16a34a;}
+  .hdr-purple{background:#9333ea;}
+  .hdr-orange{background:#ea580c;}
+  .section{border:1px solid #e5e7eb;border-top:0;border-radius:0 0 6px 6px;padding:10px 14px;margin-top:-8px;background:#fff;}
   table{border-collapse:collapse;font-size:13px;width:100%;}
   .meta{color:#555;font-size:12px;margin-bottom:10px;}
   .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;
-         background:#eee;color:#111;margin-left:6px;}
+         background:#dc2626;color:#fff;margin-left:6px;}
   .charges{background:#fff5f5;border:1px solid #f3c2c2;padding:8px;border-radius:4px;color:#7a1313;}
   ul{padding-left:20px;}
   .doc-page{page-break-before:always;margin-top:12px;}
-  .doc-title{font-weight:700;font-size:13px;margin-bottom:6px;}
+  .doc-subpage{page-break-before:always;margin-top:0;}
+  .doc-title{font-weight:700;font-size:13px;margin-bottom:6px;color:#1a3a8a;}
+  img{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
   @media print { .noprint{display:none;} body{margin:12mm;} }
 </style></head>
 <body>
-  <div class="noprint" style="text-align:right;margin-bottom:10px;">
-    <button onclick="window.print()">Print</button>
+  <div class="hdr hdr-red">
+    <span>Subject Information</span>
+    <button class="noprint" onclick="window.print()" style="background:#fff;color:#111;border:0;border-radius:4px;padding:4px 10px;font-weight:600;cursor:pointer;">Print</button>
   </div>
-  <h1>${esc(fullName)} <span class="badge">${esc(person.dangerLevel)} RISK</span></h1>
+  <h1 style="margin:0 0 4px 0;">${esc(fullName)}</h1>
   <div class="meta">Active Orders of Protection &mdash; printed ${new Date().toLocaleString()}</div>
 
-  ${photos ? `<h2>Photos</h2><div>${photos}</div>` : ""}
+  ${photos ? `<div class="hdr hdr-blue">Photos</div><div class="section">${photos}</div>` : ""}
 
-  <h2>Subject Demographics</h2>
-  <table>
+  <div class="hdr hdr-blue">Subject Demographics</div>
+  <div class="section"><table>
     ${row("Last Name", person.lastName)}
     ${row("First Name", person.firstName)}
     ${row("Middle Name", person.middleName)}
@@ -351,46 +643,77 @@ const Index = () => {
     ${row("Weight", person.weight)}
     ${row("Hair", person.hair)}
     ${row("Eyes", person.eyes)}
-  </table>
+  </table></div>
 
-  <h2>Charges</h2>
-  <div class="charges">${esc(person.charges || "No charges listed")}</div>
+  <div class="hdr hdr-green">Identification</div>
+  <div class="section"><table>
+    ${row("Driver's License #", person.driversLicenseNumber)}
+    ${row("Driver's License State", person.driversLicenseState)}
+  </table></div>
 
-  <h2>Last Seen</h2>
-  <div>${esc(person.lastSeen || "Unknown")}</div>
+  <div class="hdr hdr-purple">Address of Residence</div>
+  <div class="section"><table>
+    ${row("Address of Residence", person.addressOfResidence)}
+    ${row("District", person.district)}
+    ${row("Majority District", person.majorityDistrict)}
+  </table></div>
+
+  <div class="hdr hdr-blue">IDOC Information</div>
+  <div class="section"><table>
+    ${row("IDOC #", person.idocNumber)}
+    ${row("IDOC Address of Residence", person.idocAddressOfResidence)}
+    ${row("IDOC District", person.idocDistrict)}
+  </table></div>
+
+  <div class="hdr hdr-red">Charges</div>
+  <div class="section"><div class="charges">${esc(person.charges || "No charges listed")}</div></div>
+
+  <div class="hdr hdr-blue">Active Cases</div>
+  <div class="section">${(person.activeCaseNumbers?.length ? person.activeCaseNumbers : person.activeCaseNumber ? [person.activeCaseNumber] : []).map((number, index) => row(`Active Case Number ${index + 1}`, number)).join("") || row("Active Case Number", "No active case numbers listed")}<div>${esc(person.activeCases || "No active case details listed")}</div></div>
+
+  <div class="hdr hdr-orange">Last Seen</div>
+  <div class="section">${esc(person.lastSeen || "Unknown")}</div>
 
   ${
     person.orderOfProtection
-      ? `<h2>Order of Protection</h2>
-         <table>
+      ? `<div class="hdr hdr-blue">Order of Protection</div>
+         <div class="section"><table>
            ${row("Status", "ACTIVE")}
-           ${row("Expiration", person.protectionExpirationDate)}
+           ${row("Expiration", person.protectionForDurationOfCourtDate ? 'For duration of the court date' : person.protectionExpirationDate)}
            ${row("Type", person.orderOfProtectionType ? getOrderOfProtectionTypeLabel(person.orderOfProtectionType) : "")}
            ${row("Status Flags", (person.orderStatusFlags || []).map(orderStatusFlagLabel).join(", "))}
            ${row("Petitioner", person.protectionPetitioner)}
            ${row("Respondent", person.protectionRespondent)}
            ${row("Description", person.protectionDescription)}
            ${row("Notes", person.protectionNotes)}
-          </table>`
+          </table></div>`
       : ""
   }
 
-  ${remediesHtml}
+  ${remediesHtml ? `<div class="hdr hdr-purple">Remedies Granted</div><div class="section">${remediesHtml.replace(/^<h2>[^<]*<\/h2>/, "")}</div>` : ""}
 
   ${
     person.elopementRisk === "Y" || person.frequentLocations
-      ? `<h2>Elopement Risk</h2>
-         <table>
+      ? `<div class="hdr hdr-orange">Elopement Risk</div>
+         <div class="section"><table>
            ${row("Person Wanders", person.elopementRisk === "Y" ? "YES" : person.elopementRisk === "UNK" ? "Unknown" : "No")}
          </table>
-         ${person.frequentLocations ? `<div style="margin-top:6px;"><strong>Places Frequently Visited:</strong><br/>${esc(person.frequentLocations).replace(/\n/g, "<br/>")}</div>` : ""}`
+         ${person.frequentLocations ? `<div style="margin-top:6px;"><strong>Places Frequently Visited:</strong><br/>${esc(person.frequentLocations).replace(/\n/g, "<br/>")}</div>` : ""}</div>`
       : ""
   }
 
-  ${docsList ? `<h2>Court Documents</h2><ul>${docsList}</ul>` : ""}
-  ${embeddedDocs ? `<h2 style="page-break-before:always;">Attached Documents</h2>${embeddedDocs}` : ""}
+  ${docsList ? `<div class="hdr hdr-blue">Court Documents</div><div class="section"><ul style="margin:0;">${docsList}</ul></div>` : ""}
+  ${embeddedDocs ? `<div class="hdr hdr-blue" style="page-break-before:always;">Attached Documents</div>${embeddedDocs}` : ""}
 
-  <script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 300); });</script>
+  <script>
+    window.addEventListener('load', function(){
+      var imgs = Array.from(document.images);
+      Promise.all(imgs.map(function(img){
+        if (img.complete) return Promise.resolve();
+        return new Promise(function(res){ img.onload = img.onerror = res; });
+      })).then(function(){ setTimeout(function(){ window.print(); }, 200); });
+    });
+  </script>
 </body></html>`;
 
     const w = window.open("", "_blank", "width=900,height=1000");
@@ -449,16 +772,68 @@ const Index = () => {
               <p className="text-xs sm:text-sm opacity-75">Law Enforcement Information System</p>
             </div>
           </div>
-          <Button
-            variant="secondary"
-            onClick={() => setIsAdminOpen(true)}
-            className="flex items-center gap-2 shadow-md"
-          >
-            <Settings className="h-4 w-4" />
-            Admin Panel
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <div
+              className="min-w-[190px] rounded-lg border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-2 text-right shadow-sm backdrop-blur"
+              title="Status is checked automatically every 30 seconds using the server health endpoint."
+              aria-live="polite"
+            >
+              <div className="flex items-center justify-end gap-2 text-sm font-semibold">
+                <span
+                  className={`h-2.5 w-2.5 rounded-full ${
+                    healthStatus === "online"
+                      ? "bg-green-400"
+                      : healthStatus === "offline"
+                        ? "bg-red-400"
+                        : "bg-gray-300 animate-pulse"
+                  }`}
+                  aria-hidden="true"
+                />
+                <span>
+                  {healthStatus === "online"
+                    ? "System Online"
+                    : healthStatus === "offline"
+                      ? "System Offline"
+                      : "Checking System"}
+                </span>
+              </div>
+              <div className="mt-0.5 text-[11px] opacity-80">
+                Last Checked: {healthLastChecked ? healthLastChecked.toLocaleTimeString() : "Checking..."}
+              </div>
+              <div className="text-[11px] opacity-80">Version {appVersion}</div>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={downloadBackup}
+              className="flex items-center gap-2 shadow-md"
+              title="Download a JSON backup of all records and settings"
+            >
+              <Download className="h-4 w-4" />
+              Backup
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => setIsAdminOpen(true)}
+              className="flex items-center gap-2 shadow-md"
+            >
+              <Settings className="h-4 w-4" />
+              Admin Panel
+            </Button>
+          </div>
         </div>
       </header>
+
+      {!dataLoaded && (
+        <div className="container mx-auto p-6 text-center text-muted-foreground">Loading server records…</div>
+      )}
+
+      {loadError && (
+        <div className="container mx-auto p-4">
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+            {loadError}
+          </div>
+        </div>
+      )}
 
       {/* Disclaimer */}
       <div className="border-y border-warning/30 bg-warning/10">
@@ -477,22 +852,46 @@ const Index = () => {
       <div className="border-b bg-card">
         <div className="container mx-auto p-5">
           <label className="block text-sm font-semibold text-foreground mb-2">Search Database</label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+          <div className="flex flex-wrap gap-2">
+            <div className="relative flex-1 min-w-[260px]">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"/>
               </svg>
               <input
                 type="text"
-                placeholder="Enter name or alias..."
+                placeholder="Search name, case #, driver's license, plate, address, or DOB..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition"
               />
             </div>
+            <Button variant="outline" onClick={() => setShowAdvancedFilters((value) => !value)} className="gap-2">
+              <SlidersHorizontal className="h-4 w-4" /> Filters
+            </Button>
             <Button onClick={handleSearch} className="px-6">Search</Button>
           </div>
-          <p className="text-xs text-muted-foreground mt-2">Try searching: WILLIAM, MARIA, JAMES</p>
+          {showAdvancedFilters && (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 rounded-lg border bg-muted/30 p-4">
+              <select value={districtFilter} onChange={(e) => setDistrictFilter(e.target.value)} className="rounded-md border bg-background p-2 text-sm">
+                <option value="all">All districts</option>
+                {[...new Set(people.map((p) => p.district).filter(Boolean))].sort().map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
+              <select value={stateFilter} onChange={(e) => setStateFilter(e.target.value)} className="rounded-md border bg-background p-2 text-sm">
+                <option value="all">All DL states</option>
+                {[...new Set(people.map((p) => p.driversLicenseState).filter(Boolean))].sort().map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
+              <select value={sexFilter} onChange={(e) => setSexFilter(e.target.value)} className="rounded-md border bg-background p-2 text-sm">
+                <option value="all">All sexes</option><option value="M">Male</option><option value="F">Female</option><option value="U">Unknown</option>
+              </select>
+              <select value={orderFilter} onChange={(e) => setOrderFilter(e.target.value)} className="rounded-md border bg-background p-2 text-sm">
+                <option value="all">All order statuses</option><option value="active">Active orders</option><option value="expired">Expired orders</option><option value="order">Order of Protection</option><option value="stalking">Stalking No Contact</option><option value="civil">Civil No Contact</option><option value="firearms">Firearms Restraining</option>
+              </select>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="rounded-md border bg-background p-2 text-sm">
+                <option value="name-asc">Name A–Z</option><option value="name-desc">Name Z–A</option><option value="modified-new">Recently modified</option><option value="created-new">Newest records</option><option value="created-old">Oldest records</option><option value="dob-new">DOB newest first</option><option value="expiration">Expiration date</option>
+              </select>
+              <Button variant="ghost" className="sm:col-span-2 lg:col-span-5" onClick={() => { setSearchTerm(""); setDistrictFilter("all"); setStateFilter("all"); setOrderFilter("all"); setSexFilter("all"); setSortBy("name-asc"); }}>Clear search and filters</Button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -529,13 +928,6 @@ const Index = () => {
                   className="cursor-pointer hover:shadow-lg transition-shadow relative bg-white border border-gray-300"
                   onClick={() => setSelectedPerson(person)}
                 >
-                  {/* Risk Level Badge - Top Left */}
-                  <div className="absolute top-3 left-3 z-10">
-                    <Badge className={`${getDangerLevelColor(person.dangerLevel)} text-xs font-bold px-2 py-1 rounded`}>
-                      {person.dangerLevel} RISK
-                    </Badge>
-                  </div>
-                  
                   {/* Order Type Badge - Top Right */}
                   {person.orderOfProtection && (
                     <div className="absolute top-3 right-3 z-10">
@@ -549,13 +941,12 @@ const Index = () => {
                     {/* Photo Section - Centered */}
                     <div className="flex justify-center mb-6 mt-6">
                       {person.photos && person.photos.length > 0 ? (
-                        <img 
-                          src={person.photos[0]} 
+                        <CardPhotoSlider
+                          photos={person.photos}
                           alt={person.name || `${person.firstName} ${person.lastName}`}
-                          className="w-full h-64 object-cover cursor-pointer hover:opacity-80 transition-all duration-300 border-2 border-gray-400 shadow-lg hover:shadow-xl hover:scale-105"
-                          onClick={(e) => {
+                          onClick={(e, i) => {
                             e.stopPropagation();
-                            setSelectedPhoto(person.photos![0]);
+                            setSelectedPhoto({ photos: person.photos!, index: i });
                           }}
                         />
                       ) : (
@@ -591,11 +982,19 @@ const Index = () => {
                           <Shield className="h-4 w-4 text-purple-600" />
                           <span className="text-sm font-bold text-purple-800">ACTIVE ORDER OF PROTECTION</span>
                         </div>
-                        {person.protectionExpirationDate && (
-                          <p className="text-sm text-purple-700">
-                            Expires {new Date(person.protectionExpirationDate).toLocaleDateString()}
-                          </p>
-                        )}
+                        {person.protectionForDurationOfCourtDate ? (
+                          <p className="text-sm text-purple-700">For duration of the court date</p>
+                        ) : person.protectionExpirationDate ? (
+                          (() => {
+                            const exp = new Date(person.protectionExpirationDate);
+                            const expired = exp.getTime() < Date.now();
+                            return (
+                              <p className={`text-sm ${expired ? 'text-red-700 font-semibold' : 'text-purple-700'}`}>
+                                {expired ? 'EXPIRED ' : 'Expires '}{exp.toLocaleDateString()}
+                              </p>
+                            );
+                          })()
+                        ) : null}
                       </div>
                     )}
 
@@ -637,22 +1036,13 @@ const Index = () => {
           </div>
         )}
 
-        {/* Photo Dialog */}
-        {selectedPhoto && (
-          <Dialog open={true} onOpenChange={() => setSelectedPhoto(null)}>
-            <DialogContent className="max-w-2xl" aria-describedby="photo-description">
-              <DialogHeader>
-                <DialogTitle>Photo View</DialogTitle>
-              </DialogHeader>
-              <div id="photo-description" className="flex justify-center">
-                <img 
-                  src={selectedPhoto} 
-                  alt="Enlarged photo"
-                  className="max-w-full max-h-[70vh] object-contain"
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
+        {/* Photo Slideshow Dialog */}
+        {selectedPhoto && selectedPhoto.photos.length > 0 && (
+          <PhotoSlideshow
+            photos={selectedPhoto.photos}
+            startIndex={selectedPhoto.index}
+            onClose={() => setSelectedPhoto(null)}
+          />
         )}
 
         {/* Person Detail Dialog */}
@@ -674,19 +1064,23 @@ const Index = () => {
                         <Printer className="h-4 w-4 mr-1" />
                         Print
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="bg-white text-red-600 hover:bg-gray-100"
+                        disabled={geofenceLoading}
+                        onClick={() => runGeofenceCheck(selectedPerson)}
+                      >
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {geofenceLoading ? 'Checking…' : 'Check Geofence'}
+                      </Button>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="text-center">
-                        <div className="text-sm">DANGER LEVEL</div>
-                        <Badge className={`${getDangerLevelColor(selectedPerson.dangerLevel)} font-bold`}>
-                          {selectedPerson.dangerLevel}
-                        </Badge>
-                      </div>
                       {selectedPerson.orderOfProtection && (
                         <div className="text-center">
                           <div className="text-sm">ORDER OF PROTECTION</div>
                           <div className="text-white font-bold">
-                            Active - Expires: {selectedPerson.protectionExpirationDate ? new Date(selectedPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}
+                            Active - {selectedPerson.protectionForDurationOfCourtDate ? 'For duration of the court date' : `Expires: ${selectedPerson.protectionExpirationDate ? new Date(selectedPerson.protectionExpirationDate).toLocaleDateString() : 'N/A'}`}
                           </div>
                         </div>
                       )}
@@ -696,6 +1090,38 @@ const Index = () => {
               </DialogHeader>
               
               <div className="space-y-4">
+                {geofenceResults.length > 0 && (
+                  <div className="rounded-lg border-2 border-blue-300 bg-blue-50 p-4">
+                    <h3 className="font-bold text-blue-900">Geofence Results — 1,000 ft threshold</h3>
+                    <p className="text-xs text-blue-700 mb-3">Straight-line estimate based on validated address coordinates. Confirm operational restrictions against the actual court order and agency mapping systems.</p>
+                    <div className="space-y-2">{geofenceResults.map((result,index) => (
+                      <div key={index} className="flex items-start justify-between gap-3 rounded bg-white p-3 border">
+                        <div><div className="font-semibold">{result.label}</div><div className="text-xs text-gray-600">{result.address}</div>{result.error && <div className="text-xs text-red-600">{result.error}</div>}</div>
+                        {!result.error && <Badge className={result.within ? 'bg-red-600' : 'bg-green-600'}>{result.within ? `WITHIN — ${result.distanceFeet?.toLocaleString()} ft` : `OUTSIDE — ${result.distanceFeet?.toLocaleString()} ft`}</Badge>}
+                      </div>
+                    ))}</div>
+                  </div>
+                )}
+
+                {(selectedPerson.victims?.length || selectedPerson.children?.length) ? (
+                  <div>
+                    <div className="bg-purple-700 text-white p-3 rounded-t-lg"><h3 className="text-lg font-bold">VICTIMS & PROTECTED CHILDREN</h3></div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4 space-y-4">
+                      {(selectedPerson.victims || []).map((victim,index) => <div key={`v-${index}`} className="rounded border p-3"><div className="font-bold">{victim.name || `Victim ${index+1}`}</div><div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-1"><span>Relationship: {victim.relationship || 'N/A'}</span><span>DOB: {victim.dob || 'N/A'}</span><span>Phone: {victim.phone || 'N/A'}</span><span>Residence: {victim.address || 'N/A'}</span></div></div>)}
+                      {(selectedPerson.children || []).map((child,index) => <div key={`c-${index}`} className="rounded border p-3"><div className="font-bold">{child.name || `Child ${index+1}`}</div><div className="text-sm grid grid-cols-1 md:grid-cols-2 gap-1"><span>Relationship: {child.relationship || 'N/A'}</span><span>DOB: {child.dob || 'N/A'}</span><span>School: {child.schoolName || 'N/A'}</span><span>School Address: {child.schoolAddress || 'N/A'}</span></div></div>)}
+                    </div>
+                  </div>
+                ) : null}
+
+                {selectedPerson.descriptorPhotos && selectedPerson.descriptorPhotos.length > 0 && (
+                  <div>
+                    <div className="bg-slate-700 text-white p-3 rounded-t-lg"><h3 className="text-lg font-bold">SCAR & TATTOO PHOTOS</h3></div>
+                    <div className="bg-white border border-gray-200 rounded-b-lg p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+                      {selectedPerson.descriptorPhotos.map((photo,index) => <div key={index} className="space-y-1"><img src={photo.url} alt={`${photo.category} ${index+1}`} className="w-full h-40 object-cover border cursor-pointer" onClick={() => setSelectedPhoto({ photos: selectedPerson.descriptorPhotos!.map(p => p.url), index })} /><Badge variant="outline" className="uppercase">{photo.category}</Badge><div className="text-xs">{photo.description || 'No description'}</div></div>)}
+                    </div>
+                  </div>
+                )}
+
                 {/* Subject Demographics */}
                 <div>
                   <div className="bg-blue-500 text-white p-3 rounded-t-lg">
@@ -774,7 +1200,7 @@ const Index = () => {
                             src={photo} 
                             alt={`Photo ${index + 1}`}
                             className="w-full h-40 object-cover border cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => setSelectedPhoto(photo)}
+                            onClick={() => setSelectedPhoto({ photos: selectedPerson.photos!, index })}
                           />
                         ))}
                       </div>
@@ -838,12 +1264,29 @@ const Index = () => {
                 {/* IDOC Information */}
                 <div>
                   <div className="bg-blue-600 text-white p-3 rounded-t-lg">
-                    <h3 className="text-lg font-bold flex items-center gap-2">
-                      <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd"/>
-                      </svg>
-                      IDOC INFORMATION
-                    </h3>
+                    <div className="flex items-center justify-between gap-2">
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd"/>
+                        </svg>
+                        IDOC INFORMATION
+                      </h3>
+                      <a
+                        href="https://idoc.illinois.gov/offender/inmatesearch.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => {
+                          const name = `${selectedPerson.firstName ?? ''} ${selectedPerson.lastName ?? ''}`.trim();
+                          if (name) {
+                            try { navigator.clipboard.writeText(name); } catch {}
+                          }
+                        }}
+                        className="text-xs bg-white text-blue-700 hover:bg-blue-50 font-semibold px-3 py-1.5 rounded shadow-sm"
+                        title="Opens IDOC Inmate Search in a new tab. Name copied to clipboard."
+                      >
+                        Search IDOC ↗
+                      </a>
+                    </div>
                   </div>
                   <div className="bg-white border border-gray-200 rounded-b-lg p-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
@@ -996,10 +1439,26 @@ const Index = () => {
                         <div className="font-bold text-red-600 uppercase">{selectedPerson.charges}</div>
                       </div>
                       <div>
-                        <div className="text-gray-600 text-xs">Danger Level</div>
-                        <Badge className={`${getDangerLevelColor(selectedPerson.dangerLevel)} font-bold`}>
-                          {selectedPerson.dangerLevel}
-                        </Badge>
+                        <div className="text-gray-600 text-xs">Active Case Numbers</div>
+                        {(selectedPerson.activeCaseNumbers?.length
+                          ? selectedPerson.activeCaseNumbers
+                          : selectedPerson.activeCaseNumber
+                            ? [selectedPerson.activeCaseNumber]
+                            : []
+                        ).length > 0 ? (
+                          <div className="space-y-1">
+                            {(selectedPerson.activeCaseNumbers?.length
+                              ? selectedPerson.activeCaseNumbers
+                              : [selectedPerson.activeCaseNumber!]
+                            ).map((caseNumber, index) => (
+                              <div key={`${caseNumber}-${index}`} className="font-bold">{caseNumber}</div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="font-bold">No active case numbers listed</div>
+                        )}
+                        <div className="text-gray-600 text-xs mt-3">Active Case Details</div>
+                        <div className="font-bold whitespace-pre-wrap">{selectedPerson.activeCases || 'No active case details listed'}</div>
                       </div>
                       <div>
                         <div className="text-gray-600 text-xs">Last Seen</div>
@@ -1066,7 +1525,7 @@ const Index = () => {
                         </div>
                         <div>
                           <div className="text-gray-600 text-xs">Protection Expiration Date</div>
-                          <div className="font-bold">{selectedPerson.protectionExpirationDate || 'N/A'}</div>
+                          <div className="font-bold">{selectedPerson.protectionForDurationOfCourtDate ? 'For duration of the court date' : (selectedPerson.protectionExpirationDate || 'N/A')}</div>
                         </div>
                         {selectedPerson.orderOfProtectionType && (
                           <div className="col-span-2">
@@ -1273,6 +1732,12 @@ const Index = () => {
                             <div className="font-bold">{selectedPerson.lastKnownVehicle}</div>
                           </div>
                         )}
+                        <div className="col-span-2 mt-3 border-t pt-3 grid gap-2 sm:grid-cols-2">
+                          <div><div className="text-gray-600 text-xs">Record Created</div><div className="font-medium">{selectedPerson.createdDate ? new Date(selectedPerson.createdDate).toLocaleString() : "Legacy record"}</div></div>
+                          <div><div className="text-gray-600 text-xs">Created By</div><div className="font-medium">{selectedPerson.createdByName || "Unknown"}{selectedPerson.createdByStarNumber ? ` — Star ${selectedPerson.createdByStarNumber}` : ""}</div></div>
+                          <div><div className="text-gray-600 text-xs">Last Modified</div><div className="font-medium">{selectedPerson.lastModifiedDate ? new Date(selectedPerson.lastModifiedDate).toLocaleString() : "Not recorded"}</div></div>
+                          <div><div className="text-gray-600 text-xs">Last Modified By</div><div className="font-medium">{selectedPerson.lastModifiedByName || "Unknown"}{selectedPerson.lastModifiedByStarNumber ? ` — Star ${selectedPerson.lastModifiedByStarNumber}` : ""}</div></div>
+                        </div>
                       </div>
                     </div>
                   </div>
